@@ -9,7 +9,7 @@ class DestinyRequest(BaseModel):
     other_names: Optional[str] = None
     full_name: Optional[str] = None
     current_year: Optional[int] = None
-    age: int
+    age: Optional[int] = None
     partner_name: Optional[str] = None
 
 class DestinyResponse(BaseModel):

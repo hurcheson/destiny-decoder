@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException
 from ..schemas import DestinyRequest, DestinyResponse
 from ...services.destiny_service import calculate_destiny
-from ...services.interpretation_service import get_life_seal_interpretation, get_soul_number_interpretation
+from ...services.interpretation_service import get_life_seal_interpretation, get_soul_number_interpretation, get_personality_number_interpretation
 
 router = APIRouter()
 
@@ -17,6 +17,7 @@ async def post_decode_full(request: DestinyRequest):
     life_seal_number = core["life_seal"]
     life_planet = core["life_planet"]
     soul_number = core["soul_number"]
+    personality_number = core["personality_number"]
     
     try:
         life_seal_interpretation = get_life_seal_interpretation(life_seal_number)
@@ -27,6 +28,11 @@ async def post_decode_full(request: DestinyRequest):
         soul_number_interpretation = get_soul_number_interpretation(soul_number)
     except ValueError:
         raise HTTPException(status_code=400, detail="Invalid soul number for interpretation")
+    
+    try:
+        personality_number_interpretation = get_personality_number_interpretation(personality_number)
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid personality number for interpretation")
     
     # Format date_of_birth for Flutter app (expects YYYY-MM-DD string)
     date_of_birth = f"{input_data['year_of_birth']}-{input_data['month_of_birth']:02d}-{input_data['day_of_birth']:02d}"
@@ -46,6 +52,10 @@ async def post_decode_full(request: DestinyRequest):
             "soul_number": {
                 "number": soul_number,
                 "content": soul_number_interpretation
+            },
+            "personality_number": {
+                "number": personality_number,
+                "content": personality_number_interpretation
             }
         }
     }
