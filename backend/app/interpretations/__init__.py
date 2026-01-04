@@ -1,0 +1,3 @@
+from .life_seal import LIFE_SEAL_INTERPRETATIONS
+
+__all__ = ["LIFE_SEAL_INTERPRETATIONS"]
