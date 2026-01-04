@@ -1,7 +1,12 @@
+from ...services.interpretation_service import (
+    get_life_seal_interpretation,
+    get_soul_number_interpretation,
+    get_personality_number_interpretation,
+    get_personal_year_interpretation,
+)
 from fastapi import APIRouter, HTTPException
 from ..schemas import DestinyRequest, DestinyResponse
 from ...services.destiny_service import calculate_destiny
-from ...services.interpretation_service import get_life_seal_interpretation, get_soul_number_interpretation, get_personality_number_interpretation
 
 router = APIRouter()
 
@@ -18,6 +23,7 @@ async def post_decode_full(request: DestinyRequest):
     life_planet = core["life_planet"]
     soul_number = core["soul_number"]
     personality_number = core["personality_number"]
+    personal_year = core["personal_year"]
     
     try:
         life_seal_interpretation = get_life_seal_interpretation(life_seal_number)
@@ -33,6 +39,11 @@ async def post_decode_full(request: DestinyRequest):
         personality_number_interpretation = get_personality_number_interpretation(personality_number)
     except ValueError:
         raise HTTPException(status_code=400, detail="Invalid personality number for interpretation")
+
+    try:
+        personal_year_interpretation = get_personal_year_interpretation(personal_year)
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid personal year for interpretation")
     
     # Format date_of_birth for Flutter app (expects YYYY-MM-DD string)
     date_of_birth = f"{input_data['year_of_birth']}-{input_data['month_of_birth']:02d}-{input_data['day_of_birth']:02d}"
@@ -56,6 +67,11 @@ async def post_decode_full(request: DestinyRequest):
             "personality_number": {
                 "number": personality_number,
                 "content": personality_number_interpretation
+            },
+            "personal_year": {
+                "number": personal_year,
+                "planet": "YEAR",
+                "content": personal_year_interpretation
             }
         }
     }
