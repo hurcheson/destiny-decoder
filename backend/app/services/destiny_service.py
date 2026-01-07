@@ -18,6 +18,7 @@ from ..core.cycles import (
 from ..core.compatibility import evaluate_compatibility
 from ..interpretations.cycle_interpretations import get_cycle_interpretation
 from .narrative_service import build_narrative
+from .report_service import build_report
 
 
 def calculate_destiny(payload: dict) -> dict:
@@ -114,6 +115,19 @@ def calculate_destiny(payload: dict) -> dict:
             life_cycles_with_interpretations,
             turning_points_with_interpretations
         ),
+        "report": build_report(
+            life_cycles_with_interpretations,
+            turning_points_with_interpretations,
+            build_narrative(
+                life_cycles_with_interpretations,
+                turning_points_with_interpretations
+            ),
+            life_seal_data["number"],
+            life_seal_data["planet"],
+            soul_number,
+            personality_number,
+            calculate_personal_year(day, month, current_year)
+        )
     }
 
     if partner_name:

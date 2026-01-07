@@ -6,8 +6,10 @@ from ...services.interpretation_service import (
     get_pinnacle_interpretation,
 )
 from fastapi import APIRouter, HTTPException
+from fastapi.responses import StreamingResponse
 from ..schemas import DestinyRequest, DestinyResponse
 from ...services.destiny_service import calculate_destiny
+from ...services.pdf_service import generate_report_pdf
 
 router = APIRouter()
 
@@ -88,3 +90,30 @@ async def post_decode_full(request: DestinyRequest):
             "pinnacles": pinnacle_interpretations,
         }
     }
+
+@router.post("/export/report/pdf")
+async def post_export_report_pdf(request: DestinyRequest):
+    """
+    Generate and export a PDF report for a destiny reading.
+    
+    Request body contains the same fields as /decode/full.
+    Returns PDF file as a downloadable attachment.
+    """
+    input_data = request.dict()
+    
+    # Calculate full destiny reading
+    core = calculate_destiny(input_data)
+    
+    # Format metadata
+    full_name = input_data.get("full_name") or f"{input_data['first_name']} {input_data.get('other_names', '')}".strip()
+    date_of_birth = f"{input_data['year_of_birth']}-{input_data['month_of_birth']:02d}-{input_data['day_of_birth']:02d}"
+    
+    # Generate PDF from report
+    pdf_buffer = generate_report_pdf(full_name, date_of_birth, core["report"])
+    
+    # Return as downloadable file
+    return StreamingResponse(
+        iter([pdf_buffer.getvalue()]),
+        media_type="application/pdf",
+        headers={"Content-Disposition": f"attachment; filename=destiny-report-{full_name.replace(' ', '-')}.pdf"}
+    )
