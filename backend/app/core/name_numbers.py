@@ -28,3 +28,8 @@ def calculate_personality_number(name: str) -> int:
     clean_name = ''.join(c for c in name.upper() if c.isalpha())
     total = sum(LETTER_MAP.get(c, 0) for c in clean_name if c not in VOWELS)
     return reduce_to_single_digit(total)
+
+def get_name_matrix_values(name: str) -> list[int]:
+    """Extract per-letter reduced values from name (Excel matrix equivalent)."""
+    clean_name = ''.join(c for c in name.upper() if c.isalpha())
+    return [LETTER_MAP.get(c, 0) for c in clean_name]

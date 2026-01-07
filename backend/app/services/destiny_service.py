@@ -3,16 +3,21 @@ from ..core.life_seal import calculate_life_seal
 from ..core.name_numbers import (
     calculate_physical_name_number,
     calculate_soul_number,
-    calculate_personality_number
+    calculate_personality_number,
+    get_name_matrix_values
 )
 from ..core.personal_year import calculate_personal_year
 from ..core.cycles import (
     generate_blessed_years,
     calculate_blessed_days,
     determine_life_cycle_phase,
-    get_life_turning_points
+    get_life_turning_points,
+    calculate_life_cycles,
+    calculate_turning_points
 )
 from ..core.compatibility import evaluate_compatibility
+from ..interpretations.cycle_interpretations import get_cycle_interpretation
+from .narrative_service import build_narrative
 
 
 def calculate_destiny(payload: dict) -> dict:
@@ -51,17 +56,64 @@ def calculate_destiny(payload: dict) -> dict:
 
     life_seal_data = calculate_life_seal(day, month, year)
 
+    # Calculate name-based numbers
+    physical_name_number = calculate_physical_name_number(full_name)
+    soul_number = calculate_soul_number(full_name)
+    personality_number = calculate_personality_number(full_name)
+    
+    # Extract name matrix values (per-letter reduced values)
+    name_matrix_values = get_name_matrix_values(full_name)
+    
+    # Calculate Life Cycles using Excel-faithful logic
+    # matrix = name_matrix_values, extra_1 = soul_number, extra_2 = personality_number
+    life_cycles = calculate_life_cycles(name_matrix_values, soul_number, personality_number)
+    
+    # Calculate Turning Points from Life Cycles
+    turning_points = calculate_turning_points(life_cycles)
+    
+    # Excel-faithful age ranges for Life Cycles
+    life_cycle_age_ranges = ["0–30", "30–55", "55+"]
+    
+    # Build Life Cycles with interpretations and age ranges
+    life_cycles_with_interpretations = [
+        {
+            "number": num,
+            "interpretation": get_cycle_interpretation(num),
+            "age_range": life_cycle_age_ranges[idx]
+        }
+        for idx, num in enumerate(life_cycles)
+    ]
+    
+    # Excel-faithful ages for Turning Points
+    turning_point_ages = [36, 45, 54, 63]
+    
+    # Build Turning Points with interpretations and ages
+    turning_points_with_interpretations = [
+        {
+            "number": num,
+            "interpretation": get_cycle_interpretation(num),
+            "age": turning_point_ages[idx]
+        }
+        for idx, num in enumerate(turning_points)
+    ]
+
     result = {
         "life_seal": life_seal_data["number"],
         "life_planet": life_seal_data["planet"],
-        "physical_name_number": calculate_physical_name_number(full_name),
-        "soul_number": calculate_soul_number(full_name),
-        "personality_number": calculate_personality_number(full_name),
+        "physical_name_number": physical_name_number,
+        "soul_number": soul_number,
+        "personality_number": personality_number,
         "personal_year": calculate_personal_year(day, month, current_year),
         "blessed_years": generate_blessed_years(current_year),
         "blessed_days": calculate_blessed_days(day),
         "life_cycle_phase": determine_life_cycle_phase(age),
         "life_turning_points": get_life_turning_points(),
+        "life_cycles": life_cycles_with_interpretations,
+        "turning_points": turning_points_with_interpretations,
+        "narrative": build_narrative(
+            life_cycles_with_interpretations,
+            turning_points_with_interpretations
+        ),
     }
 
     if partner_name:
