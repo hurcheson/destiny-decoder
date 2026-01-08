@@ -6,9 +6,11 @@ from app.api.routes.interpretations import router as interpretations_router
 app = FastAPI(title="Destiny Decoder API")
 
 # Configure CORS for Flutter web
+# IMPORTANT: In production, replace ["*"] with specific origins like:
+# allow_origins=["https://yourdomain.com", "https://app.yourdomain.com"]
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # In production, specify exact origins
+    allow_origins=["*"],  # TODO: Update for production deployment
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
