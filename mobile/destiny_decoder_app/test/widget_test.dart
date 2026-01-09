@@ -7,12 +7,15 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:destiny_decoder_app/main.dart';
 
 void main() {
   testWidgets('App renders without errors', (WidgetTester tester) async {
-    await tester.pumpWidget(const DestinyDecoderApp());
+    await tester.pumpWidget(
+      const ProviderScope(child: DestinyDecoderApp()),
+    );
 
     expect(find.byType(MaterialApp), findsOneWidget);
   });

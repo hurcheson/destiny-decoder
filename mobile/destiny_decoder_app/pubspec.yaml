@@ -22,6 +22,8 @@ dependencies:
   
   # File management
   path_provider: ^2.1.0
+  shared_preferences: ^2.2.2
+  uuid: ^4.4.0
 
 dev_dependencies:
   flutter_test:

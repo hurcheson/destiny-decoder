@@ -5,6 +5,7 @@ import '../../../core/theme/app_theme.dart';
 import 'decode_controller.dart';
 import 'decode_result_page.dart';
 import 'widgets/cards.dart';
+import '../../history/presentation/history_page.dart';
 import 'widgets/loading_animation.dart';
 
 class DecodeFormPage extends ConsumerStatefulWidget {
@@ -64,6 +65,22 @@ class _DecodeFormPageState extends ConsumerState<DecodeFormPage> {
                     crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   const SizedBox(height: AppSpacing.lg),
+                      Row(
+                        children: [
+                          const Spacer(),
+                          IconButton(
+                            tooltip: 'History',
+                            icon: const Icon(Icons.history),
+                            onPressed: () {
+                              Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (_) => const HistoryPage(),
+                                ),
+                              );
+                            },
+                          ),
+                        ],
+                      ),
                   // Header
                   Text(
                     '🌙 Destiny Decoder 🌙',

@@ -10,6 +10,7 @@ import 'timeline.dart';
 import 'widgets/cards.dart';
 import 'widgets/animated_number.dart';
 import 'widgets/export_dialog.dart';
+import '../../history/presentation/history_controller.dart';
 
 class DecodeResultPage extends ConsumerStatefulWidget {
   const DecodeResultPage({super.key});
@@ -23,6 +24,7 @@ class _DecodeResultPageState extends ConsumerState<DecodeResultPage>
   final _overviewController = ScrollController();
   final _numbersController = ScrollController();
   final _timelineController = ScrollController();
+  bool _isSaving = false;
   TabController? _tabController;
 
   @override
@@ -421,8 +423,9 @@ class _DecodeResultPageState extends ConsumerState<DecodeResultPage>
                         showDialog(
                           context: context,
                           builder: (context) => ExportOptionsDialog(
-                            isLoading: isExporting,
+                            isLoading: isExporting || _isSaving,
                             onExportPdf: () => _exportPdf(ref, result),
+                            onSaveLocal: () => _saveReading(ref, result),
                           ),
                         );
                       },
@@ -614,6 +617,43 @@ class _DecodeResultPageState extends ConsumerState<DecodeResultPage>
           backgroundColor: Colors.red,
         ),
       );
+    }
+  }
+
+  Future<void> _saveReading(
+    WidgetRef ref,
+    dynamic result,
+  ) async {
+    if (_isSaving) return;
+
+    final messenger = ScaffoldMessenger.of(context);
+    setState(() {
+      _isSaving = true;
+    });
+
+    try {
+      await ref.read(historyControllerProvider.notifier).addFromResult(result);
+      if (!mounted) return;
+      messenger.showSnackBar(
+        const SnackBar(
+          content: Text('Reading saved to history'),
+          backgroundColor: Colors.green,
+        ),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text('Save failed: ${e.toString()}'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isSaving = false;
+        });
+      }
     }
   }
 
