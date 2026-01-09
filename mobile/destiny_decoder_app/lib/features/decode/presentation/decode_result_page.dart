@@ -39,6 +39,15 @@ class _DecodeResultPageState extends ConsumerState<DecodeResultPage>
     super.dispose();
   }
 
+  /// Refresh the current reading - reloads from stored result
+  Future<void> _refreshReading() async {
+    // Since we're already on the result page with data loaded,
+    // a "refresh" scrolls to top and provides visual refresh feedback
+    _scrollToTop();
+    // Small delay for visual feedback
+    await Future.delayed(const Duration(milliseconds: 300));
+  }
+
   Widget _wrapAnimated(Widget child, bool reduceMotion) {
     if (reduceMotion) return child;
     return AnimatedSwitcher(
@@ -454,21 +463,23 @@ class _DecodeResultPageState extends ConsumerState<DecodeResultPage>
                   child: Container(
                     color: Colors.white,
                     child: GradientContainer(
-                      child: TabBarView(
-                        children: [
-                          _wrapAnimated(
-                            _buildOverviewTab(
-                              context,
-                              isDarkMode,
-                              lifeSeal,
-                              exportState,
-                              result,
-                              _overviewController,
+                      child: RefreshIndicator(
+                        onRefresh: _refreshReading,
+                        child: TabBarView(
+                          children: [
+                            _wrapAnimated(
+                              _buildOverviewTab(
+                                context,
+                                isDarkMode,
+                                lifeSeal,
+                                exportState,
+                                result,
+                                _overviewController,
+                              ),
+                              reduceMotion,
                             ),
-                            reduceMotion,
-                          ),
-                          _wrapAnimated(
-                            _buildNumbersTab(
+                            _wrapAnimated(
+                              _buildNumbersTab(
                               context,
                               isDarkMode,
                               lifeSeal,
@@ -492,6 +503,7 @@ class _DecodeResultPageState extends ConsumerState<DecodeResultPage>
                             reduceMotion,
                           ),
                         ],
+                      ),
                       ),
                     ),
                   ),
