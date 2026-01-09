@@ -120,13 +120,23 @@ class PDFExportService:
         
         # Core Numbers Summary Table
         story.append(Paragraph("Core Numbers", self.styles['CustomSubtitle']))
+        
+        # Safe conversion to string for table cells
+        def safe_str(value):
+            """Convert value to string safely, handling dicts/lists."""
+            if value is None:
+                return 'N/A'
+            if isinstance(value, (dict, list)):
+                return 'N/A'  # Skip complex types
+            return str(value)
+        
         core_data = [
             ['Number Type', 'Number', 'Planet/Meaning'],
-            ['Life Path (Life Seal)', str(core.get('life_seal', 'N/A')), core.get('life_planet', 'N/A')],
-            ['Soul Urge (Soul Number)', str(core.get('soul_number', 'N/A')), 'Inner Desire'],
-            ['Expression (Destiny)', str(core.get('expression_number', 'N/A')), 'Life Purpose'],
-            ['Personality', str(core.get('personality_number', 'N/A')), 'Outer Expression'],
-            ['Personal Year', str(core.get('personal_year', 'N/A')), 'Current Cycle'],
+            ['Life Path (Life Seal)', safe_str(core.get('life_seal')), safe_str(core.get('life_planet'))],
+            ['Soul Urge (Soul Number)', safe_str(core.get('soul_number')), 'Inner Desire'],
+            ['Expression (Destiny)', safe_str(core.get('expression_number')), 'Life Purpose'],
+            ['Personality', safe_str(core.get('personality_number')), 'Outer Expression'],
+            ['Personal Year', safe_str(core.get('personal_year')), 'Current Cycle'],
         ]
         
         core_table = Table(core_data, colWidths=[2*inch, 1*inch, 2*inch])
@@ -149,26 +159,32 @@ class PDFExportService:
         # Life Seal Interpretation
         if interpretations.get('life_seal'):
             life_seal = interpretations['life_seal']
-            story.append(Paragraph(f"Life Path Number {life_seal['number']}", self.styles['CustomSubtitle']))
-            story.append(Paragraph(f"<i>Planet: {life_seal.get('planet', 'N/A')}</i>", self.styles['InfoLabel']))
+            story.append(Paragraph(f"Life Path Number {life_seal.get('number', 'N/A')}", self.styles['CustomSubtitle']))
+            story.append(Paragraph(f"<i>Planet: {safe_str(life_seal.get('planet', 'N/A'))}</i>", self.styles['InfoLabel']))
             story.append(Spacer(1, 0.08*inch))
-            story.append(Paragraph(life_seal.get('content', ''), self.styles['CustomBody']))
+            content = life_seal.get('content', '')
+            if content and isinstance(content, str):
+                story.append(Paragraph(content, self.styles['CustomBody']))
             story.append(Spacer(1, 0.15*inch))
         
         # Soul Number Interpretation
         if interpretations.get('soul_number'):
             soul = interpretations['soul_number']
-            story.append(Paragraph(f"Soul Urge Number {soul['number']}", self.styles['CustomSubtitle']))
+            story.append(Paragraph(f"Soul Urge Number {soul.get('number', 'N/A')}", self.styles['CustomSubtitle']))
             story.append(Spacer(1, 0.08*inch))
-            story.append(Paragraph(soul.get('content', ''), self.styles['CustomBody']))
+            content = soul.get('content', '')
+            if content and isinstance(content, str):
+                story.append(Paragraph(content, self.styles['CustomBody']))
             story.append(Spacer(1, 0.15*inch))
         
         # Personality Number Interpretation
         if interpretations.get('personality_number'):
             pers = interpretations['personality_number']
-            story.append(Paragraph(f"Personality Number {pers['number']}", self.styles['CustomSubtitle']))
+            story.append(Paragraph(f"Personality Number {pers.get('number', 'N/A')}", self.styles['CustomSubtitle']))
             story.append(Spacer(1, 0.08*inch))
-            story.append(Paragraph(pers.get('content', ''), self.styles['CustomBody']))
+            content = pers.get('content', '')
+            if content and isinstance(content, str):
+                story.append(Paragraph(content, self.styles['CustomBody']))
             story.append(Spacer(1, 0.15*inch))
         
         story.append(PageBreak())
@@ -176,9 +192,11 @@ class PDFExportService:
         # Personal Year
         if interpretations.get('personal_year'):
             py = interpretations['personal_year']
-            story.append(Paragraph(f"Personal Year Cycle - Year {py['number']}", self.styles['CustomSubtitle']))
+            story.append(Paragraph(f"Personal Year Cycle - Year {py.get('number', 'N/A')}", self.styles['CustomSubtitle']))
             story.append(Spacer(1, 0.08*inch))
-            story.append(Paragraph(py.get('content', ''), self.styles['CustomBody']))
+            content = py.get('content', '')
+            if content and isinstance(content, str):
+                story.append(Paragraph(content, self.styles['CustomBody']))
             story.append(Spacer(1, 0.2*inch))
         
         # Life Cycles
@@ -186,14 +204,20 @@ class PDFExportService:
             story.append(Paragraph("Life Cycles", self.styles['CustomSubtitle']))
             cycles = core['life_cycles']
             
-            for cycle_name, cycle_data in cycles.items():
-                if isinstance(cycle_data, dict) and cycle_data.get('number'):
-                    clean_name = cycle_name.replace('_', ' ').title()
-                    story.append(Paragraph(
-                        f"<b>{clean_name}:</b> Number {cycle_data.get('number')} "
-                        f"(Ages {cycle_data.get('start_age', 'N/A')}-{cycle_data.get('end_age', 'N/A')})",
-                        self.styles['CustomBody']
-                    ))
+            # life_cycles is a list of dicts, not a dict
+            if isinstance(cycles, list):
+                cycle_names = ["First Cycle", "Second Cycle", "Third Cycle"]
+                for idx, cycle_data in enumerate(cycles):
+                    if isinstance(cycle_data, dict) and cycle_data.get('number'):
+                        cycle_name = cycle_names[idx] if idx < len(cycle_names) else f"Cycle {idx+1}"
+                        story.append(Paragraph(
+                            f"<b>{cycle_name}:</b> Number {cycle_data.get('number')} "
+                            f"<i>{cycle_data.get('age_range', 'N/A')}</i>",
+                            self.styles['CustomBody']
+                        ))
+                        if cycle_data.get('interpretation'):
+                            story.append(Paragraph(cycle_data['interpretation'], self.styles['InfoLabel']))
+                        story.append(Spacer(1, 0.08*inch))
             
             story.append(Spacer(1, 0.2*inch))
         
@@ -203,34 +227,19 @@ class PDFExportService:
             pinnacles = interpretations['pinnacles']
             
             for i, pinnacle in enumerate(pinnacles, 1):
-                story.append(Paragraph(
-                    f"<b>Pinnacle {i} - Number {pinnacle.get('number', 'N/A')}</b>",
-                    self.styles['SectionHeader']
-                ))
-                if pinnacle.get('content'):
-                    story.append(Paragraph(pinnacle['content'], self.styles['CustomBody']))
-                story.append(Spacer(1, 0.1*inch))
+                if isinstance(pinnacle, dict):
+                    story.append(Paragraph(
+                        f"<b>Pinnacle {i} - Number {pinnacle.get('number', 'N/A')}</b>",
+                        self.styles['SectionHeader']
+                    ))
+                    content = pinnacle.get('content')
+                    if content and isinstance(content, str):
+                        story.append(Paragraph(content, self.styles['CustomBody']))
+                    story.append(Spacer(1, 0.1*inch))
             
             story.append(Spacer(1, 0.15*inch))
         
         story.append(PageBreak())
-        
-        # Challenges (if available in core data)
-        if core.get('challenges'):
-            story.append(Paragraph("Life Challenges", self.styles['CustomSubtitle']))
-            challenges = core['challenges']
-            
-            for i, challenge in enumerate(challenges, 1):
-                if isinstance(challenge, dict):
-                    story.append(Paragraph(
-                        f"<b>Challenge {i} - Number {challenge.get('number', 'N/A')}</b>",
-                        self.styles['SectionHeader']
-                    ))
-                    if challenge.get('interpretation'):
-                        story.append(Paragraph(challenge['interpretation'], self.styles['CustomBody']))
-                    story.append(Spacer(1, 0.1*inch))
-            
-            story.append(Spacer(1, 0.15*inch))
         
         # Footer
         story.append(Spacer(1, 0.3*inch))
