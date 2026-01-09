@@ -328,7 +328,7 @@ class _EnhancedExportFABState extends State<EnhancedExportFAB>
         icon: Icon(widget.isLoading ? Icons.hourglass_top : Icons.download),
         label: Text(
           widget.isLoading ? 'Exporting...' : 'Export PDF',
-          style: TextStyle(
+          style: const TextStyle(
             fontWeight: FontWeight.w600,
             fontSize: 15,
           ),

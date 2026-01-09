@@ -147,8 +147,6 @@ class _AnimatedHeroNumberCardState extends State<AnimatedHeroNumberCard>
 
   @override
   Widget build(BuildContext context) {
-    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    
     return FadeTransition(
       opacity: _fadeAnimation,
       child: SlideTransition(

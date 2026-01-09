@@ -9,7 +9,6 @@ import 'decode_controller.dart';
 import 'timeline.dart';
 import 'widgets/cards.dart';
 import 'widgets/animated_number.dart';
-import 'widgets/loading_animation.dart';
 import 'widgets/export_dialog.dart';
 
 class DecodeResultPage extends ConsumerStatefulWidget {
