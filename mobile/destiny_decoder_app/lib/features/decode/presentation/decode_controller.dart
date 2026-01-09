@@ -39,6 +39,10 @@ class DecodeController extends StateNotifier<AsyncValue<DecodeResult?>> {
   void reset() {
     state = const AsyncValue.data(null);
   }
+
+  void setResult(DecodeResult result) {
+    state = AsyncValue.data(result);
+  }
 }
 
 final decodeControllerProvider =
