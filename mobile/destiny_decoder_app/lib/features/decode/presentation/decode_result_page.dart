@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:screenshot/screenshot.dart';
 import 'package:file_picker/file_picker.dart';
-import 'package:saver_gallery/saver_gallery.dart';
+import 'package:path_provider/path_provider.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/screenshot_service.dart';
@@ -774,30 +774,19 @@ class _DecodeResultPageState extends ConsumerState<DecodeResultPage>
     String filename,
   ) async {
     try {
-      // On mobile (Android/iOS), save to Downloads folder
+      // On mobile (Android/iOS), save directly to Downloads folder
       if (Platform.isAndroid || Platform.isIOS) {
-        // Create temp file first
-        final tempDir = await Directory.systemTemp.createTemp('pdf_export');
-        final tempFile = File('${tempDir.path}/$filename');
-        await tempFile.writeAsBytes(bytes);
-        
-        // Save to gallery/downloads
-        final result = await SaverGallery.saveFile(
-          file: tempFile.path,
-          name: filename,
-          androidExistNotSave: false,
-        );
-        
-        // Clean up temp file
-        try {
-          await tempDir.delete(recursive: true);
-        } catch (_) {}
-        
-        if (!result.isSuccess) {
-          throw Exception(result.errorMessage ?? 'Failed to save file');
+        // Get the Downloads directory
+        final downloadDir = await getDownloadsDirectory();
+        if (downloadDir == null) {
+          throw Exception('Unable to access Downloads folder');
         }
         
-        return 'Downloads/$filename';
+        // Create file in Downloads folder
+        final file = File('${downloadDir.path}/$filename');
+        await file.writeAsBytes(bytes);
+        
+        return '${downloadDir.path}/$filename';
       } else {
         // On desktop (Windows/macOS/Linux), use file picker
         final outputPath = await FilePicker.platform.saveFile(
