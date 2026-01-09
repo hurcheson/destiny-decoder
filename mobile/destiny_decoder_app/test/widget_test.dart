@@ -14,7 +14,9 @@ import 'package:destiny_decoder_app/main.dart';
 void main() {
   testWidgets('App renders without errors', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const ProviderScope(child: DestinyDecoderApp()),
+      const ProviderScope(
+        child: DestinyDecoderApp(hasSeenOnboarding: false),
+      ),
     );
 
     expect(find.byType(MaterialApp), findsOneWidget);
