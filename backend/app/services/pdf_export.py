@@ -76,11 +76,26 @@ class PDFExportService:
         Generate a comprehensive PDF report from /decode/full response.
         
         Args:
-            decode_response: Full response from /decode/full endpoint
+            decode_response: Full response from /decode/full endpoint containing:
+                - input: {full_name, date_of_birth}
+                - core: Core calculation data
+                - interpretations: Interpretations for all numbers
             
         Returns:
             BytesIO buffer containing the PDF
+            
+        Raises:
+            ValueError: If required data is missing
         """
+        # Extract data with safe defaults
+        input_data = decode_response.get('input', {})
+        core = decode_response.get('core', {})
+        interpretations = decode_response.get('interpretations', {})
+        
+        # Validate required data
+        if not input_data or not input_data.get('full_name'):
+            raise ValueError("Missing required input data: full_name")
+        
         buffer = BytesIO()
         doc = SimpleDocTemplate(buffer, pagesize=letter,
                                 topMargin=0.5*inch, bottomMargin=0.5*inch,
