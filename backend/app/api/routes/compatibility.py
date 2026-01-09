@@ -32,9 +32,26 @@ async def post_decode_compatibility(request: CompatibilityRequest):
     Returns both full readings plus compatibility scores.
     """
     
-    # Calculate both readings
-    person_a_data = request.person_a.dict()
-    person_b_data = request.person_b.dict()
+    # Calculate both readings - transform data to match calculate_destiny expectations
+    person_a_input = request.person_a.dict()
+    person_b_input = request.person_b.dict()
+    
+    # Transform to match calculate_destiny format (needs first_name not full_name)
+    person_a_data = {
+        'first_name': person_a_input['full_name'].split()[0] if person_a_input['full_name'] else '',
+        'other_names': ' '.join(person_a_input['full_name'].split()[1:]) if len(person_a_input['full_name'].split()) > 1 else '',
+        'year_of_birth': person_a_input['year_of_birth'],
+        'month_of_birth': person_a_input['month_of_birth'],
+        'day_of_birth': person_a_input['day_of_birth'],
+    }
+    
+    person_b_data = {
+        'first_name': person_b_input['full_name'].split()[0] if person_b_input['full_name'] else '',
+        'other_names': ' '.join(person_b_input['full_name'].split()[1:]) if len(person_b_input['full_name'].split()) > 1 else '',
+        'year_of_birth': person_b_input['year_of_birth'],
+        'month_of_birth': person_b_input['month_of_birth'],
+        'day_of_birth': person_b_input['day_of_birth'],
+    }
     
     core_a = calculate_destiny(person_a_data)
     core_b = calculate_destiny(person_b_data)
@@ -79,14 +96,14 @@ async def post_decode_compatibility(request: CompatibilityRequest):
     else:
         overall = "Challenging"
     
-    # Format dates
-    date_a = f"{person_a_data['year_of_birth']}-{person_a_data['month_of_birth']:02d}-{person_a_data['day_of_birth']:02d}"
-    date_b = f"{person_b_data['year_of_birth']}-{person_b_data['month_of_birth']:02d}-{person_b_data['day_of_birth']:02d}"
+    # Format dates from original input
+    date_a = f"{person_a_input['year_of_birth']}-{person_a_input['month_of_birth']:02d}-{person_a_input['day_of_birth']:02d}"
+    date_b = f"{person_b_input['year_of_birth']}-{person_b_input['month_of_birth']:02d}-{person_b_input['day_of_birth']:02d}"
     
     return {
         "person_a": {
             "input": {
-                "full_name": person_a_data["full_name"],
+                "full_name": person_a_input["full_name"],
                 "date_of_birth": date_a,
             },
             "core": core_a,
@@ -113,7 +130,7 @@ async def post_decode_compatibility(request: CompatibilityRequest):
         },
         "person_b": {
             "input": {
-                "full_name": person_b_data["full_name"],
+                "full_name": person_b_input["full_name"],
                 "date_of_birth": date_b,
             },
             "core": core_b,
