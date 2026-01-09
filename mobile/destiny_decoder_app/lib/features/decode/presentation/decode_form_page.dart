@@ -257,7 +257,6 @@ class _DecodeFormPageState extends ConsumerState<DecodeFormPage> {
           ),
         ),
       ),
-          ),
           
           // Loading overlay with premium animation
           if (isLoading)

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:math' as math;
 
 /// Premium loading animation with numerology/mandala theme
 class NumerologyLoadingAnimation extends StatefulWidget {
@@ -86,9 +87,9 @@ class _NumerologyLoadingAnimationState extends State<NumerologyLoadingAnimation>
                   ),
                   child: Stack(
                     children: List.generate(9, (index) {
-                      final angle = (index * 40) * 3.14159 / 180;
-                      final x = 50 + 40 * Math.cos(angle);
-                      final y = 50 + 40 * Math.sin(angle);
+                      final angle = (index * 40) * math.pi / 180;
+                      final x = 50 + 40 * math.cos(angle);
+                      final y = 50 + 40 * math.sin(angle);
                       return Positioned(
                         left: x,
                         top: y,
@@ -203,10 +204,4 @@ class _NumerologyLoadingAnimationState extends State<NumerologyLoadingAnimation>
       ],
     );
   }
-}
-
-// Simple Math helper for cos/sin
-class Math {
-  static double cos(double x) => (x).cos();
-  static double sin(double x) => (x).sin();
 }
