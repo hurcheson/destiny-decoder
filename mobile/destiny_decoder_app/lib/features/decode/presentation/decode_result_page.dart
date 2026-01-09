@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:screenshot/screenshot.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:saver_gallery/saver_gallery.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/screenshot_service.dart';
@@ -773,21 +774,47 @@ class _DecodeResultPageState extends ConsumerState<DecodeResultPage>
     String filename,
   ) async {
     try {
-      // Let user choose where to save the file
-      final outputPath = await FilePicker.platform.saveFile(
-        dialogTitle: 'Save PDF',
-        fileName: filename,
-        type: FileType.custom,
-        allowedExtensions: ['pdf'],
-      );
+      // On mobile (Android/iOS), save to Downloads folder
+      if (Platform.isAndroid || Platform.isIOS) {
+        // Create temp file first
+        final tempDir = await Directory.systemTemp.createTemp('pdf_export');
+        final tempFile = File('${tempDir.path}/$filename');
+        await tempFile.writeAsBytes(bytes);
+        
+        // Save to gallery/downloads
+        final result = await SaverGallery.saveFile(
+          file: tempFile.path,
+          name: filename,
+          androidExistNotSave: false,
+        );
+        
+        // Clean up temp file
+        try {
+          await tempDir.delete(recursive: true);
+        } catch (_) {}
+        
+        if (!result.isSuccess) {
+          throw Exception(result.errorMessage ?? 'Failed to save file');
+        }
+        
+        return 'Downloads/$filename';
+      } else {
+        // On desktop (Windows/macOS/Linux), use file picker
+        final outputPath = await FilePicker.platform.saveFile(
+          dialogTitle: 'Save PDF',
+          fileName: filename,
+          type: FileType.custom,
+          allowedExtensions: ['pdf'],
+        );
 
-      if (outputPath == null) {
-        throw Exception('Save cancelled by user');
+        if (outputPath == null) {
+          throw Exception('Save cancelled by user');
+        }
+
+        final file = File(outputPath);
+        await file.writeAsBytes(bytes);
+        return outputPath;
       }
-
-      final file = File(outputPath);
-      await file.writeAsBytes(bytes);
-      return outputPath;
     } catch (e) {
       throw Exception('Failed to save file: $e');
     }
