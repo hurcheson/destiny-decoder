@@ -99,7 +99,7 @@ class DailyInsightsPage extends ConsumerWidget {
                 ),
                 const SizedBox(height: 16),
                 ElevatedButton.icon(
-                  onPressed: () => ref.refresh(dailyInsightProvider(params)),
+                  onPressed: () async => await ref.refresh(dailyInsightProvider(params).future),
                   icon: const Icon(Icons.refresh),
                   label: const Text('Retry'),
                 ),

@@ -115,9 +115,9 @@ class _CompatibilityFormPageState extends ConsumerState<CompatibilityFormPage> {
                         children: [
                           Row(
                             children: [
-                              CircleAvatar(
+                              const CircleAvatar(
                                 backgroundColor: AppColors.primary,
-                                child: const Text(
+                                child: Text(
                                   'A',
                                   style: TextStyle(
                                     color: Colors.white,
@@ -209,9 +209,9 @@ class _CompatibilityFormPageState extends ConsumerState<CompatibilityFormPage> {
                         children: [
                           Row(
                             children: [
-                              CircleAvatar(
+                              const CircleAvatar(
                                 backgroundColor: AppColors.accent,
-                                child: const Text(
+                                child: Text(
                                   'B',
                                   style: TextStyle(
                                     color: Colors.black,

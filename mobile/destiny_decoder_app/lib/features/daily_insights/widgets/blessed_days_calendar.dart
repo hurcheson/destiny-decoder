@@ -119,7 +119,7 @@ class _BlessedDaysCalendarState extends ConsumerState<BlessedDaysCalendar> {
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(8),
                           color: isBlessed
-                              ? Colors.green.withOpacity(0.18)
+                              ? Colors.green.withValues(alpha: 0.18)
                               : Theme.of(context).colorScheme.surface,
                           border: Border.all(
                             color: isBlessed ? Colors.green : Theme.of(context).dividerColor,
@@ -143,7 +143,7 @@ class _BlessedDaysCalendarState extends ConsumerState<BlessedDaysCalendar> {
                   alignment: Alignment.centerLeft,
                   child: Row(
                     children: [
-                      Container(width: 14, height: 14, decoration: BoxDecoration(color: Colors.green.withOpacity(0.18), border: Border.all(color: Colors.green), borderRadius: BorderRadius.circular(3))),
+                      Container(width: 14, height: 14, decoration: BoxDecoration(color: Colors.green.withValues(alpha: 0.18), border: Border.all(color: Colors.green), borderRadius: BorderRadius.circular(3))),
                       const SizedBox(width: 6),
                       Text('Blessed day', style: Theme.of(context).textTheme.bodySmall),
                     ],

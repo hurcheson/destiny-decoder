@@ -433,7 +433,7 @@ class _DecodeResultPageState extends ConsumerState<DecodeResultPage>
                     FloatingActionButton.extended(
                       heroTag: 'daily_insights',
                       onPressed: () {
-                        final lifeSealNumber = lifeSeal.number as int;
+                        final lifeSealNumber = lifeSeal.number;
                         final dayOfBirth = DateTime.parse(result.input.dateOfBirth).day;
                         Navigator.of(context).push(
                           MaterialPageRoute(
