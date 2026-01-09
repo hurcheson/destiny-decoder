@@ -37,7 +37,15 @@ class _DecodeFormPageState extends ConsumerState<DecodeFormPage> {
         );
 
     final state = ref.read(decodeControllerProvider);
-    if (state.hasValue && state.value != null && mounted) {
+    if (state.hasError && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error: ${state.error}'),
+          backgroundColor: Colors.red,
+          duration: const Duration(seconds: 5),
+        ),
+      );
+    } else if (state.hasValue && state.value != null && mounted) {
       Navigator.of(context).push(
         MaterialPageRoute(
           builder: (_) => const DecodeResultPage(),

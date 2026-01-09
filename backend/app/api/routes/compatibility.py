@@ -1,4 +1,5 @@
 from fastapi import APIRouter, HTTPException
+from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 from typing import Optional
 from ...services.destiny_service import calculate_destiny
@@ -8,6 +9,7 @@ from ...services.interpretation_service import (
     get_personality_number_interpretation,
     get_personal_year_interpretation,
 )
+from ...services.compatibility_pdf_service import generate_compatibility_pdf
 from ...core.compatibility import evaluate_compatibility
 
 router = APIRouter()
@@ -164,3 +166,98 @@ async def post_decode_compatibility(request: CompatibilityRequest):
             "max_score": max_score,
         }
     }
+
+
+@router.post("/export/compatibility/pdf")
+async def export_compatibility_pdf(request: CompatibilityRequest):
+    """
+    Generate and export a PDF report for compatibility analysis.
+    Returns PDF file as a downloadable attachment.
+    """
+    
+    # Reuse the compatibility calculation logic
+    person_a_input = request.person_a.dict()
+    person_b_input = request.person_b.dict()
+    
+    person_a_data = {
+        'first_name': person_a_input['full_name'].split()[0] if person_a_input['full_name'] else '',
+        'other_names': ' '.join(person_a_input['full_name'].split()[1:]) if len(person_a_input['full_name'].split()) > 1 else '',
+        'year_of_birth': person_a_input['year_of_birth'],
+        'month_of_birth': person_a_input['month_of_birth'],
+        'day_of_birth': person_a_input['day_of_birth'],
+    }
+    
+    person_b_data = {
+        'first_name': person_b_input['full_name'].split()[0] if person_b_input['full_name'] else '',
+        'other_names': ' '.join(person_b_input['full_name'].split()[1:]) if len(person_b_input['full_name'].split()) > 1 else '',
+        'year_of_birth': person_b_input['year_of_birth'],
+        'month_of_birth': person_b_input['month_of_birth'],
+        'day_of_birth': person_b_input['day_of_birth'],
+    }
+    
+    core_a = calculate_destiny(person_a_data)
+    core_b = calculate_destiny(person_b_data)
+    
+    # Calculate compatibility
+    life_seal_compat = evaluate_compatibility(core_a["life_seal"], core_b["life_seal"])
+    soul_compat = evaluate_compatibility(core_a["soul_number"], core_b["soul_number"])
+    personality_compat = evaluate_compatibility(core_a["personality_number"], core_b["personality_number"])
+    
+    compat_scores = {"Very Strong": 3, "Compatible": 2, "Challenging": 1}
+    total_score = (
+        compat_scores[life_seal_compat] * 2 +
+        compat_scores[soul_compat] +
+        compat_scores[personality_compat]
+    )
+    max_score = 12
+    
+    if total_score >= 10:
+        overall = "Highly Compatible"
+    elif total_score >= 7:
+        overall = "Compatible"
+    elif total_score >= 5:
+        overall = "Moderately Compatible"
+    else:
+        overall = "Challenging"
+    
+    # Format data for PDF
+    date_a = f"{person_a_input['year_of_birth']}-{person_a_input['month_of_birth']:02d}-{person_a_input['day_of_birth']:02d}"
+    date_b = f"{person_b_input['year_of_birth']}-{person_b_input['month_of_birth']:02d}-{person_b_input['day_of_birth']:02d}"
+    
+    person_a_pdf = {
+        'input': {
+            'full_name': person_a_input['full_name'],
+            'date_of_birth': date_a,
+        },
+        'core': core_a,
+    }
+    
+    person_b_pdf = {
+        'input': {
+            'full_name': person_b_input['full_name'],
+            'date_of_birth': date_b,
+        },
+        'core': core_b,
+    }
+    
+    compatibility_pdf = {
+        'overall': overall,
+        'life_seal': life_seal_compat,
+        'soul_number': soul_compat,
+        'personality_number': personality_compat,
+        'score': total_score,
+        'max_score': max_score,
+    }
+    
+    # Generate PDF
+    pdf_buffer = generate_compatibility_pdf(person_a_pdf, person_b_pdf, compatibility_pdf)
+    
+    filename = f"compatibility-{person_a_input['full_name'].replace(' ', '-')}-{person_b_input['full_name'].replace(' ', '-')}.pdf"
+    
+    return StreamingResponse(
+        pdf_buffer,
+        media_type='application/pdf',
+        headers={
+            'Content-Disposition': f'attachment; filename="{filename}"'
+        }
+    )
