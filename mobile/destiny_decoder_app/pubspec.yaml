@@ -27,6 +27,11 @@ dependencies:
   
   # URL launcher for PDFs
   url_launcher: ^6.2.0
+  
+  # Screenshot & Image Export
+  screenshot: ^3.0.0
+  saver_gallery: ^3.0.6
+  share_plus: ^7.2.0
 
 dev_dependencies:
   flutter_test:

@@ -34,31 +34,52 @@ def generate_compatibility_pdf(person_a: dict, person_b: dict, compatibility: di
         bottomMargin=0.75 * inch,
     )
     
+    # Define color palette - Professional compatibility theme
+    PRIMARY_COLOR = '#8B4789'      # Rich purple (Compatibility/Hearts theme)
+    SECONDARY_COLOR = '#D4AF37'    # Gold accent
+    DARK_TEXT = '#1A1A1A'          # Near black for readability
+    LIGHT_TEXT = '#FFFFFF'         # White for contrast
+    BORDER_COLOR = '#C89EC9'       # Lighter purple for borders
+    HEADER_BG = '#8B4789'          # Rich purple background
+    SECTION_BG = '#FAF6FD'         # Very light purple background
+    TABLE_HEADER_BG = '#8B4789'    # Rich purple for table headers
+    TABLE_HEADER_TEXT = '#FFFFFF'  # White text on headers
+    TABLE_ALT_ROW = '#FAF6FD'      # Very light purple alternate rows
+    TABLE_BORDER = '#D4B5DC'       # Muted purple borders
+    
     styles = getSampleStyleSheet()
+    
+    # Premium title style
     title_style = ParagraphStyle(
         'CustomTitle',
         parent=styles['Heading1'],
-        fontSize=24,
-        textColor=colors.HexColor('#8B4789'),
+        fontSize=28,
+        textColor=colors.HexColor(PRIMARY_COLOR),
         spaceAfter=12,
-        alignment=1  # Center
+        alignment=1,  # Center
+        fontName='Helvetica-Bold'
     )
     
+    # Section headers
     section_header_style = ParagraphStyle(
         'SectionHeader',
         parent=styles['Heading2'],
         fontSize=16,
-        textColor=colors.HexColor('#2C3E50'),
+        textColor=colors.HexColor(PRIMARY_COLOR),
         spaceAfter=12,
         spaceBefore=12,
+        fontName='Helvetica-Bold'
     )
     
+    # Body text
     body_style = ParagraphStyle(
         'CustomBody',
         parent=styles['BodyText'],
         fontSize=11,
+        textColor=colors.HexColor(DARK_TEXT),
         leading=14,
         spaceAfter=12,
+        fontName='Helvetica'
     )
     
     elements = []
@@ -115,19 +136,31 @@ def generate_compatibility_pdf(person_a: dict, person_b: dict, compatibility: di
     
     breakdown_table = Table(breakdown_data, colWidths=[2*inch, 1.5*inch, 3*inch])
     breakdown_table.setStyle(TableStyle([
-        ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#8B4789')),
-        ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
-        ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+        # Header styling - Rich purple with white text and gold underline
+        ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor(TABLE_HEADER_BG)),
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.HexColor(TABLE_HEADER_TEXT)),
         ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
         ('FONTSIZE', (0, 0), (-1, 0), 12),
-        ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
-        ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
-        ('GRID', (0, 0), (-1, -1), 1, colors.black),
+        ('ALIGN', (0, 0), (-1, 0), 'CENTER'),
+        ('VALIGN', (0, 0), (-1, 0), 'MIDDLE'),
+        ('BOTTOMPADDING', (0, 0), (-1, 0), 14),
+        ('TOPPADDING', (0, 0), (-1, 0), 10),
+        ('LINEBELOW', (0, 0), (-1, 0), 2, colors.HexColor(SECONDARY_COLOR)),
+        
+        # Row styling - Alternating light purple and white with proper borders
+        ('BACKGROUND', (0, 1), (-1, -1), colors.HexColor(TABLE_ALT_ROW)),
+        ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.HexColor(TABLE_ALT_ROW), colors.white]),
+        ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+        ('VALIGN', (0, 0), (-1, -1), 'TOP'),
         ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
         ('FONTSIZE', (0, 1), (-1, -1), 10),
-        ('VALIGN', (0, 0), (-1, -1), 'TOP'),
         ('TOPPADDING', (0, 1), (-1, -1), 8),
         ('BOTTOMPADDING', (0, 1), (-1, -1), 8),
+        ('LEFTPADDING', (0, 1), (-1, -1), 8),
+        ('RIGHTPADDING', (0, 1), (-1, -1), 8),
+        
+        # Border styling - Muted purple instead of black
+        ('GRID', (0, 0), (-1, -1), 1, colors.HexColor(TABLE_BORDER)),
     ]))
     elements.append(breakdown_table)
     elements.append(Spacer(1, 0.3 * inch))
@@ -149,19 +182,38 @@ def generate_compatibility_pdf(person_a: dict, person_b: dict, compatibility: di
     
     profile_table = Table(profile_data, colWidths=[2*inch, 2.25*inch, 2.25*inch])
     profile_table.setStyle(TableStyle([
-        ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#3498DB')),
-        ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
-        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+        # Header styling - Rich purple with white text and gold underline
+        ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor(TABLE_HEADER_BG)),
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.HexColor(TABLE_HEADER_TEXT)),
         ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
         ('FONTSIZE', (0, 0), (-1, 0), 12),
-        ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
-        ('BACKGROUND', (0, 1), (0, -1), colors.HexColor('#ECF0F1')),
+        ('ALIGN', (0, 0), (-1, 0), 'CENTER'),
+        ('VALIGN', (0, 0), (-1, 0), 'MIDDLE'),
+        ('BOTTOMPADDING', (0, 0), (-1, 0), 14),
+        ('TOPPADDING', (0, 0), (-1, 0), 10),
+        ('LINEBELOW', (0, 0), (-1, 0), 2, colors.HexColor(SECONDARY_COLOR)),
+        
+        # First column styling - Light background with purple text
+        ('BACKGROUND', (0, 1), (0, -1), colors.HexColor(SECTION_BG)),
+        ('TEXTCOLOR', (0, 1), (0, -1), colors.HexColor(PRIMARY_COLOR)),
         ('FONTNAME', (0, 1), (0, -1), 'Helvetica-Bold'),
-        ('BACKGROUND', (1, 1), (-1, -1), colors.beige),
-        ('GRID', (0, 0), (-1, -1), 1, colors.black),
-        ('FONTSIZE', (0, 1), (-1, -1), 10),
-        ('TOPPADDING', (0, 1), (-1, -1), 8),
-        ('BOTTOMPADDING', (0, 1), (-1, -1), 8),
+        
+        # Data columns - Alternating light purple and white rows
+        ('BACKGROUND', (1, 1), (-1, -1), colors.white),
+        ('ROWBACKGROUNDS', (1, 1), (-1, -1), [colors.HexColor(TABLE_ALT_ROW), colors.white]),
+        
+        # Overall alignment and padding
+        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+        ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
+        ('FONTSIZE', (0, 0), (-1, -1), 10),
+        ('TOPPADDING', (0, 0), (-1, -1), 8),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 8),
+        ('LEFTPADDING', (0, 0), (-1, -1), 8),
+        ('RIGHTPADDING', (0, 0), (-1, -1), 8),
+        
+        # Border styling - Muted purple instead of black
+        ('GRID', (0, 0), (-1, -1), 1, colors.HexColor(TABLE_BORDER)),
     ]))
     elements.append(profile_table)
     elements.append(Spacer(1, 0.3 * inch))

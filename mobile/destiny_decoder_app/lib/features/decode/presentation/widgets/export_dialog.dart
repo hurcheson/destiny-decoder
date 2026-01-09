@@ -5,6 +5,9 @@ class ExportOptionsDialog extends StatelessWidget {
   final VoidCallback onExportPdf;
   final VoidCallback? onShare;
   final VoidCallback? onSaveLocal;
+  final VoidCallback? onSaveImage;
+  final VoidCallback? onShareImage;
+  final VoidCallback? onShareWithDetails;
   final bool isLoading;
 
   const ExportOptionsDialog({
@@ -12,6 +15,9 @@ class ExportOptionsDialog extends StatelessWidget {
     required this.onExportPdf,
     this.onShare,
     this.onSaveLocal,
+    this.onSaveImage,
+    this.onShareImage,
+    this.onShareWithDetails,
     this.isLoading = false,
   });
 
@@ -52,7 +58,7 @@ class ExportOptionsDialog extends StatelessWidget {
                 Icon(Icons.share, color: accent, size: 28),
                 const SizedBox(width: 12),
                 Text(
-                  'Export & Share',
+                  'Export Options',
                   style: TextStyle(
                     fontSize: 22,
                     fontWeight: FontWeight.w700,
@@ -63,7 +69,7 @@ class ExportOptionsDialog extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             Text(
-              'Choose how to share your reading',
+              'Choose how to export your reading',
               style: TextStyle(
                 fontSize: 14,
                 color: primary.withValues(alpha: 0.7),
@@ -83,7 +89,7 @@ class ExportOptionsDialog extends StatelessWidget {
                 // PDF Export
                 _ExportOption(
                   icon: Icons.picture_as_pdf,
-                  label: 'Export PDF',
+                  label: 'Export',
                   description: 'Professional 4-page report',
                   color: Colors.red,
                   isLoading: isLoading,
@@ -118,6 +124,48 @@ class ExportOptionsDialog extends StatelessWidget {
                     onTap: isLoading ? null : () {
                       Navigator.pop(context);
                       onSaveLocal!();
+                    },
+                  ),
+
+                // Save as Image
+                if (onSaveImage != null)
+                  _ExportOption(
+                    icon: Icons.image,
+                    label: 'Save as Image',
+                    description: 'Save to photo gallery',
+                    color: Colors.blue,
+                    isLoading: isLoading,
+                    onTap: isLoading ? null : () {
+                      Navigator.pop(context);
+                      onSaveImage!();
+                    },
+                  ),
+
+                // Share as Image
+                if (onShareImage != null)
+                  _ExportOption(
+                    icon: Icons.photo_camera,
+                    label: 'Share Image',
+                    description: 'Share as picture',
+                    color: Colors.purple,
+                    isLoading: isLoading,
+                    onTap: isLoading ? null : () {
+                      Navigator.pop(context);
+                      onShareImage!();
+                    },
+                  ),
+
+                // Share with Details
+                if (onShareWithDetails != null)
+                  _ExportOption(
+                    icon: Icons.share_outlined,
+                    label: 'Share Details',
+                    description: 'With reading summary',
+                    color: Colors.teal,
+                    isLoading: isLoading,
+                    onTap: isLoading ? null : () {
+                      Navigator.pop(context);
+                      onShareWithDetails!();
                     },
                   ),
 
@@ -327,7 +375,7 @@ class _EnhancedExportFABState extends State<EnhancedExportFAB>
         ),
         icon: Icon(widget.isLoading ? Icons.hourglass_top : Icons.download),
         label: Text(
-          widget.isLoading ? 'Exporting...' : 'Export PDF',
+          widget.isLoading ? 'Exporting...' : 'Share',
           style: const TextStyle(
             fontWeight: FontWeight.w600,
             fontSize: 15,

@@ -3,8 +3,11 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:screenshot/screenshot.dart';
 
 import '../../../core/theme/app_theme.dart';
+import '../../../core/utils/screenshot_service.dart';
+import '../../../core/utils/share_service.dart';
 import 'decode_controller.dart';
 import 'timeline.dart';
 import 'widgets/cards.dart';
@@ -24,6 +27,7 @@ class _DecodeResultPageState extends ConsumerState<DecodeResultPage>
   final _overviewController = ScrollController();
   final _numbersController = ScrollController();
   final _timelineController = ScrollController();
+  final _screenshotController = ScreenshotController();
   bool _isSaving = false;
   TabController? _tabController;
 
@@ -426,6 +430,9 @@ class _DecodeResultPageState extends ConsumerState<DecodeResultPage>
                             isLoading: isExporting || _isSaving,
                             onExportPdf: () => _exportPdf(ref, result),
                             onSaveLocal: () => _saveReading(ref, result),
+                            onSaveImage: () => _saveAsImage(result),
+                            onShareImage: () => _shareAsImage(result),
+                            onShareWithDetails: () => _shareWithDetails(result),
                           ),
                         );
                       },
@@ -442,45 +449,51 @@ class _DecodeResultPageState extends ConsumerState<DecodeResultPage>
                   ],
                 ),
                 floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
-                body: GradientContainer(
-                  child: TabBarView(
-                    children: [
-                      _wrapAnimated(
-                        _buildOverviewTab(
-                          context,
-                          isDarkMode,
-                          lifeSeal,
-                          exportState,
-                          result,
-                          _overviewController,
-                        ),
-                        reduceMotion,
+                body: Screenshot(
+                  controller: _screenshotController,
+                  child: Container(
+                    color: Colors.white,
+                    child: GradientContainer(
+                      child: TabBarView(
+                        children: [
+                          _wrapAnimated(
+                            _buildOverviewTab(
+                              context,
+                              isDarkMode,
+                              lifeSeal,
+                              exportState,
+                              result,
+                              _overviewController,
+                            ),
+                            reduceMotion,
+                          ),
+                          _wrapAnimated(
+                            _buildNumbersTab(
+                              context,
+                              isDarkMode,
+                              lifeSeal,
+                              soulNumber,
+                              personalityNumber,
+                              personalYear,
+                              result,
+                              _numbersController,
+                            ),
+                            reduceMotion,
+                          ),
+                          _wrapAnimated(
+                            _buildTimelineTab(
+                              context,
+                              isDarkMode,
+                              lifeCycles,
+                              turningPoints,
+                              result.input.dateOfBirth,
+                              _timelineController,
+                            ),
+                            reduceMotion,
+                          ),
+                        ],
                       ),
-                      _wrapAnimated(
-                        _buildNumbersTab(
-                          context,
-                          isDarkMode,
-                          lifeSeal,
-                          soulNumber,
-                          personalityNumber,
-                          personalYear,
-                          result,
-                          _numbersController,
-                        ),
-                        reduceMotion,
-                      ),
-                      _wrapAnimated(
-                        _buildTimelineTab(
-                          context,
-                          isDarkMode,
-                          lifeCycles,
-                          turningPoints,
-                          result.input.dateOfBirth,
-                          _timelineController,
-                        ),
-                        reduceMotion,
-                      ),
-                    ],
+                    ),
                   ),
                 ),
               );
@@ -654,6 +667,86 @@ class _DecodeResultPageState extends ConsumerState<DecodeResultPage>
           _isSaving = false;
         });
       }
+    }
+  }
+
+  Future<void> _saveAsImage(dynamic result) async {
+    final messenger = ScaffoldMessenger.of(context);
+    
+    try {
+      final fileName = ScreenshotService.generateFileName(
+        result.input.fullName.replaceAll(' ', '_'),
+      );
+      
+      final success = await ScreenshotService.saveToGallery(
+        controller: _screenshotController,
+        fileName: fileName,
+      );
+      
+      if (!mounted) return;
+      
+      if (success) {
+        messenger.showSnackBar(
+          const SnackBar(
+            content: Text('Image saved to gallery'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      } else {
+        throw Exception('Failed to save image');
+      }
+    } catch (e) {
+      if (!mounted) return;
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text('Save failed: ${e.toString()}'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
+  Future<void> _shareAsImage(dynamic result) async {
+    final messenger = ScaffoldMessenger.of(context);
+    
+    try {
+      final fileName = ScreenshotService.generateFileName(
+        result.input.fullName.replaceAll(' ', '_'),
+      );
+      
+      await ScreenshotService.shareImage(
+        controller: _screenshotController,
+        fileName: fileName,
+        text: 'Check out my Destiny Decoder reading!',
+      );
+    } catch (e) {
+      if (!mounted) return;
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text('Share failed: ${e.toString()}'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
+  Future<void> _shareWithDetails(dynamic result) async {
+    final messenger = ScaffoldMessenger.of(context);
+    
+    try {
+      final formattedText = ShareService.formatDecodeReadingText(result);
+      await ShareService.shareReading(
+        text: formattedText,
+        subject: 'My Destiny Reading - ${result.input.fullName}',
+      );
+    } catch (e) {
+      if (!mounted) return;
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text('Share failed: ${e.toString()}'),
+          backgroundColor: Colors.red,
+        ),
+      );
     }
   }
 

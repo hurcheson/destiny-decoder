@@ -35,52 +35,86 @@ def generate_report_pdf(full_name: str, date_of_birth: str, report: dict) -> Byt
         bottomMargin=0.75 * inch,
     )
     
+    # Define color palette - Professional numerology-inspired theme
+    PRIMARY_COLOR = '#6B5B8A'      # Deep purple (Life Seal theme)
+    SECONDARY_COLOR = '#D4AF37'    # Gold accent
+    DARK_TEXT = '#1A1A1A'          # Near black for readability
+    LIGHT_TEXT = '#FFFFFF'          # White for contrast
+    BORDER_COLOR = '#8B7BA8'       # Lighter purple for borders
+    HEADER_BG = '#6B5B8A'          # Deep purple background
+    SECTION_BG = '#F5F3FA'         # Light purple background
+    TABLE_HEADER_BG = '#6B5B8A'    # Deep purple for table headers
+    TABLE_HEADER_TEXT = '#FFFFFF'  # White text on headers
+    TABLE_ALT_ROW = '#F5F3FA'      # Light purple alternate rows
+    TABLE_BORDER = '#D0C9E0'       # Muted purple borders
+    
     # Define styles
     styles = getSampleStyleSheet()
+    
+    # Premium title style
     title_style = ParagraphStyle(
         'CustomTitle',
         parent=styles['Heading1'],
-        fontSize=24,
-        textColor=colors.HexColor('#2C3E50'),
+        fontSize=28,
+        textColor=colors.HexColor(PRIMARY_COLOR),
         spaceAfter=6,
-        alignment=0
+        alignment=0,
+        fontName='Helvetica-Bold'
     )
     
+    # Section headers with gradient-like effect using color
     section_header_style = ParagraphStyle(
         'SectionHeader',
         parent=styles['Heading2'],
         fontSize=16,
-        textColor=colors.HexColor('#34495E'),
+        textColor=colors.HexColor(PRIMARY_COLOR),
         spaceAfter=12,
         spaceBefore=12,
-        alignment=0
+        alignment=0,
+        fontName='Helvetica-Bold'
     )
     
+    # Subtitle style
     subtitle_style = ParagraphStyle(
         'Subtitle',
         parent=styles['Normal'],
         fontSize=11,
-        textColor=colors.HexColor('#7F8C8D'),
+        textColor=colors.HexColor(SECONDARY_COLOR),
         spaceAfter=6,
-        italic=True
+        italic=True,
+        fontName='Helvetica-Oblique'
     )
     
+    # Body text style for readability
     body_style = ParagraphStyle(
         'Body',
         parent=styles['Normal'],
         fontSize=10,
-        textColor=colors.HexColor('#2C3E50'),
+        textColor=colors.HexColor(DARK_TEXT),
         spaceAfter=10,
-        leading=14
+        leading=14,
+        fontName='Helvetica'
     )
     
+    # Label style with accent color
     label_style = ParagraphStyle(
         'Label',
         parent=styles['Normal'],
         fontSize=10,
-        textColor=colors.HexColor('#34495E'),
+        textColor=colors.HexColor(PRIMARY_COLOR),
         bold=True,
-        spaceAfter=4
+        spaceAfter=4,
+        fontName='Helvetica-Bold'
+    )
+    
+    # Table header style with white text for contrast on purple background
+    table_header_style = ParagraphStyle(
+        'TableHeader',
+        parent=styles['Normal'],
+        fontSize=10,
+        textColor=colors.HexColor(LIGHT_TEXT),
+        bold=True,
+        fontName='Helvetica-Bold'
     )
     
     # Build document content
@@ -106,9 +140,9 @@ def generate_report_pdf(full_name: str, date_of_birth: str, report: dict) -> Byt
         if 'core_numbers' in overview:
             core_nums = overview['core_numbers']
             table_data = [[
-                Paragraph('Number', label_style),
-                Paragraph('Value', label_style),
-                Paragraph('Meaning', label_style),
+                Paragraph('Number', table_header_style),
+                Paragraph('Value', table_header_style),
+                Paragraph('Meaning', table_header_style),
             ]]
             
             if 'life_seal' in core_nums:
@@ -150,18 +184,40 @@ def generate_report_pdf(full_name: str, date_of_birth: str, report: dict) -> Byt
                 hAlign='LEFT',
             )
             table.setStyle(TableStyle([
-                ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#34495E')),
-                ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
-                ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
-                ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+                # Header row styling - Deep purple with white text
+                ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor(TABLE_HEADER_BG)),
+                ('TEXTCOLOR', (0, 0), (-1, 0), colors.HexColor(TABLE_HEADER_TEXT)),
                 ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-                ('FONTSIZE', (0, 0), (-1, 0), 10),
+                ('FONTSIZE', (0, 0), (-1, 0), 11),
+                ('BOTTOMPADDING', (0, 0), (-1, 0), 14),
+                ('TOPPADDING', (0, 0), (-1, 0), 10),
+                ('ALIGN', (0, 0), (-1, 0), 'CENTER'),
+                
+                # Body text styling
+                ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
                 ('FONTSIZE', (0, 1), (-1, -1), 9),
-                ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
-                ('BACKGROUND', (0, 1), (-1, -1), colors.HexColor('#ECF0F1')),
-                ('GRID', (0, 0), (-1, -1), 1, colors.HexColor('#BDC3C7')),
-                ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.HexColor('#ECF0F1'), colors.white]),
-                ('LINEBELOW', (0, 0), (-1, 0), 1, colors.HexColor('#BDC3C7')),
+                ('TOPPADDING', (0, 1), (-1, -1), 10),
+                ('BOTTOMPADDING', (0, 1), (-1, -1), 10),
+                ('LEFTPADDING', (0, 0), (-1, -1), 10),
+                ('RIGHTPADDING', (0, 0), (-1, -1), 10),
+                
+                # Alignment
+                ('ALIGN', (0, 0), (0, -1), 'LEFT'),      # First column left
+                ('ALIGN', (1, 1), (1, -1), 'CENTER'),    # Value column center
+                ('ALIGN', (2, 1), (2, -1), 'LEFT'),      # Meaning column left
+                ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+                
+                # Alternating row colors for better readability
+                ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.HexColor(TABLE_ALT_ROW)]),
+                
+                # Borders with muted purple
+                ('GRID', (0, 0), (-1, -1), 0.75, colors.HexColor(TABLE_BORDER)),
+                ('LINEBELOW', (0, 0), (-1, 0), 2, colors.HexColor(SECONDARY_COLOR)),
+                
+                # First column (Number names) - Use light purple background with darker purple text
+                ('BACKGROUND', (0, 1), (0, -1), colors.HexColor(TABLE_ALT_ROW)),
+                ('TEXTCOLOR', (0, 1), (0, -1), colors.HexColor(PRIMARY_COLOR)),
+                ('FONTNAME', (0, 1), (0, -1), 'Helvetica-Bold'),
             ]))
             story.append(table)
         
