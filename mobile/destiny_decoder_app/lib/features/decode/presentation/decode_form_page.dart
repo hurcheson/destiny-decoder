@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/app_theme.dart';
+import '../../compatibility/presentation/compatibility_form_page.dart';
 import 'decode_controller.dart';
 import 'decode_result_page.dart';
 import 'widgets/cards.dart';
@@ -68,6 +69,17 @@ class _DecodeFormPageState extends ConsumerState<DecodeFormPage> {
                       Row(
                         children: [
                           const Spacer(),
+                          IconButton(
+                            tooltip: 'Compatibility',
+                            icon: const Icon(Icons.favorite_border),
+                            onPressed: () {
+                              Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (_) => const CompatibilityFormPage(),
+                                ),
+                              );
+                            },
+                          ),
                           IconButton(
                             tooltip: 'History',
                             icon: const Icon(Icons.history),

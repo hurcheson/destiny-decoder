@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.api.routes.destiny import router as destiny_router
 from app.api.routes.interpretations import router as interpretations_router
+from app.api.routes.compatibility import router as compatibility_router
 
 app = FastAPI(title="Destiny Decoder API")
 
@@ -18,3 +19,4 @@ app.add_middleware(
 
 app.include_router(destiny_router)
 app.include_router(interpretations_router)
+app.include_router(compatibility_router)
