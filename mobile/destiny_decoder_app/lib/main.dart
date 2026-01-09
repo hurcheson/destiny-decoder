@@ -9,14 +9,18 @@ import 'features/onboarding/presentation/onboarding_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
+
   // Initialize shared preferences
   final prefs = await SharedPreferences.getInstance();
   final hasSeenOnboarding = prefs.getBool('has_seen_onboarding') ?? false;
 
-  // Initialize notifications
-  final notificationService = NotificationService();
-  await notificationService.initialize();
+  // Initialize notifications (optional - will fail gracefully if Firebase not configured)
+  try {
+    final notificationService = NotificationService();
+    await notificationService.initialize();
+  } catch (e) {
+    print('⚠️ Firebase not configured - notifications disabled: $e');
+  }
 
   runApp(
     ProviderScope(

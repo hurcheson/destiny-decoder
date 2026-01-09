@@ -22,11 +22,17 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
   }
 
   Future<void> _loadFcmToken() async {
-    final notificationService = NotificationService();
-    final token = await notificationService.getDeviceToken();
-    setState(() {
-      _fcmToken = token ?? 'No token available';
-    });
+    try {
+      final notificationService = NotificationService();
+      final token = await notificationService.getDeviceToken();
+      setState(() {
+        _fcmToken = token ?? 'Firebase not configured';
+      });
+    } catch (e) {
+      setState(() {
+        _fcmToken = 'Firebase not configured';
+      });
+    }
   }
 
   Future<void> _testBlessedDay() async {
