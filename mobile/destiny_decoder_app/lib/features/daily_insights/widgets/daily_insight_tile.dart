@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:share_plus/share_plus.dart';
 import '../models.dart';
 
 class DailyInsightTile extends StatelessWidget {
@@ -74,6 +75,17 @@ class DailyInsightTile extends StatelessWidget {
                 ),
                 if (data.isBlessedDay)
                   const Icon(Icons.auto_awesome, color: Colors.orangeAccent),
+                PopupMenuButton<String>(
+                  onSelected: (action) {
+                    if (action == 'share') {
+                      _shareInsight(context);
+                    }
+                  },
+                  itemBuilder: (context) => [
+                    const PopupMenuItem(value: 'share', child: Text('Share')),
+                  ],
+                  icon: const Icon(Icons.more_vert),
+                ),
               ],
             ),
             const SizedBox(height: 12),
@@ -93,5 +105,26 @@ class DailyInsightTile extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  void _shareInsight(BuildContext context) {
+    final text = '''
+🔮 Daily Insight for ${data.date}
+
+Power Number: ${data.powerNumber}
+${data.insight.title}
+
+${data.briefInsight}
+
+Action Focus:
+${data.insight.actionFocus.map((a) => '• $a').join('\n')}
+
+Affirmation:
+${data.insight.affirmation}
+
+Shared from Destiny Decoder
+    '''.trim();
+
+    Share.share(text, subject: '${data.insight.title} - ${data.date}');
   }
 }
