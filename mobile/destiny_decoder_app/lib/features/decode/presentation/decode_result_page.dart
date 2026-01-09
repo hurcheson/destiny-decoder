@@ -15,6 +15,7 @@ import 'widgets/cards.dart';
 import 'widgets/animated_number.dart';
 import 'widgets/export_dialog.dart';
 import '../../history/presentation/history_controller.dart';
+import '../../daily_insights/view/daily_insights_page.dart';
 
 class DecodeResultPage extends ConsumerStatefulWidget {
   const DecodeResultPage({super.key});
@@ -429,6 +430,28 @@ class _DecodeResultPageState extends ConsumerState<DecodeResultPage>
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
+                    FloatingActionButton.extended(
+                      heroTag: 'daily_insights',
+                      onPressed: () {
+                        final lifeSealNumber = lifeSeal.number as int;
+                        final dayOfBirth = DateTime.parse(result.input.dateOfBirth).day;
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) => DailyInsightsPage(
+                              lifeSeal: lifeSealNumber,
+                              dayOfBirth: dayOfBirth,
+                              // If you want a specific date, pass ISO yyyy-MM-dd; else omit for today
+                              // targetDate: DateTime.now().toIso8601String().split('T').first,
+                            ),
+                          ),
+                        );
+                      },
+                      backgroundColor: AppColors.getAccentColorForTheme(isDarkMode),
+                      foregroundColor: isDarkMode ? AppColors.darkBackground : Colors.black,
+                      icon: const Icon(Icons.today),
+                      label: const Text('Daily Insights'),
+                    ),
+                    const SizedBox(height: 12),
                     EnhancedExportFAB(
                       isLoading: isExporting,
                       backgroundColor: AppColors.getAccentColorForTheme(isDarkMode),
