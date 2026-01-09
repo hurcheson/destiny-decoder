@@ -1,13 +1,15 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:equatable/equatable.dart';
 import 'package:destiny_decoder_app/core/network/api_client_provider.dart';
+import 'package:destiny_decoder_app/core/cache/cache_providers.dart';
 import 'service.dart';
 import 'models.dart';
 
 // Service provider
 final dailyInsightsServiceProvider = Provider<DailyInsightsService>((ref) {
   final api = ref.watch(apiClientProvider);
-  return DailyInsightsService(api);
+  final cache = ref.watch(dailyInsightsCacheServiceProvider);
+  return DailyInsightsService(api, cache: cache);
 });
 
 // Params
