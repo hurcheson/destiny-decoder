@@ -98,12 +98,35 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                     Container(
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
-                        color: Theme.of(context).colorScheme.surface,
+                        color: _fcmToken == 'Firebase not configured'
+                            ? Colors.orange.withValues(alpha: 0.1)
+                            : Theme.of(context).colorScheme.surface,
                         borderRadius: BorderRadius.circular(8),
+                        border: _fcmToken == 'Firebase not configured'
+                            ? Border.all(color: Colors.orange, width: 1)
+                            : null,
                       ),
-                      child: SelectableText(
-                        _fcmToken ?? 'Loading...',
-                        style: Theme.of(context).textTheme.bodySmall,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          SelectableText(
+                            _fcmToken ?? 'Loading...',
+                            style: Theme.of(context).textTheme.bodySmall,
+                          ),
+                          if (_fcmToken == 'Firebase not configured') ...[
+                            const SizedBox(height: 8),
+                            Text(
+                              '⚠️ Optional: Push notifications require Firebase setup (google-services.json)',
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodySmall
+                                  ?.copyWith(
+                                    color: Colors.orange,
+                                    fontSize: 11,
+                                  ),
+                            ),
+                          ],
+                        ],
                       ),
                     ),
                     const SizedBox(height: 16),
@@ -113,7 +136,10 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                     ),
                     const SizedBox(height: 12),
                     ElevatedButton.icon(
-                      onPressed: _testingBlessedDay ? null : _testBlessedDay,
+                      onPressed: (_testingBlessedDay ||
+                              _fcmToken == 'Firebase not configured')
+                          ? null
+                          : _testBlessedDay,
                       icon: _testingBlessedDay
                           ? const SizedBox(
                               width: 20,
@@ -127,8 +153,10 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                     ),
                     const SizedBox(height: 12),
                     ElevatedButton.icon(
-                      onPressed:
-                          _testingPersonalYear ? null : _testPersonalYear,
+                      onPressed: (_testingPersonalYear ||
+                              _fcmToken == 'Firebase not configured')
+                          ? null
+                          : _testPersonalYear,
                       icon: _testingPersonalYear
                           ? const SizedBox(
                               width: 20,
