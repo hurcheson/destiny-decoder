@@ -1,14 +1,18 @@
 # Destiny Decoder
 
-A numerology-based destiny reading application with FastAPI backend and Flutter cross-platform mobile app.
+A beautiful, feature-rich numerology application with FastAPI backend and Flutter cross-platform mobile app.
 
-## Features
+## ✨ Features
 
-- **Destiny Calculation**: Calculate life seal, soul number, personality number, and more
-- **Life Cycles**: Track personal year cycles and turning points
-- **Compatibility**: Check numerological compatibility with partners
-- **PDF Reports**: Generate and export full readings as PDF
-- **Cross-Platform**: Works on web, iOS, and Android
+- **🔮 Destiny Calculation**: Life seal, soul number, personality number, personal year
+- **📈 Life Journey Timeline**: Interactive visualization with life cycles and turning points
+- **💕 Compatibility Analysis**: Check numerological compatibility with partners
+- **📄 PDF Reports**: Professional 4-page reports with interpretations
+- **💾 Reading History**: Save and revisit unlimited readings
+- **🖼️ Image Export**: Share readings as beautiful images
+- **🌙 Onboarding Flow**: 5-screen welcome experience
+- **🎨 Premium Design**: Smooth animations, dark mode, planet-color theming
+- **📱 Cross-Platform**: iOS, Android, and Web support
 
 ## Project Structure
 
@@ -96,6 +100,22 @@ flutter test
 - Flutter 3.0+
 - Riverpod for state management
 - Dio for HTTP requests
+
+## 📚 Documentation
+
+### Getting Started
+- **[QUICK_START_GUIDE.md](QUICK_START_GUIDE.md)** - Get up and running in 5 minutes
+- **[CODEBASE_OVERVIEW.md](CODEBASE_OVERVIEW.md)** - Architecture and technical details
+- **[DEPLOYMENT.md](DEPLOYMENT.md)** - Complete deployment guide
+
+### Development
+- **[PRODUCT_ROADMAP_2026.md](PRODUCT_ROADMAP_2026.md)** - Future features and roadmap
+- **[IMPLEMENTATION_HISTORY.md](IMPLEMENTATION_HISTORY.md)** - What's been built (Phases 1-5)
+- **[docs/formulas.md](docs/formulas.md)** - Numerology calculation specifications
+
+### Quick Deploy
+- **[QUICK_DEPLOY.md](QUICK_DEPLOY.md)** - One-command deployment options
+- **[PRE_DEPLOYMENT_CHECKLIST.md](PRE_DEPLOYMENT_CHECKLIST.md)** - Pre-launch verification
 
 ## Environment Variables
 
