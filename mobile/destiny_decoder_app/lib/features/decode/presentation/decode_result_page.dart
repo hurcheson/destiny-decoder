@@ -2,8 +2,8 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:screenshot/screenshot.dart';
+import 'package:file_picker/file_picker.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/screenshot_service.dart';
@@ -773,18 +773,21 @@ class _DecodeResultPageState extends ConsumerState<DecodeResultPage>
     String filename,
   ) async {
     try {
-      final directory = Platform.isAndroid
-          ? await getExternalStorageDirectory()
-          : await getApplicationDocumentsDirectory();
+      // Let user choose where to save the file
+      final outputPath = await FilePicker.platform.saveFile(
+        dialogTitle: 'Save PDF',
+        fileName: filename,
+        type: FileType.custom,
+        allowedExtensions: ['pdf'],
+      );
 
-      if (directory == null) {
-        throw Exception('Could not access storage directory');
+      if (outputPath == null) {
+        throw Exception('Save cancelled by user');
       }
 
-      final filePath = '${directory.path}/$filename';
-      final file = File(filePath);
+      final file = File(outputPath);
       await file.writeAsBytes(bytes);
-      return filePath;
+      return outputPath;
     } catch (e) {
       throw Exception('Failed to save file: $e');
     }
