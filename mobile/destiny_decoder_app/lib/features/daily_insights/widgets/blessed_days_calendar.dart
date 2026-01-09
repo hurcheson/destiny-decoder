@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers.dart';
+import 'skeleton_loaders.dart';
 
 class BlessedDaysCalendar extends ConsumerStatefulWidget {
   final int dayOfBirth;
@@ -152,7 +153,7 @@ class _BlessedDaysCalendarState extends ConsumerState<BlessedDaysCalendar> {
               ],
             );
           },
-          loading: () => const SizedBox(height: 200, child: Center(child: CircularProgressIndicator())),
+          loading: () => const SizedBox(height: 200, child: BlessedDaysCalendarSkeleton()),
           error: (err, _) => SizedBox(
             height: 200,
             child: Center(

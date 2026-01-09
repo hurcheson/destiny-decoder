@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers.dart';
 import '../models.dart';
+import 'skeleton_loaders.dart';
 
 class WeeklyPreviewCarousel extends ConsumerWidget {
   final int lifeSeal;
@@ -42,10 +43,7 @@ class WeeklyPreviewCarousel extends ConsumerWidget {
           ),
         );
       },
-      loading: () => const SizedBox(
-        height: 140,
-        child: Center(child: CircularProgressIndicator()),
-      ),
+      loading: () => const WeeklyPreviewCarouselSkeleton(),
       error: (err, _) => SizedBox(
         height: 140,
         child: Center(
