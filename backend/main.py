@@ -5,6 +5,7 @@ from app.api.routes.interpretations import router as interpretations_router
 from app.api.routes.compatibility import router as compatibility_router
 from app.api.routes.daily_insights import router as daily_insights_router
 from app.api.routes.notifications import router as notifications_router
+from app.api.routes.export import router as export_router
 
 app = FastAPI(title="Destiny Decoder API")
 
@@ -24,3 +25,4 @@ app.include_router(interpretations_router)
 app.include_router(compatibility_router)
 app.include_router(daily_insights_router)
 app.include_router(notifications_router)
+app.include_router(export_router)
