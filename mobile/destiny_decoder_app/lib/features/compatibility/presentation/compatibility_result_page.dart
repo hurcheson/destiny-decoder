@@ -5,6 +5,7 @@ import 'dart:io';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:file_picker/file_picker.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../core/network/api_client_provider.dart';
@@ -79,24 +80,45 @@ class _CompatibilityResultPageState extends ConsumerState<CompatibilityResultPag
         dobB: result.personB.input.dateOfBirth,
       );
 
-      // Save file using same method as decode
-      if (kIsWeb) {
-        _downloadFileWeb(pdfBytes, 'compatibility-report.pdf');
-      } else {
-        final filePath = await _saveFileMobile(pdfBytes, 'compatibility-report.pdf');
-        if (!mounted) return;
-        messenger.showSnackBar(
-          SnackBar(
-            content: Text('PDF saved to: $filePath'),
-            duration: const Duration(seconds: 4),
-          ),
-        );
-      }
-
+      // Save file using user-chosen location
+      final fileName =
+          'compatibility_${result.personA.input.fullName.replaceAll(' ', '_')}_'
+          '${result.personB.input.fullName.replaceAll(' ', '_')}.pdf';
+      final filePath = await _saveFileMobile(pdfBytes, fileName);
+      
       if (!mounted) return;
+      
+      // Show success with file location and open button
       messenger.showSnackBar(
-        const SnackBar(
-          content: Text('PDF exported successfully'),
+        SnackBar(
+          content: Text('PDF saved to:\n$filePath'),
+          duration: const Duration(seconds: 5),
+          action: SnackBarAction(
+            label: 'Open',
+            onPressed: () async {
+              try {
+                final uri = Uri.file(filePath);
+                if (!await launchUrl(
+                  uri,
+                  mode: LaunchMode.externalApplication,
+                )) {
+                  messenger.showSnackBar(
+                    const SnackBar(
+                      content: Text('Could not open file'),
+                      backgroundColor: Colors.orange,
+                    ),
+                  );
+                }
+              } catch (e) {
+                messenger.showSnackBar(
+                  SnackBar(
+                    content: Text('Could not open file: $e'),
+                    backgroundColor: Colors.orange,
+                  ),
+                );
+              }
+            },
+          ),
           backgroundColor: Colors.green,
         ),
       );
@@ -119,38 +141,37 @@ class _CompatibilityResultPageState extends ConsumerState<CompatibilityResultPag
 
   Future<String> _saveFileMobile(List<int> bytes, String filename) async {
     try {
-      // On mobile (Android/iOS), save directly to Downloads folder
-      if (Platform.isAndroid || Platform.isIOS) {
-        // Get the Downloads directory
-        final downloadDir = await getDownloadsDirectory();
-        if (downloadDir == null) {
-          throw Exception('Unable to access Downloads folder');
-        }
-        
-        // Create file in Downloads folder
-        final file = File('${downloadDir.path}/$filename');
-        await file.writeAsBytes(bytes);
-        
-        return '${downloadDir.path}/$filename';
-      } else {
-        // On desktop (Windows/macOS/Linux), use file picker
-        final outputPath = await FilePicker.platform.saveFile(
-          dialogTitle: 'Save PDF',
-          fileName: filename,
-          type: FileType.custom,
-          allowedExtensions: ['pdf'],
-        );
+      // Use FilePicker for ALL platforms to let user choose location
+      final outputPath = await FilePicker.platform.saveFile(
+        dialogTitle: 'Save PDF Report',
+        fileName: filename,
+        type: FileType.custom,
+        allowedExtensions: ['pdf'],
+        lockParentWindow: true,
+      );
 
-        if (outputPath == null) {
-          throw Exception('Save cancelled by user');
-        }
-
-        final file = File(outputPath);
-        await file.writeAsBytes(bytes);
-        return outputPath;
+      if (outputPath == null) {
+        throw Exception('Save cancelled by user');
       }
+
+      // Write file to chosen location
+      final file = File(outputPath);
+      await file.writeAsBytes(bytes);
+
+      // Verify file was actually created and has content
+      if (!await file.exists()) {
+        throw Exception('File was not created at: $outputPath');
+      }
+
+      final fileSize = await file.length();
+      if (fileSize == 0) {
+        throw Exception('File was created but is empty (0 bytes)');
+      }
+
+      // Return success with exact path
+      return outputPath;
     } catch (e) {
-      throw Exception('Failed to save file: $e');
+      throw Exception('Failed to save PDF: ${e.toString()}');
     }
   }
 

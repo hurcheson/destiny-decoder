@@ -627,32 +627,51 @@ class _DecodeResultPageState extends ConsumerState<DecodeResultPage>
         dateOfBirth: result.input.dateOfBirth,
       );
 
-      // Save file
-      if (kIsWeb) {
-        // Web platform - trigger download
-        _downloadFileWeb(pdfBytes, 'life-journey-report.pdf');
-      } else {
-        // Mobile/Desktop - save to downloads or documents
-        final filePath = await _saveFileMobile(pdfBytes, 'life-journey-report.pdf');
-        if (!mounted) return;
-        messenger.showSnackBar(
-          SnackBar(
-            content: Text('PDF saved to: $filePath'),
-            duration: const Duration(seconds: 4),
-          ),
-        );
-      }
+      // Save file with user-chosen location
+      final filePath = await _saveFileMobile(
+        pdfBytes,
+        'destiny_reading_${result.input.fullName.replaceAll(' ', '_')}.pdf',
+      );
 
-      // Set success state
-      exportStateNotifier.state = const AsyncValue.data(false);
+      if (!mounted) return;
 
-      // Show success message
+      // Show success with file location and open button
       messenger.showSnackBar(
-        const SnackBar(
-          content: Text('PDF exported successfully'),
+        SnackBar(
+          content: Text('PDF saved to:\n$filePath'),
+          duration: const Duration(seconds: 5),
+          action: SnackBarAction(
+            label: 'Open',
+            onPressed: () async {
+              try {
+                final uri = Uri.file(filePath);
+                if (!await launchUrl(
+                  uri,
+                  mode: LaunchMode.externalApplication,
+                )) {
+                  messenger.showSnackBar(
+                    const SnackBar(
+                      content: Text('Could not open file'),
+                      backgroundColor: Colors.orange,
+                    ),
+                  );
+                }
+              } catch (e) {
+                messenger.showSnackBar(
+                  SnackBar(
+                    content: Text('Could not open file: $e'),
+                    backgroundColor: Colors.orange,
+                  ),
+                );
+              }
+            },
+          ),
           backgroundColor: Colors.green,
         ),
       );
+
+      // Set success state
+      exportStateNotifier.state = const AsyncValue.data(false);
     } catch (e) {
       // Set error state
       exportStateNotifier.state = AsyncValue.error(e, StackTrace.current);
@@ -797,38 +816,37 @@ class _DecodeResultPageState extends ConsumerState<DecodeResultPage>
     String filename,
   ) async {
     try {
-      // On mobile (Android/iOS), save directly to Downloads folder
-      if (Platform.isAndroid || Platform.isIOS) {
-        // Get the Downloads directory
-        final downloadDir = await getDownloadsDirectory();
-        if (downloadDir == null) {
-          throw Exception('Unable to access Downloads folder');
-        }
-        
-        // Create file in Downloads folder
-        final file = File('${downloadDir.path}/$filename');
-        await file.writeAsBytes(bytes);
-        
-        return '${downloadDir.path}/$filename';
-      } else {
-        // On desktop (Windows/macOS/Linux), use file picker
-        final outputPath = await FilePicker.platform.saveFile(
-          dialogTitle: 'Save PDF',
-          fileName: filename,
-          type: FileType.custom,
-          allowedExtensions: ['pdf'],
-        );
+      // Use FilePicker for ALL platforms to let user choose location
+      final outputPath = await FilePicker.platform.saveFile(
+        dialogTitle: 'Save PDF Report',
+        fileName: filename,
+        type: FileType.custom,
+        allowedExtensions: ['pdf'],
+        lockParentWindow: true,
+      );
 
-        if (outputPath == null) {
-          throw Exception('Save cancelled by user');
-        }
-
-        final file = File(outputPath);
-        await file.writeAsBytes(bytes);
-        return outputPath;
+      if (outputPath == null) {
+        throw Exception('Save cancelled by user');
       }
+
+      // Write file to chosen location
+      final file = File(outputPath);
+      await file.writeAsBytes(bytes);
+
+      // Verify file was actually created and has content
+      if (!await file.exists()) {
+        throw Exception('File was not created at: $outputPath');
+      }
+
+      final fileSize = await file.length();
+      if (fileSize == 0) {
+        throw Exception('File was created but is empty (0 bytes)');
+      }
+
+      // Return success with exact path
+      return outputPath;
     } catch (e) {
-      throw Exception('Failed to save file: $e');
+      throw Exception('Failed to save PDF: ${e.toString()}');
     }
   }
 }
