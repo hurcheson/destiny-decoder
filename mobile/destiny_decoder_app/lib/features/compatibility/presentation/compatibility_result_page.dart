@@ -141,35 +141,57 @@ class _CompatibilityResultPageState extends ConsumerState<CompatibilityResultPag
 
   Future<String> _saveFileMobile(List<int> bytes, String filename) async {
     try {
-      // Use FilePicker for ALL platforms to let user choose location
-      final outputPath = await FilePicker.platform.saveFile(
-        dialogTitle: 'Save PDF Report',
-        fileName: filename,
-        type: FileType.custom,
-        allowedExtensions: ['pdf'],
-        lockParentWindow: true,
-      );
+      if (Platform.isAndroid || Platform.isIOS) {
+        // On mobile: Save directly to Downloads folder
+        final downloadsDir = await getDownloadsDirectory();
+        if (downloadsDir == null) {
+          throw Exception('Unable to access Downloads folder');
+        }
 
-      if (outputPath == null) {
-        throw Exception('Save cancelled by user');
+        final file = File('${downloadsDir.path}/$filename');
+        await file.writeAsBytes(bytes);
+
+        // Verify file was created with content
+        if (!await file.exists()) {
+          throw Exception('File was not created at: ${file.path}');
+        }
+
+        final fileSize = await file.length();
+        if (fileSize == 0) {
+          throw Exception('File was created but is empty (0 bytes)');
+        }
+
+        return file.path;
+      } else {
+        // On desktop: Use FilePicker to let user choose location
+        final outputPath = await FilePicker.platform.saveFile(
+          dialogTitle: 'Save PDF Report',
+          fileName: filename,
+          type: FileType.custom,
+          allowedExtensions: ['pdf'],
+          lockParentWindow: true,
+        );
+
+        if (outputPath == null) {
+          throw Exception('Save cancelled by user');
+        }
+
+        // Write file to chosen location
+        final file = File(outputPath);
+        await file.writeAsBytes(bytes);
+
+        // Verify file was actually created and has content
+        if (!await file.exists()) {
+          throw Exception('File was not created at: $outputPath');
+        }
+
+        final fileSize = await file.length();
+        if (fileSize == 0) {
+          throw Exception('File was created but is empty (0 bytes)');
+        }
+
+        return outputPath;
       }
-
-      // Write file to chosen location
-      final file = File(outputPath);
-      await file.writeAsBytes(bytes);
-
-      // Verify file was actually created and has content
-      if (!await file.exists()) {
-        throw Exception('File was not created at: $outputPath');
-      }
-
-      final fileSize = await file.length();
-      if (fileSize == 0) {
-        throw Exception('File was created but is empty (0 bytes)');
-      }
-
-      // Return success with exact path
-      return outputPath;
     } catch (e) {
       throw Exception('Failed to save PDF: ${e.toString()}');
     }
