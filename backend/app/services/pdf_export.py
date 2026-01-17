@@ -109,7 +109,7 @@ class PDFExportService:
         interpretations = decode_response.get('interpretations', {})
         
         # Title
-        story.append(Paragraph("🌙 Your Destiny Reading 🌙", self.styles['CustomTitle']))
+        story.append(Paragraph("Your Destiny Reading", self.styles['CustomTitle']))
         story.append(Spacer(1, 0.15*inch))
         
         # Personal Information
@@ -129,6 +129,19 @@ class PDFExportService:
             if isinstance(value, (dict, list)):
                 return 'N/A'  # Skip complex types
             return str(value)
+        
+        def format_interpretation(text):
+            """Format interpretation text for better readability."""
+            if not text or not isinstance(text, str):
+                return ''
+            # Add space after commas if missing
+            text = text.replace(',', ', ').replace(',  ', ', ')
+            # Fix common typos
+            text = text.replace('Matrial', 'Material')
+            text = text.replace('Startegic', 'Strategic')
+            text = text.replace('Dominioring', 'Domineering')
+            text = text.replace('Opprtunities', 'Opportunities')
+            return text
         
         core_data = [
             ['Number Type', 'Number', 'Planet/Meaning'],
@@ -164,7 +177,10 @@ class PDFExportService:
             story.append(Spacer(1, 0.08*inch))
             content = life_seal.get('content', '')
             if content and isinstance(content, str):
-                story.append(Paragraph(content, self.styles['CustomBody']))
+                formatted_content = format_interpretation(content)
+                story.append(Paragraph(formatted_content, self.styles['CustomBody']))
+            elif not content:
+                story.append(Paragraph("<i>Interpretation data not available.</i>", self.styles['InfoLabel']))
             story.append(Spacer(1, 0.15*inch))
         
         # Soul Number Interpretation
@@ -174,7 +190,10 @@ class PDFExportService:
             story.append(Spacer(1, 0.08*inch))
             content = soul.get('content', '')
             if content and isinstance(content, str):
-                story.append(Paragraph(content, self.styles['CustomBody']))
+                formatted_content = format_interpretation(content)
+                story.append(Paragraph(formatted_content, self.styles['CustomBody']))
+            elif not content:
+                story.append(Paragraph("<i>Interpretation data not available.</i>", self.styles['InfoLabel']))
             story.append(Spacer(1, 0.15*inch))
         
         # Personality Number Interpretation
@@ -184,7 +203,10 @@ class PDFExportService:
             story.append(Spacer(1, 0.08*inch))
             content = pers.get('content', '')
             if content and isinstance(content, str):
-                story.append(Paragraph(content, self.styles['CustomBody']))
+                formatted_content = format_interpretation(content)
+                story.append(Paragraph(formatted_content, self.styles['CustomBody']))
+            elif not content:
+                story.append(Paragraph("<i>Interpretation data not available.</i>", self.styles['InfoLabel']))
             story.append(Spacer(1, 0.15*inch))
         
         story.append(PageBreak())
@@ -196,7 +218,10 @@ class PDFExportService:
             story.append(Spacer(1, 0.08*inch))
             content = py.get('content', '')
             if content and isinstance(content, str):
-                story.append(Paragraph(content, self.styles['CustomBody']))
+                formatted_content = format_interpretation(content)
+                story.append(Paragraph(formatted_content, self.styles['CustomBody']))
+            elif not content:
+                story.append(Paragraph("<i>Interpretation data not available.</i>", self.styles['InfoLabel']))
             story.append(Spacer(1, 0.2*inch))
         
         # Blessed Years and Days
@@ -230,11 +255,12 @@ class PDFExportService:
                             self.styles['SectionHeader']
                         ))
                         
-                        # Interpretation
+                        # Interpretation with formatting
                         if cycle_data.get('interpretation'):
-                            story.append(Paragraph(cycle_data['interpretation'], self.styles['CustomBody']))
+                            formatted_interp = format_interpretation(cycle_data['interpretation'])
+                            story.append(Paragraph(formatted_interp, self.styles['CustomBody']))
                         
-                        story.append(Spacer(1, 0.08*inch))
+                        story.append(Spacer(1, 0.12*inch))
             
             story.append(Spacer(1, 0.2*inch))
         
@@ -252,17 +278,25 @@ class PDFExportService:
                             self.styles['SectionHeader']
                         ))
                         
-                        # Interpretation
+                        # Interpretation with formatting
                         if tp_data.get('interpretation'):
-                            story.append(Paragraph(tp_data['interpretation'], self.styles['CustomBody']))
+                            formatted_interp = format_interpretation(tp_data['interpretation'])
+                            story.append(Paragraph(formatted_interp, self.styles['CustomBody']))
                         
-                        story.append(Spacer(1, 0.08*inch))
+                        story.append(Spacer(1, 0.12*inch))
             
             story.append(Spacer(1, 0.2*inch))
         
+        story.append(PageBreak())
+        
         # Pinnacles
         if interpretations.get('pinnacles'):
-            story.append(Paragraph("Pinnacles (Life Pinnacles)", self.styles['CustomSubtitle']))
+            story.append(Paragraph("Pinnacles - Achievement Periods", self.styles['CustomSubtitle']))
+            story.append(Paragraph(
+                "<i>Four major achievement periods that highlight opportunities and focus areas throughout your life.</i>",
+                self.styles['InfoLabel']
+            ))
+            story.append(Spacer(1, 0.1*inch))
             pinnacles = interpretations['pinnacles']
             
             for i, pinnacle in enumerate(pinnacles, 1):
@@ -273,8 +307,9 @@ class PDFExportService:
                     ))
                     content = pinnacle.get('content')
                     if content and isinstance(content, str):
-                        story.append(Paragraph(content, self.styles['CustomBody']))
-                    story.append(Spacer(1, 0.1*inch))
+                        formatted_content = format_interpretation(content)
+                        story.append(Paragraph(formatted_content, self.styles['CustomBody']))
+                    story.append(Spacer(1, 0.12*inch))
             
             story.append(Spacer(1, 0.15*inch))
         
@@ -298,8 +333,14 @@ class PDFExportService:
                             age_range = phase.get('age_range', '')
                             text = phase.get('text', '')
                             if age_range and text:
-                                story.append(Paragraph(f"<b>Ages {age_range}:</b> {text}", self.styles['CustomBody']))
-                                story.append(Spacer(1, 0.08*inch))
+                                # Remove duplicate age prefix from text if it exists
+                                text_clean = text.strip()
+                                if text_clean.startswith(f"Ages {age_range}:"):
+                                    text_clean = text_clean[len(f"Ages {age_range}:"):].strip()
+                                elif text_clean.startswith(age_range):
+                                    text_clean = text_clean[len(age_range):].strip().lstrip(':')
+                                story.append(Paragraph(f"<b>Ages {age_range}:</b> {text_clean}", self.styles['CustomBody']))
+                                story.append(Spacer(1, 0.1*inch))
                 
                 # Turning Points detailed narrative
                 if narrative.get('turning_points'):
@@ -310,8 +351,15 @@ class PDFExportService:
                             age = tp.get('age', '')
                             text = tp.get('text', '')
                             if age and text:
-                                story.append(Paragraph(f"<b>Age {age}:</b> {text}", self.styles['CustomBody']))
-                                story.append(Spacer(1, 0.08*inch))
+                                # Ensure text is complete - find last complete sentence
+                                text_clean = text.strip()
+                                if len(text_clean) > 300 and not text_clean.endswith('.'):
+                                    # Find last period before cutoff
+                                    last_period = text_clean.rfind('.', 0, 300)
+                                    if last_period > 0:
+                                        text_clean = text_clean[:last_period + 1]
+                                story.append(Paragraph(f"<b>Age {age}:</b> {text_clean}", self.styles['CustomBody']))
+                                story.append(Spacer(1, 0.1*inch))
         
         story.append(PageBreak())
         
