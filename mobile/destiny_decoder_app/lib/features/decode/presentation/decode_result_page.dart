@@ -817,11 +817,8 @@ class _DecodeResultPageState extends ConsumerState<DecodeResultPage>
   ) async {
     try {
       if (Platform.isAndroid || Platform.isIOS) {
-        // On mobile: Save directly to Downloads folder
-        final downloadsDir = await getDownloadsDirectory();
-        if (downloadsDir == null) {
-          throw Exception('Unable to access Downloads folder');
-        }
+        // On mobile: Prefer the public Downloads folder so the user can access the file.
+        final downloadsDir = await _resolveDownloadsDir();
 
         final file = File('${downloadsDir.path}/$filename');
         await file.writeAsBytes(bytes);
@@ -870,6 +867,35 @@ class _DecodeResultPageState extends ConsumerState<DecodeResultPage>
     } catch (e) {
       throw Exception('Failed to save PDF: ${e.toString()}');
     }
+  }
+
+  // Try multiple candidate paths to land in a user-visible Downloads directory.
+  Future<Directory> _resolveDownloadsDir() async {
+    // Common public downloads paths first (more user-accessible on many Android devices).
+    final candidates = <Directory>[
+      Directory('/storage/emulated/0/Download'),
+      Directory('/sdcard/Download'),
+    ];
+
+    for (final dir in candidates) {
+      if (await dir.exists()) {
+        return dir;
+      }
+      try {
+        await dir.create(recursive: true);
+        return dir;
+      } catch (_) {
+        // Continue trying other options.
+      }
+    }
+
+    // Fallback: platform-provided downloads directory (may be app-scoped on some devices).
+    final fallback = await getDownloadsDirectory();
+    if (fallback != null) {
+      return fallback;
+    }
+
+    throw Exception('Unable to access a Downloads folder');
   }
 }
 /// Staggered number grid with cascading animation
