@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:screenshot/screenshot.dart';
 import 'dart:io';
-import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:file_picker/file_picker.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -133,10 +132,6 @@ class _CompatibilityResultPageState extends ConsumerState<CompatibilityResultPag
     } finally {
       if (mounted) setState(() => _isExporting = false);
     }
-  }
-
-  void _downloadFileWeb(List<int> bytes, String filename) {
-    throw UnsupportedError('Web download not implemented');
   }
 
   Future<String> _saveFileMobile(List<int> bytes, String filename) async {

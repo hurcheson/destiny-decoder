@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/app_theme.dart';
+import '../../../core/analytics/analytics_service.dart';
 import '../../decode/presentation/widgets/cards.dart';
 import 'compatibility_controller.dart';
 import 'compatibility_result_page.dart';
@@ -49,11 +50,16 @@ class _CompatibilityFormPageState extends ConsumerState<CompatibilityFormPage> {
         ),
       );
     } else if (state.hasValue && state.value != null && mounted) {
-      Navigator.of(context).push(
-        MaterialPageRoute(
-          builder: (_) => const CompatibilityResultPage(),
-        ),
-      );
+      // Log compatibility check
+      await AnalyticsService.logCompatibilityCheck();
+      
+      if (mounted) {
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (_) => const CompatibilityResultPage(),
+          ),
+        );
+      }
     }
   }
 

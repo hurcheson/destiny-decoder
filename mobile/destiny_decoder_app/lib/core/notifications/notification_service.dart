@@ -1,5 +1,6 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/foundation.dart';
 
 /// Firebase Cloud Messaging notification handler.
 class NotificationService {
@@ -53,15 +54,19 @@ class NotificationService {
 
   /// Handle foreground messages (app is open).
   void _handleForegroundMessage(RemoteMessage message) {
-    print('Foreground message: ${message.notification?.title}');
-    print('Body: ${message.notification?.body}');
+    if (kDebugMode) {
+      print('Foreground message: ${message.notification?.title}');
+      print('Body: ${message.notification?.body}');
+    }
   }
 
   /// Handle background messages (app is closed/background).
   /// Must be a top-level function.
   static Future<void> _handleBackgroundMessage(RemoteMessage message) async {
     await Firebase.initializeApp();
-    print('Background message: ${message.notification?.title}');
+    if (kDebugMode) {
+      print('Background message: ${message.notification?.title}');
+    }
   }
 
   /// Subscribe to a notification topic (for server-side targeting).
@@ -76,15 +81,19 @@ class NotificationService {
 
   /// Test: Show a blessed day notification (via print for now).
   Future<void> showTestBlessedDayNotification() async {
-    print('✨ Test Blessed Day Notification: Today is Your Blessed Day!');
-    print(
-        'Harness the divine energy. This is an auspicious day for important decisions.');
+    if (kDebugMode) {
+      print('✨ Test Blessed Day Notification: Today is Your Blessed Day!');
+      print(
+          'Harness the divine energy. This is an auspicious day for important decisions.');
+    }
   }
 
   /// Test: Show a personal year notification (via print for now).
   Future<void> showTestPersonalYearNotification() async {
-    print('🎂 Test Personal Year Notification: Personal Year 7 Begins!');
-    print(
-        'Happy numerological birthday! You\'re entering a year of wisdom and introspection.');
+    if (kDebugMode) {
+      print('🎂 Test Personal Year Notification: Personal Year 7 Begins!');
+      print(
+          'Happy numerological birthday! You\'re entering a year of wisdom and introspection.');
+    }
   }
 }

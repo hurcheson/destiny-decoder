@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/app_theme.dart';
+import '../../../core/analytics/analytics_service.dart';
 import '../../compatibility/presentation/compatibility_form_page.dart';
 import '../../settings/presentation/settings_page.dart';
 import 'decode_controller.dart';
@@ -47,11 +48,19 @@ class _DecodeFormPageState extends ConsumerState<DecodeFormPage> {
         ),
       );
     } else if (state.hasValue && state.value != null && mounted) {
-      Navigator.of(context).push(
-        MaterialPageRoute(
-          builder: (_) => const DecodeResultPage(),
-        ),
-      );
+      // Log successful calculation
+      final result = state.value!;
+      if (result.lifeSeal != null) {
+        await AnalyticsService.logCalculationCompleted(result.lifeSeal!.number);
+      }
+      
+      if (mounted) {
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (_) => const DecodeResultPage(),
+          ),
+        );
+      }
     }
   }
 

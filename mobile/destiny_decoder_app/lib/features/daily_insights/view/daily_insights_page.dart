@@ -32,7 +32,7 @@ class DailyInsightsPage extends ConsumerWidget {
       body: insightAsync.when(
         data: (data) => RefreshIndicator(
           onRefresh: () async {
-            await ref.refresh(dailyInsightProvider(params).future);
+            ref.refresh(dailyInsightProvider(params).future);
           },
           child: ListView(
             padding: const EdgeInsets.all(16),

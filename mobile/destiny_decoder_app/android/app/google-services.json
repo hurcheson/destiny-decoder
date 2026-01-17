@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "177104812289",
+    "project_id": "destiny-decoder-6b571",
+    "storage_bucket": "destiny-decoder-6b571.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:177104812289:android:e668ecd67d6c0250b54300",
+        "android_client_info": {
+          "package_name": "com.example.destiny_decoder_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDeyjfjkhaPuO9yypSSjFPJ4WQtUWZjyz4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

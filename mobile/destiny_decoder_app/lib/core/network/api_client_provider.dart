@@ -8,3 +8,10 @@ final apiClientProvider = Provider<ApiClient>((ref) {
   client.enableLogging();
   return client;
 });
+
+/// Create API client for use outside of Riverpod context
+ApiClient createApiClient() {
+  final client = ApiClient(baseUrl: AppConfig.apiBaseUrl);
+  client.enableLogging();
+  return client;
+}

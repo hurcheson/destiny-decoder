@@ -7,6 +7,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/theme/app_theme.dart';
+import '../../../core/analytics/analytics_service.dart';
 import '../../../core/utils/screenshot_service.dart';
 import '../../../core/utils/share_service.dart';
 import 'decode_controller.dart';
@@ -635,6 +636,9 @@ class _DecodeResultPageState extends ConsumerState<DecodeResultPage>
 
       if (!mounted) return;
 
+      // Log PDF export
+      await AnalyticsService.logPdfExport();
+
       // Show success with file location and open button
       messenger.showSnackBar(
         SnackBar(
@@ -803,12 +807,6 @@ class _DecodeResultPageState extends ConsumerState<DecodeResultPage>
         ),
       );
     }
-  }
-
-  void _downloadFileWeb(List<int> bytes, String filename) {
-    // For web platform - would need to use dart:html
-    // Not implemented in this mobile-focused app
-    throw UnsupportedError('Web download not implemented');
   }
 
   Future<String> _saveFileMobile(
