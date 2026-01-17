@@ -134,7 +134,7 @@ class PDFExportService:
             ['Number Type', 'Number', 'Planet/Meaning'],
             ['Life Path (Life Seal)', safe_str(core.get('life_seal')), safe_str(core.get('life_planet'))],
             ['Soul Urge (Soul Number)', safe_str(core.get('soul_number')), 'Inner Desire'],
-            ['Expression (Destiny)', safe_str(core.get('expression_number')), 'Life Purpose'],
+            ['Expression (Destiny)', safe_str(core.get('physical_name_number')), 'Life Purpose'],
             ['Personality', safe_str(core.get('personality_number')), 'Outer Expression'],
             ['Personal Year', safe_str(core.get('personal_year')), 'Current Cycle'],
         ]
@@ -199,24 +199,63 @@ class PDFExportService:
                 story.append(Paragraph(content, self.styles['CustomBody']))
             story.append(Spacer(1, 0.2*inch))
         
-        # Life Cycles
+        # Blessed Years and Days
+        if core.get('blessed_years') or core.get('blessed_days'):
+            story.append(Paragraph("Blessed Years & Days", self.styles['CustomSubtitle']))
+            if core.get('blessed_years'):
+                blessed_years = core['blessed_years']
+                if isinstance(blessed_years, list):
+                    years_str = ', '.join(str(y) for y in blessed_years[:10])  # Show first 10
+                    story.append(Paragraph(f"<b>Blessed Years (next 10):</b> {years_str}", self.styles['CustomBody']))
+            if core.get('blessed_days'):
+                blessed_days = core['blessed_days']
+                if isinstance(blessed_days, list):
+                    days_str = ', '.join(str(d) for d in blessed_days)
+                    story.append(Paragraph(f"<b>Blessed Days (each month):</b> {days_str}", self.styles['CustomBody']))
+            story.append(Spacer(1, 0.2*inch))
+        
+        # Life Cycles - Enhanced with narrative
         if core.get('life_cycles'):
-            story.append(Paragraph("Life Cycles", self.styles['CustomSubtitle']))
+            story.append(Paragraph("Life Cycles - Your Life Journey Phases", self.styles['CustomSubtitle']))
             cycles = core['life_cycles']
             
-            # life_cycles is a list of dicts, not a dict
             if isinstance(cycles, list):
-                cycle_names = ["First Cycle", "Second Cycle", "Third Cycle"]
+                cycle_names = ["First Cycle (Formative Years)", "Second Cycle (Productive Years)", "Third Cycle (Harvest Years)"]
                 for idx, cycle_data in enumerate(cycles):
                     if isinstance(cycle_data, dict) and cycle_data.get('number'):
                         cycle_name = cycle_names[idx] if idx < len(cycle_names) else f"Cycle {idx+1}"
                         story.append(Paragraph(
-                            f"<b>{cycle_name}:</b> Number {cycle_data.get('number')} "
-                            f"<i>{cycle_data.get('age_range', 'N/A')}</i>",
-                            self.styles['CustomBody']
+                            f"<b>{cycle_name}</b> - Number {cycle_data.get('number')} "
+                            f"<i>(Ages {cycle_data.get('age_range', 'N/A')})</i>",
+                            self.styles['SectionHeader']
                         ))
+                        
+                        # Interpretation
                         if cycle_data.get('interpretation'):
-                            story.append(Paragraph(cycle_data['interpretation'], self.styles['InfoLabel']))
+                            story.append(Paragraph(cycle_data['interpretation'], self.styles['CustomBody']))
+                        
+                        story.append(Spacer(1, 0.08*inch))
+            
+            story.append(Spacer(1, 0.2*inch))
+        
+        # Turning Points - Enhanced with ages and narrative
+        if core.get('turning_points'):
+            story.append(Paragraph("Turning Points - Major Life Transitions", self.styles['CustomSubtitle']))
+            turning_points = core['turning_points']
+            
+            if isinstance(turning_points, list):
+                for idx, tp_data in enumerate(turning_points):
+                    if isinstance(tp_data, dict) and tp_data.get('number'):
+                        age = tp_data.get('age', 'N/A')
+                        story.append(Paragraph(
+                            f"<b>Turning Point {idx+1} at Age {age}</b> - Number {tp_data.get('number')}",
+                            self.styles['SectionHeader']
+                        ))
+                        
+                        # Interpretation
+                        if tp_data.get('interpretation'):
+                            story.append(Paragraph(tp_data['interpretation'], self.styles['CustomBody']))
+                        
                         story.append(Spacer(1, 0.08*inch))
             
             story.append(Spacer(1, 0.2*inch))
@@ -238,6 +277,41 @@ class PDFExportService:
                     story.append(Spacer(1, 0.1*inch))
             
             story.append(Spacer(1, 0.15*inch))
+        
+        # Life Journey Narrative (from report if available)
+        if core.get('narrative'):
+            narrative = core['narrative']
+            if isinstance(narrative, dict):
+                story.append(PageBreak())
+                story.append(Paragraph("Your Life Journey - Deeper Insights", self.styles['CustomSubtitle']))
+                
+                # Overview
+                if narrative.get('overview'):
+                    story.append(Paragraph(narrative['overview'], self.styles['CustomBody']))
+                    story.append(Spacer(1, 0.15*inch))
+                
+                # Life Phases detailed narrative
+                if narrative.get('life_phases'):
+                    story.append(Paragraph("Life Phase Perspectives:", self.styles['SectionHeader']))
+                    for phase in narrative['life_phases']:
+                        if isinstance(phase, dict):
+                            age_range = phase.get('age_range', '')
+                            text = phase.get('text', '')
+                            if age_range and text:
+                                story.append(Paragraph(f"<b>Ages {age_range}:</b> {text}", self.styles['CustomBody']))
+                                story.append(Spacer(1, 0.08*inch))
+                
+                # Turning Points detailed narrative
+                if narrative.get('turning_points'):
+                    story.append(Spacer(1, 0.15*inch))
+                    story.append(Paragraph("Turning Point Insights:", self.styles['SectionHeader']))
+                    for tp in narrative['turning_points']:
+                        if isinstance(tp, dict):
+                            age = tp.get('age', '')
+                            text = tp.get('text', '')
+                            if age and text:
+                                story.append(Paragraph(f"<b>Age {age}:</b> {text}", self.styles['CustomBody']))
+                                story.append(Spacer(1, 0.08*inch))
         
         story.append(PageBreak())
         
