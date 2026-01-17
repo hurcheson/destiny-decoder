@@ -15,6 +15,7 @@ from ..core.cycles import (
     calculate_life_cycles,
     calculate_turning_points
 )
+from ..core.pinnacles import calculate_pinnacles
 from ..core.compatibility import evaluate_compatibility
 from ..interpretations.cycle_interpretations import get_cycle_interpretation
 from .narrative_service import build_narrative
@@ -97,6 +98,9 @@ def calculate_destiny(payload: dict) -> dict:
         }
         for idx, num in enumerate(turning_points)
     ]
+    
+    # Calculate Pinnacles
+    pinnacles = calculate_pinnacles(day, month, year)
 
     result = {
         "life_seal": life_seal_data["number"],
@@ -111,6 +115,7 @@ def calculate_destiny(payload: dict) -> dict:
         "life_turning_points": get_life_turning_points(),
         "life_cycles": life_cycles_with_interpretations,
         "turning_points": turning_points_with_interpretations,
+        "pinnacles": pinnacles,
         "narrative": build_narrative(
             life_cycles_with_interpretations,
             turning_points_with_interpretations

@@ -1,6 +1,11 @@
 """Test script to generate and inspect PDF export."""
 import requests
 import json
+import sys
+
+# Fix Windows encoding issues
+if sys.platform == 'win32':
+    sys.stdout.reconfigure(encoding='utf-8')
 
 # Test data
 test_data = {
@@ -50,6 +55,24 @@ try:
         if 'narrative' in core:
             narrative = core['narrative']
             print(f'Narrative keys: {list(narrative.keys())}')
+        
+        # Check interpretations
+        interpretations = decode_data.get('interpretations', {})
+        print(f'\nInterpretations available: {list(interpretations.keys())}')
+        if 'life_seal' in interpretations:
+            life_seal = interpretations['life_seal']
+            content_preview = str(life_seal.get("content", ""))[:50] + "..." if life_seal.get("content") else "NONE"
+            print(f'  Life Seal: number={life_seal.get("number")}, content={content_preview}')
+        if 'soul_number' in interpretations:
+            soul = interpretations['soul_number']
+            content_preview = str(soul.get("content", ""))[:50] + "..." if soul.get("content") else "NONE"
+            print(f'  Soul: number={soul.get("number")}, content={content_preview}')
+        if 'pinnacles' in interpretations:
+            pinnacles = interpretations['pinnacles']
+            print(f'  Pinnacles: type={type(pinnacles).__name__}, count={len(pinnacles) if isinstance(pinnacles, list) else "N/A"}')
+            if isinstance(pinnacles, list) and len(pinnacles) > 0:
+                p1 = pinnacles[0]
+                print(f'    First pinnacle: type={type(p1).__name__}, number={p1.get("number") if isinstance(p1, dict) else "N/A"}')
         
         print()
         

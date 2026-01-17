@@ -110,14 +110,14 @@ def build_narrative(
 # HELPERS
 # =============================================================================
 
-def _extract_hint(interpretation: str, max_words: int = 5) -> str:
+def _extract_hint(interpretation: str, max_words: int = 8) -> str:
     """
     Extract a brief hint from interpretation text.
-    Returns first few words, lowercase, without period.
+    Returns first phrase up to max_words, ending at complete word/punctuation.
     
     Args:
         interpretation: Full interpretation text
-        max_words: Maximum words to extract
+        max_words: Maximum words to extract (increased to 8 for completeness)
     
     Returns:
         Brief hint phrase
@@ -125,8 +125,21 @@ def _extract_hint(interpretation: str, max_words: int = 5) -> str:
     if not interpretation:
         return "personal growth"
     
-    # Split and limit
-    words = interpretation.split()[:max_words]
-    hint = " ".join(words).lower().rstrip(".")
+    # Clean up interpretation text
+    text = interpretation.strip()
+    
+    # If there's a comma or period early, stop there
+    first_comma = text.find(',')
+    first_period = text.find('.')
+    
+    # Use the earliest punctuation as natural break point
+    if first_comma > 0 and first_comma < 60:  # Reasonable comma position
+        text = text[:first_comma]
+    elif first_period > 0 and first_period < 80:  # Reasonable period position
+        text = text[:first_period]
+    
+    # Split and limit to max_words
+    words = text.split()[:max_words]
+    hint = " ".join(words).lower().rstrip(".,;:")
     
     return hint if hint else "significant transition"

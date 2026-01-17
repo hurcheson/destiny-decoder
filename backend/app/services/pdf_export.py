@@ -176,10 +176,16 @@ class PDFExportService:
             story.append(Paragraph(f"<i>Planet: {safe_str(life_seal.get('planet', 'N/A'))}</i>", self.styles['InfoLabel']))
             story.append(Spacer(1, 0.08*inch))
             content = life_seal.get('content', '')
-            if content and isinstance(content, str):
+            # Handle dict content with title/summary or plain string
+            if isinstance(content, dict):
+                text_content = content.get('summary', '') or content.get('title', '')
+                if text_content:
+                    formatted_content = format_interpretation(text_content)
+                    story.append(Paragraph(formatted_content, self.styles['CustomBody']))
+            elif isinstance(content, str) and content:
                 formatted_content = format_interpretation(content)
                 story.append(Paragraph(formatted_content, self.styles['CustomBody']))
-            elif not content:
+            else:
                 story.append(Paragraph("<i>Interpretation data not available.</i>", self.styles['InfoLabel']))
             story.append(Spacer(1, 0.15*inch))
         
@@ -189,10 +195,16 @@ class PDFExportService:
             story.append(Paragraph(f"Soul Urge Number {soul.get('number', 'N/A')}", self.styles['CustomSubtitle']))
             story.append(Spacer(1, 0.08*inch))
             content = soul.get('content', '')
-            if content and isinstance(content, str):
+            # Handle dict content with title/summary or plain string
+            if isinstance(content, dict):
+                text_content = content.get('summary', '') or content.get('title', '')
+                if text_content:
+                    formatted_content = format_interpretation(text_content)
+                    story.append(Paragraph(formatted_content, self.styles['CustomBody']))
+            elif isinstance(content, str) and content:
                 formatted_content = format_interpretation(content)
                 story.append(Paragraph(formatted_content, self.styles['CustomBody']))
-            elif not content:
+            else:
                 story.append(Paragraph("<i>Interpretation data not available.</i>", self.styles['InfoLabel']))
             story.append(Spacer(1, 0.15*inch))
         
@@ -202,10 +214,16 @@ class PDFExportService:
             story.append(Paragraph(f"Personality Number {pers.get('number', 'N/A')}", self.styles['CustomSubtitle']))
             story.append(Spacer(1, 0.08*inch))
             content = pers.get('content', '')
-            if content and isinstance(content, str):
+            # Handle dict content with title/summary or plain string
+            if isinstance(content, dict):
+                text_content = content.get('summary', '') or content.get('title', '')
+                if text_content:
+                    formatted_content = format_interpretation(text_content)
+                    story.append(Paragraph(formatted_content, self.styles['CustomBody']))
+            elif isinstance(content, str) and content:
                 formatted_content = format_interpretation(content)
                 story.append(Paragraph(formatted_content, self.styles['CustomBody']))
-            elif not content:
+            else:
                 story.append(Paragraph("<i>Interpretation data not available.</i>", self.styles['InfoLabel']))
             story.append(Spacer(1, 0.15*inch))
         
@@ -217,10 +235,16 @@ class PDFExportService:
             story.append(Paragraph(f"Personal Year Cycle - Year {py.get('number', 'N/A')}", self.styles['CustomSubtitle']))
             story.append(Spacer(1, 0.08*inch))
             content = py.get('content', '')
-            if content and isinstance(content, str):
+            # Handle dict content with title/summary or plain string
+            if isinstance(content, dict):
+                text_content = content.get('summary', '') or content.get('title', '')
+                if text_content:
+                    formatted_content = format_interpretation(text_content)
+                    story.append(Paragraph(formatted_content, self.styles['CustomBody']))
+            elif isinstance(content, str) and content:
                 formatted_content = format_interpretation(content)
                 story.append(Paragraph(formatted_content, self.styles['CustomBody']))
-            elif not content:
+            else:
                 story.append(Paragraph("<i>Interpretation data not available.</i>", self.styles['InfoLabel']))
             story.append(Spacer(1, 0.2*inch))
         
@@ -306,7 +330,13 @@ class PDFExportService:
                         self.styles['SectionHeader']
                     ))
                     content = pinnacle.get('content')
-                    if content and isinstance(content, str):
+                    # Handle dict content with title/summary or plain string
+                    if isinstance(content, dict):
+                        text_content = content.get('summary', '') or content.get('title', '')
+                        if text_content:
+                            formatted_content = format_interpretation(text_content)
+                            story.append(Paragraph(formatted_content, self.styles['CustomBody']))
+                    elif isinstance(content, str) and content:
                         formatted_content = format_interpretation(content)
                         story.append(Paragraph(formatted_content, self.styles['CustomBody']))
                     story.append(Spacer(1, 0.12*inch))
