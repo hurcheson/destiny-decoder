@@ -13,6 +13,7 @@ import '../models/share_models.dart';
 class LifeSealShareWidget extends StatefulWidget {
   final int lifeSealNumber;
   final String lifeSealName;
+  final String planet;
   final String description;
   final VoidCallback? onShare;
 
@@ -20,6 +21,7 @@ class LifeSealShareWidget extends StatefulWidget {
     super.key,
     required this.lifeSealNumber,
     required this.lifeSealName,
+    required this.planet,
     required this.description,
     this.onShare,
   });
@@ -82,7 +84,7 @@ class _LifeSealShareWidgetState extends State<LifeSealShareWidget> {
       final imageBytes = await LifeSealCardGenerator.generateLifeSealCard(
         lifeSealNumber: widget.lifeSealNumber,
         lifeSealName: widget.lifeSealName,
-        planet: 'Planet Name', // TODO: Pass actual planet name from parent
+        planet: widget.planet,
         accentColor: accentColor,
       );
 
@@ -249,6 +251,7 @@ class ArticleShareWidget extends StatefulWidget {
   final String title;
   final String category;
   final String slug;
+  final int readTime;
   final VoidCallback? onShare;
 
   const ArticleShareWidget({
@@ -256,6 +259,7 @@ class ArticleShareWidget extends StatefulWidget {
     required this.title,
     required this.category,
     required this.slug,
+    required this.readTime,
     this.onShare,
   });
 
@@ -315,7 +319,7 @@ class _ArticleShareWidgetState extends State<ArticleShareWidget> {
       final imageBytes = await ArticleCardGenerator.generateArticleCard(
         title: widget.title,
         category: widget.category,
-        readTime: 5, // TODO: Pass actual read time from parent
+        readTime: widget.readTime,
         categoryColor: categoryColor,
       );
 

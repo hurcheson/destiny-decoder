@@ -123,6 +123,7 @@ class _ArticleReaderPageState extends ConsumerState<ArticleReaderPage> {
                       title: article.title,
                       category: article.category,
                       slug: widget.slug,
+                      readTime: article.readTime,
                     ),
 
                     const SizedBox(height: 24),

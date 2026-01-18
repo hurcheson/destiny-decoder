@@ -131,6 +131,7 @@ class _DecodeResultPageState extends ConsumerState<DecodeResultPage>
           LifeSealShareWidget(
             lifeSealNumber: lifeSeal.number,
             lifeSealName: LifeSealNames.getName(lifeSeal.number),
+            planet: lifeSeal.planet,
             description: 'Life Seal #${lifeSeal.number} - ${lifeSeal.planet}\n\nExplore your unique numerological profile and unlock personalized daily guidance.',
           ),
         ],
