@@ -16,6 +16,8 @@ import 'widgets/cards.dart';
 import 'widgets/animated_number.dart';
 import 'widgets/export_dialog.dart';
 import 'widgets/recommended_articles_widget.dart';
+import '../../sharing/widgets/share_widget.dart';
+import '../../sharing/models/share_models.dart';
 import '../../history/presentation/history_controller.dart';
 import '../../daily_insights/view/daily_insights_page.dart';
 
@@ -124,6 +126,12 @@ class _DecodeResultPageState extends ConsumerState<DecodeResultPage>
           RecommendedArticlesWidget(
             lifeSealNumber: lifeSeal.number,
             isDarkMode: isDarkMode,
+          ),
+          // Share section
+          LifeSealShareWidget(
+            lifeSealNumber: lifeSeal.number,
+            lifeSealName: LifeSealNames.getName(lifeSeal.number),
+            description: 'Life Seal #${lifeSeal.number} - ${lifeSeal.planet}\n\nExplore your unique numerological profile and unlock personalized daily guidance.',
           ),
         ],
       ),

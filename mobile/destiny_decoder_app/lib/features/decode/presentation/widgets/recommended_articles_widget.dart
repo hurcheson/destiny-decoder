@@ -116,13 +116,14 @@ class RecommendedArticlesWidget extends ConsumerWidget {
                                   Icon(
                                     Icons.access_time,
                                     size: 14,
-                                    color: Theme.of(context).colorScheme.outline,
+                                    color: Theme.of(context).colorScheme.onSurfaceVariant,
                                   ),
                                   const SizedBox(width: 4),
                                   Text(
                                     '${article.readTime} min',
                                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                          color: Theme.of(context).colorScheme.outline,
+                                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                                          fontWeight: FontWeight.w500,
                                         ),
                                   ),
                                 ],
@@ -133,7 +134,7 @@ class RecommendedArticlesWidget extends ConsumerWidget {
                         Icon(
                           Icons.arrow_forward_ios,
                           size: 16,
-                          color: Theme.of(context).colorScheme.outline,
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
                         ),
                       ],
                     ),

@@ -4,6 +4,7 @@ import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:share_plus/share_plus.dart';
 import '../providers/content_providers.dart';
 import '../data/models/article_models.dart';
+import '../../sharing/widgets/share_widget.dart';
 
 class ArticleReaderPage extends ConsumerStatefulWidget {
   final String slug;
@@ -114,6 +115,15 @@ class _ArticleReaderPageState extends ConsumerState<ArticleReaderPage> {
 
                     const SizedBox(height: 32),
 
+                    // Share article
+                    ArticleShareWidget(
+                      title: article.title,
+                      category: article.category,
+                      slug: widget.slug,
+                    ),
+
+                    const SizedBox(height: 24),
+
                     // Related articles
                     _RelatedArticlesSection(slug: widget.slug),
                   ],
@@ -205,22 +215,23 @@ class _ArticleMetadata extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 12),
-            Icon(Icons.access_time, size: 16, color: Theme.of(context).colorScheme.outline),
+            Icon(Icons.access_time, size: 16, color: Theme.of(context).colorScheme.onSurfaceVariant),
             const SizedBox(width: 4),
             Text(
               '${article.readTime} min read',
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Theme.of(context).colorScheme.outline,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    fontWeight: FontWeight.w500,
                   ),
             ),
             const SizedBox(width: 12),
-            Icon(Icons.person, size: 16, color: Theme.of(context).colorScheme.outline),
+            Icon(Icons.person, size: 16, color: Theme.of(context).colorScheme.onSurfaceVariant),
             const SizedBox(width: 4),
             Expanded(
               child: Text(
                 article.author,
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Theme.of(context).colorScheme.outline,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
                 overflow: TextOverflow.ellipsis,
               ),
@@ -344,7 +355,7 @@ class _CalloutWidget extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 24),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         border: Border.all(color: color, width: 2),
         borderRadius: BorderRadius.circular(8),
       ),

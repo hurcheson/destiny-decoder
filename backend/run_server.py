@@ -28,14 +28,14 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Include routers
-app.include_router(destiny_router, prefix="/destiny", tags=["Destiny"])
-app.include_router(interpretations_router, prefix="/interpretations", tags=["Interpretations"])
-app.include_router(compatibility_router, prefix="/compatibility", tags=["Compatibility"])
-app.include_router(daily_insights_router, prefix="/daily", tags=["Daily Insights"])
-app.include_router(notifications_router, prefix="/notifications", tags=["Notifications"])
-app.include_router(export_router, prefix="/export", tags=["Export"])
-app.include_router(content_router, prefix="/content", tags=["Content"])
+# Include routers (routers already define their own prefixes)
+app.include_router(destiny_router)
+app.include_router(interpretations_router)
+app.include_router(compatibility_router)
+app.include_router(daily_insights_router)
+app.include_router(notifications_router)
+app.include_router(export_router)
+app.include_router(content_router)
 
 # Health check endpoint
 @app.get("/health")
