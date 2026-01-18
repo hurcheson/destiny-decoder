@@ -50,6 +50,14 @@ dependencies:
   
   # Image generation for social cards
   image: ^4.2.0
+  
+  # In-app purchases
+  in_app_purchase: ^3.1.11
+  in_app_purchase_android: ^0.3.0+17
+  in_app_purchase_storekit: ^0.3.6+7
+  
+  # Internationalization
+  intl: ^0.18.0
 
 dev_dependencies:
   flutter_test:

@@ -10,6 +10,7 @@ from app.api.routes.export import router as export_router
 from app.api.routes.content import router as content_router
 from app.api.routes.analytics import router as analytics_router
 from app.api.routes.shares import router as shares_router
+from app.api.routes.subscriptions import router as subscriptions_router
 from app.services.notification_scheduler import get_notification_scheduler
 import logging
 
@@ -93,6 +94,7 @@ app.include_router(export_router)
 app.include_router(content_router)
 app.include_router(analytics_router)
 app.include_router(shares_router)
+app.include_router(subscriptions_router)
 
 
 @app.get("/health")
