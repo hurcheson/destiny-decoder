@@ -44,6 +44,12 @@ dependencies:
   firebase_messaging: ^14.7.0
   firebase_analytics: ^10.7.0
   permission_handler: ^11.0.1
+  
+  # Deep linking
+  app_links: ^6.3.2
+  
+  # Image generation for social cards
+  image: ^4.2.0
 
 dev_dependencies:
   flutter_test:

@@ -10,5 +10,14 @@ class AppConfig {
     'API_BASE_URL',
     defaultValue: 'http://192.168.100.197:8001',
   );
+
+  /// Optional public landing URL for sharing (e.g. website or store link)
+  /// Provide via: --dart-define=APP_SHARE_URL=https://your-landing.page
+  /// If empty, share messages will omit direct links.
+  /// For testing deep links, use: destinydecoder://destinydecoder.app
+  static const String appShareUrl = String.fromEnvironment(
+    'APP_SHARE_URL',
+    defaultValue: 'destinydecoder://destinydecoder.app',
+  );
 }
 

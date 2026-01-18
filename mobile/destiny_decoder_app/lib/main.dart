@@ -8,7 +8,9 @@ import 'core/firebase/firebase_service.dart';
 import 'core/network/api_client_provider.dart';
 import 'core/analytics/analytics_service.dart';
 import 'core/navigation/main_navigation_page.dart';
+import 'core/deep_linking/deep_link_service.dart';
 import 'features/onboarding/view/onboarding_page.dart';
+import 'features/content/presentation/article_reader_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -66,7 +68,7 @@ void main() async {
   );
 }
 
-class DestinyDecoderApp extends StatelessWidget {
+class DestinyDecoderApp extends StatefulWidget {
   final bool hasSeenOnboarding;
 
   const DestinyDecoderApp({
@@ -75,13 +77,56 @@ class DestinyDecoderApp extends StatelessWidget {
   });
 
   @override
+  State<DestinyDecoderApp> createState() => _DestinyDecoderAppState();
+}
+
+class _DestinyDecoderAppState extends State<DestinyDecoderApp> {
+  final GlobalKey<NavigatorState> _navigatorKey = GlobalKey<NavigatorState>();
+  final _deepLinkService = DeepLinkService();
+
+  @override
+  void initState() {
+    super.initState();
+    _initDeepLinking();
+  }
+
+  Future<void> _initDeepLinking() async {
+    _deepLinkService.onLinkReceived = (path, refCode) {
+      if (kDebugMode) {
+        print('🔗 Handling deep link: $path (ref: $refCode)');
+      }
+
+      // Navigate to article if it's an article path
+      if (DeepLinkService.isArticlePath(path)) {
+        final slug = DeepLinkService.parseArticleSlug(path);
+        if (slug != null) {
+          _navigatorKey.currentState?.push(
+            MaterialPageRoute(
+              builder: (_) => ArticleReaderPage(slug: slug),
+            ),
+          );
+        }
+      }
+    };
+
+    await _deepLinkService.initialize();
+  }
+
+  @override
+  void dispose() {
+    _deepLinkService.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      navigatorKey: _navigatorKey,
       title: 'Destiny Decoder',
       theme: getLightTheme(),
       darkTheme: getDarkTheme(),
       themeMode: ThemeMode.system,
-      home: hasSeenOnboarding ? const MainNavigationPage() : const OnboardingPage(),
+      home: widget.hasSeenOnboarding ? const MainNavigationPage() : const OnboardingPage(),
     );
   }
 }

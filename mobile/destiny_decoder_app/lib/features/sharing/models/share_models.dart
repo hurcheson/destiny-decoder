@@ -1,35 +1,4 @@
-/// Share data models for Life Seal and article sharing
-import 'package:freezed_annotation/freezed_annotation.dart';
-
-part 'share_models.freezed.dart';
-part 'share_models.g.dart';
-
-@freezed
-class LifeSealShareData with _$LifeSealShareData {
-  const factory LifeSealShareData({
-    required int lifeSealNumber,
-    required String lifeSealName,
-    required String description,
-    required String shareCode, // Unique code for referral tracking
-    required DateTime generatedAt,
-  }) = _LifeSealShareData;
-
-  factory LifeSealShareData.fromJson(Map<String, dynamic> json) =>
-      _$LifeSealShareDataFromJson(json);
-}
-
-@freezed
-class ArticleShareData with _$ArticleShareData {
-  const factory ArticleShareData({
-    required String slug,
-    required String title,
-    required String category,
-    required String shareCode,
-  }) = _ArticleShareData;
-
-  factory ArticleShareData.fromJson(Map<String, dynamic> json) =>
-      _$ArticleShareDataFromJson(json);
-}
+/// Share helpers for Life Seal and articles (no code generation required)
 
 /// Maps Life Seal numbers to names for sharing
 class LifeSealNames {
@@ -51,32 +20,62 @@ class LifeSealNames {
 /// Share content formatter
 class ShareContentFormatter {
   /// Format Life Seal share message
-  static String formatLifeSealShare(int lifeSealNumber, String description) {
+  /// Optionally include an app landing URL if provided.
+  static String formatLifeSealShare(
+    int lifeSealNumber,
+    String description, [
+    String appShareUrl = '',
+    String refCode = '',
+  ]) {
     final name = LifeSealNames.getName(lifeSealNumber);
+    final trimmedDesc = description.trim();
+
+    String linkSection = '';
+    if (appShareUrl.isNotEmpty) {
+      final qp = refCode.isNotEmpty
+          ? '?ref=$refCode&utm_source=share&utm_medium=app&utm_campaign=life_seal'
+          : '?utm_source=share&utm_medium=app&utm_campaign=life_seal';
+      linkSection = '\nGet the app: $appShareUrl$qp\n';
+    }
+
     return '''
 🔮 My Life Seal: #$lifeSealNumber - $name
 
-$description
+$trimmedDesc
 
-Discover your unique numerological profile with Destiny Decoder! 
+Discover your unique numerological profile with Destiny Decoder!
 ✨ Know yourself deeper
 📊 Get personalized daily insights
 🌟 Unlock your life's purpose
 
-Download now and find YOUR Life Seal!
-''';
+$linkSection'''.trim();
   }
 
   /// Format article share message
-  static String formatArticleShare(String title, String category) {
+  /// Optionally include a direct article URL using slug if provided.
+  static String formatArticleShare(
+    String title,
+    String category,
+    String slug, [
+    String appShareUrl = '',
+    String refCode = '',
+  ]) {
+    final articleLink = appShareUrl.isNotEmpty
+        ? () {
+            final qp = refCode.isNotEmpty
+                ? '?ref=$refCode&utm_source=share&utm_medium=app&utm_campaign=article'
+                : '?utm_source=share&utm_medium=app&utm_campaign=article';
+            return '\nRead it here: $appShareUrl/articles/$slug$qp\n';
+          }()
+        : '';
+
     return '''
-📚 Just discovered this insightful article:
+📚 I just found this insightful article:
 
 "$title"
 
 Category: $category
 
-Learn more about numerology and unlock personalized guidance with Destiny Decoder!
-''';
+${articleLink}Learn more about numerology and unlock personalized guidance with Destiny Decoder!'''.trim();
   }
 }

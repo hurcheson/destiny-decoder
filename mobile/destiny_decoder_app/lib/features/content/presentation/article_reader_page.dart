@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:share_plus/share_plus.dart';
+import '../../sharing/models/share_models.dart';
+import '../../../core/config/app_config.dart';
+import 'dart:math';
 import '../providers/content_providers.dart';
 import '../data/models/article_models.dart';
 import '../../sharing/widgets/share_widget.dart';
@@ -170,9 +173,28 @@ class _ArticleReaderPageState extends ConsumerState<ArticleReaderPage> {
   }
 
   void _shareArticle(Article article) {
+    final refCode = _generateRefCode();
+    final text = ShareContentFormatter.formatArticleShare(
+      article.title,
+      article.category,
+      article.slug,
+      AppConfig.appShareUrl,
+      refCode,
+    );
     Share.share(
-      '${article.title}\n\n${article.subtitle}\n\nRead more on Destiny Decoder app!',
+      text,
       subject: article.title,
+    );
+  }
+
+  String _generateRefCode([int length = 8]) {
+    const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
+    final rand = Random.secure();
+    return String.fromCharCodes(
+      Iterable.generate(
+        length,
+        (_) => chars.codeUnitAt(rand.nextInt(chars.length)),
+      ),
     );
   }
 }

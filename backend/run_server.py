@@ -12,6 +12,7 @@ from app.api.routes.daily_insights import router as daily_insights_router
 from app.api.routes.notifications import router as notifications_router
 from app.api.routes.export import router as export_router
 from app.api.routes.content import router as content_router
+from app.api.routes.analytics import router as analytics_router
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -36,6 +37,7 @@ app.include_router(daily_insights_router)
 app.include_router(notifications_router)
 app.include_router(export_router)
 app.include_router(content_router)
+app.include_router(analytics_router)
 
 # Health check endpoint
 @app.get("/health")

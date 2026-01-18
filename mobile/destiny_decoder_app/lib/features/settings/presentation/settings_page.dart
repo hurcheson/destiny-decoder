@@ -5,6 +5,7 @@ import '../../../core/firebase/firebase_service.dart';
 import '../../../core/onboarding/onboarding_service.dart';
 import '../../onboarding/view/onboarding_page.dart';
 import '../../../core/notifications/notification_service.dart';
+import '../../debug/deep_link_test_page.dart';
 import 'widgets/notification_preferences_widget.dart';
 
 class SettingsPage extends ConsumerStatefulWidget {
@@ -303,6 +304,30 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
             const SizedBox(height: 24),
             // Notification Preferences Section
             const NotificationPreferencesWidget(),
+            
+            // Debug tools (only in debug mode)
+            if (kDebugMode) ...[
+              const SizedBox(height: 24),
+              Text(
+                'Debug Tools',
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
+              const SizedBox(height: 16),
+              Card(
+                child: ListTile(
+                  leading: const Icon(Icons.link),
+                  title: const Text('Test Deep Links'),
+                  subtitle: const Text('Test article deep linking and referral tracking'),
+                  trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+                  onTap: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(builder: (_) => const DeepLinkTestPage()),
+                    );
+                  },
+                ),
+              ),
+            ],
+            
             const SizedBox(height: 24),
             // About section
             Text(
