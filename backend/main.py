@@ -1,6 +1,9 @@
 from contextlib import asynccontextmanager
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.util import get_remote_address
+from slowapi.errors import RateLimitExceeded
 from app.api.routes.destiny import router as destiny_router
 from app.api.routes.interpretations import router as interpretations_router
 from app.api.routes.compatibility import router as compatibility_router
@@ -73,6 +76,11 @@ app = FastAPI(
     title="Destiny Decoder API",
     lifespan=lifespan
 )
+
+# Initialize rate limiter
+limiter = Limiter(key_func=get_remote_address, default_limits=["100/minute"])
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 # Configure CORS for Flutter web
 # IMPORTANT: In production, replace ["*"] with specific origins like:
