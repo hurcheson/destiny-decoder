@@ -15,6 +15,7 @@ import 'timeline.dart';
 import 'widgets/cards.dart';
 import 'widgets/animated_number.dart';
 import 'widgets/export_dialog.dart';
+import 'widgets/recommended_articles_widget.dart';
 import '../../history/presentation/history_controller.dart';
 import '../../daily_insights/view/daily_insights_page.dart';
 
@@ -118,6 +119,11 @@ class _DecodeResultPageState extends ConsumerState<DecodeResultPage>
               'Summary: Your Life Seal is ${lifeSeal.number} (${lifeSeal.planet}). Explore detailed interpretations under the Numbers tab.',
               style: AppTypography.bodySmall.copyWith(color: textColor),
             ),
+          ),
+          // Recommended articles section
+          RecommendedArticlesWidget(
+            lifeSealNumber: lifeSeal.number,
+            isDarkMode: isDarkMode,
           ),
         ],
       ),

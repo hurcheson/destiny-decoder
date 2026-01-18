@@ -36,6 +36,9 @@ dependencies:
   saver_gallery: ^3.0.6
   share_plus: ^7.2.0
   
+  # Markdown rendering
+  flutter_markdown: ^0.6.18
+  
   # Push notifications
   firebase_core: ^2.24.0
   firebase_messaging: ^14.7.0

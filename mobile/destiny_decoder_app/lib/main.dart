@@ -7,6 +7,7 @@ import 'core/theme/app_theme.dart';
 import 'core/firebase/firebase_service.dart';
 import 'core/network/api_client_provider.dart';
 import 'core/analytics/analytics_service.dart';
+import 'core/navigation/main_navigation_page.dart';
 import 'features/decode/presentation/decode_form_page.dart';
 import 'features/onboarding/view/onboarding_page.dart';
 
@@ -81,7 +82,7 @@ class DestinyDecoderApp extends StatelessWidget {
       theme: getLightTheme(),
       darkTheme: getDarkTheme(),
       themeMode: ThemeMode.system,
-      home: hasSeenOnboarding ? const DecodeFormPage() : const OnboardingPage(),
+      home: hasSeenOnboarding ? const MainNavigationPage() : const OnboardingPage(),
     );
   }
 }
