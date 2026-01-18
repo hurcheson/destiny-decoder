@@ -81,7 +81,7 @@ class EnvironmentConfig {
   static const String production = 'production';
 
   /// Current environment
-  static const String currentEnvironment = development;
+  static const String currentEnvironment = production;
 
   /// Get backend URL based on environment
   static String getBackendUrl() {
@@ -91,7 +91,7 @@ class EnvironmentConfig {
       case staging:
         return 'https://staging-api.destinydecoderapp.com';
       case production:
-        return 'https://api.destinydecoderapp.com';
+        return 'https://destiny-decoder-production.up.railway.app';
       default:
         return 'http://10.0.2.2:8000';
     }
