@@ -1,6 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:dio/dio.dart';
-import '../../core/config/api_config.dart';
+import '../../../core/config/app_config.dart';
 import '../data/content_api_client.dart';
 import '../data/content_repository.dart';
 import '../data/models/article_models.dart';
@@ -11,7 +11,7 @@ final contentApiClientProvider = Provider<ContentApiClient>((ref) {
   final dio = Dio();
   return ContentApiClient(
     dio: dio,
-    baseUrl: ApiConfig.baseUrl,
+    baseUrl: AppConfig.apiBaseUrl,
   );
 });
 

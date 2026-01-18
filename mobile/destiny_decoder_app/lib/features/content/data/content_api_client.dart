@@ -1,5 +1,5 @@
 import 'package:dio/dio.dart';
-import '../models/article_models.dart';
+import 'models/article_models.dart';
 
 class ContentApiClient {
   final Dio _dio;

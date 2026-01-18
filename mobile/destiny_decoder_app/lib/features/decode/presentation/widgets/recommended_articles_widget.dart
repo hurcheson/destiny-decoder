@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../content/providers/content_providers.dart';
-import '../../content/presentation/article_reader_page.dart';
+import '../../../content/providers/content_providers.dart';
+import '../../../content/presentation/article_reader_page.dart';
 
 class RecommendedArticlesWidget extends ConsumerWidget {
   final int lifeSealNumber;

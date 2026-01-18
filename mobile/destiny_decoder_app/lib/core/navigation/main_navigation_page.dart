@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../features/decode/presentation/decode_form_page.dart';
-import '../features/content/presentation/content_hub_page.dart';
+import '../../features/decode/presentation/decode_form_page.dart';
+import '../../features/content/presentation/content_hub_page.dart';
 
 class MainNavigationPage extends StatefulWidget {
   const MainNavigationPage({super.key});
