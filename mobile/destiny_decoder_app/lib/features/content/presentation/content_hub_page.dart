@@ -329,13 +329,14 @@ class _ArticleCard extends ConsumerWidget {
                       Icon(
                         Icons.access_time,
                         size: 16,
-                        color: Theme.of(context).colorScheme.outline,
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
                       ),
                       const SizedBox(width: 4),
                       Text(
                         '${article.readTime} min',
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: Theme.of(context).colorScheme.outline,
+                              color: Theme.of(context).colorScheme.onSurfaceVariant,
+                              fontWeight: FontWeight.w500,
                             ),
                       ),
                     ],
@@ -347,7 +348,7 @@ class _ArticleCard extends ConsumerWidget {
                       isBookmarked ? Icons.bookmark : Icons.bookmark_border,
                       color: isBookmarked
                           ? Theme.of(context).colorScheme.primary
-                          : Theme.of(context).colorScheme.outline,
+                          : Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
                     onPressed: () {
                       ref.read(bookmarksProvider.notifier).toggleBookmark(article.slug);
@@ -370,7 +371,7 @@ class _ArticleCard extends ConsumerWidget {
               Text(
                 article.subtitle,
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.8),
                     ),
               ),
               const SizedBox(height: 12),
@@ -393,7 +394,7 @@ class _ArticleCard extends ConsumerWidget {
                     return Container(
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                       decoration: BoxDecoration(
-                        color: Theme.of(context).colorScheme.surfaceVariant,
+                        color: Theme.of(context).colorScheme.surfaceContainerHighest,
                         borderRadius: BorderRadius.circular(4),
                       ),
                       child: Text(

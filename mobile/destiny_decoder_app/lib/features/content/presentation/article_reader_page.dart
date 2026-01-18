@@ -129,7 +129,7 @@ class _ArticleReaderPageState extends ConsumerState<ArticleReaderPage> {
             children: [
               const Icon(Icons.error_outline, size: 64),
               const SizedBox(height: 16),
-              Text('Failed to load article'),
+              const Text('Failed to load article'),
               const SizedBox(height: 8),
               ElevatedButton(
                 onPressed: () => ref.invalidate(articleDetailProvider(widget.slug)),
@@ -411,7 +411,7 @@ class _QuoteWidget extends StatelessWidget {
             width: 4,
           ),
         ),
-        color: Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.3),
+        color: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

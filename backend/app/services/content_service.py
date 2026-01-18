@@ -161,24 +161,55 @@ class ContentService:
         """Get recommended articles based on user's Life Seal number"""
         articles = self._load_articles()
         
-        # Priority 1: Specific Life Seal article
         recommended = []
-        life_seal_tag = f'life-seal-{life_seal}'
+        
+        # Priority 1: The specific Life Seal deep-dive article
+        life_seal_slug = f'life-seal-{life_seal}-'  # Will match life-seal-1-pioneer, etc.
+        specific_article = None
         
         for article in articles:
-            tags = article.get('tags', [])
-            category = article.get('category', '')
-            
-            # High priority: life-seals category or specific life seal tag
-            if category == 'life-seals' or life_seal_tag in tags:
+            slug = article.get('slug', '')
+            if slug.startswith(life_seal_slug):
                 lightweight = {k: v for k, v in article.items() if k != 'content'}
                 lightweight['contentPreview'] = self._get_preview(article)
-                recommended.insert(0, lightweight)
-            # Medium priority: related topics
-            elif any(tag in tags for tag in ['life seal', 'life path', 'soul purpose']):
+                specific_article = lightweight
+                break
+        
+        # Add the specific Life Seal article first
+        if specific_article:
+            recommended.append(specific_article)
+        
+        # Priority 2: Other life-seals category articles
+        for article in articles:
+            if len(recommended) >= limit:
+                break
+            slug = article.get('slug', '')
+            category = article.get('category', '')
+            
+            # Skip the one we already added and add other Life Seal articles
+            if category == 'life-seals' and not slug.startswith(life_seal_slug):
                 lightweight = {k: v for k, v in article.items() if k != 'content'}
                 lightweight['contentPreview'] = self._get_preview(article)
                 recommended.append(lightweight)
+        
+        # Priority 3: Fill with related topics if needed
+        if len(recommended) < limit:
+            for article in articles:
+                if len(recommended) >= limit:
+                    break
+                tags = article.get('tags', [])
+                category = article.get('category', '')
+                slug = article.get('slug', '')
+                
+                # Skip already added
+                if any(slug == r['slug'] for r in recommended):
+                    continue
+                
+                # Add related numerology topics
+                if any(tag in tags for tag in ['life seal', 'life path', 'soul purpose', 'destiny']):
+                    lightweight = {k: v for k, v in article.items() if k != 'content'}
+                    lightweight['contentPreview'] = self._get_preview(article)
+                    recommended.append(lightweight)
                 
         return recommended[:limit]
 

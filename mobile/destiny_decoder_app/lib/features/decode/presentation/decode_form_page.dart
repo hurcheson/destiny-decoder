@@ -50,11 +50,9 @@ class _DecodeFormPageState extends ConsumerState<DecodeFormPage> {
       );
     } else if (state.hasValue && mounted) {
       // Log successful calculation
-      final result = state.value;
-      final lifeSealNumber = result?.lifeSeal?.number;
-      if (lifeSealNumber != null) {
-        await AnalyticsService.logCalculationCompleted(lifeSealNumber);
-      }
+      final result = state.value!;
+      final lifeSealNumber = result.lifeSeal.number;
+      await AnalyticsService.logCalculationCompleted(lifeSealNumber);
 
       if (mounted) {
         Navigator.of(context).push(
@@ -338,3 +336,5 @@ class _DecodeFormPageState extends ConsumerState<DecodeFormPage> {
     );
   }
 }
+
+

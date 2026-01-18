@@ -57,7 +57,7 @@ class WelcomeStep extends ConsumerWidget {
                         .textTheme
                         .bodyMedium
                         ?.color
-                        ?.withOpacity(0.7),
+                        ?.withValues(alpha: 0.7),
                   ),
             ),
             const SizedBox(height: 60),
@@ -117,7 +117,7 @@ class WelcomeStep extends ConsumerWidget {
         color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: Theme.of(context).colorScheme.outline.withOpacity(0.5),
+          color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.5),
         ),
       ),
       child: Row(
@@ -146,7 +146,7 @@ class WelcomeStep extends ConsumerWidget {
                             .textTheme
                             .bodyMedium
                             ?.color
-                            ?.withOpacity(0.6),
+                            ?.withValues(alpha: 0.6),
                       ),
                 ),
               ],
@@ -261,7 +261,7 @@ class _BirthInfoStepState extends ConsumerState<BirthInfoStep> {
                         .textTheme
                         .bodyMedium
                         ?.color
-                        ?.withOpacity(0.7),
+                        ?.withValues(alpha: 0.7),
                   ),
             ),
             const SizedBox(height: 48),
@@ -441,7 +441,7 @@ class CalculateStep extends ConsumerWidget {
                         .textTheme
                         .bodyMedium
                         ?.color
-                        ?.withOpacity(0.7),
+                        ?.withValues(alpha: 0.7),
                   ),
             ),
             const SizedBox(height: 60),
@@ -462,7 +462,7 @@ class CalculateStep extends ConsumerWidget {
                 boxShadow: [
                   BoxShadow(
                     color:
-                        Theme.of(context).colorScheme.primary.withOpacity(0.4),
+                        Theme.of(context).colorScheme.primary.withValues(alpha: 0.4),
                     blurRadius: 20,
                     spreadRadius: 5,
                   ),
@@ -485,7 +485,7 @@ class CalculateStep extends ConsumerWidget {
                 color: Theme.of(context).colorScheme.surface,
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
-                  color: Theme.of(context).colorScheme.outline.withOpacity(0.5),
+                  color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.5),
                 ),
               ),
               child: Column(
@@ -504,7 +504,7 @@ class CalculateStep extends ConsumerWidget {
                               .textTheme
                               .bodyMedium
                               ?.color
-                              ?.withOpacity(0.7),
+                              ?.withValues(alpha: 0.7),
                         ),
                   ),
                 ],
@@ -639,7 +639,7 @@ class LifeSealDisplayStep extends ConsumerWidget {
                 color: Theme.of(context).colorScheme.surface,
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
-                  color: Theme.of(context).colorScheme.outline.withOpacity(0.5),
+                  color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.5),
                 ),
               ),
               child: Text(
@@ -711,7 +711,7 @@ class FeaturesStep extends ConsumerWidget {
                         .textTheme
                         .bodyMedium
                         ?.color
-                        ?.withOpacity(0.7),
+                        ?.withValues(alpha: 0.7),
                   ),
             ),
             const SizedBox(height: 48),
@@ -777,7 +777,7 @@ class FeaturesStep extends ConsumerWidget {
         color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: Theme.of(context).colorScheme.outline.withOpacity(0.5),
+          color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.5),
         ),
       ),
       child: Row(
@@ -787,7 +787,7 @@ class FeaturesStep extends ConsumerWidget {
             height: 48,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: Theme.of(context).colorScheme.primary.withOpacity(0.2),
+              color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.2),
             ),
             child: Icon(icon, color: Theme.of(context).colorScheme.primary),
           ),
@@ -810,7 +810,7 @@ class FeaturesStep extends ConsumerWidget {
                             .textTheme
                             .bodyMedium
                             ?.color
-                            ?.withOpacity(0.6),
+                            ?.withValues(alpha: 0.6),
                       ),
                 ),
               ],
@@ -899,7 +899,7 @@ class _PermissionsStepState extends ConsumerState<PermissionsStep> {
                         .textTheme
                         .bodyMedium
                         ?.color
-                        ?.withOpacity(0.7),
+                        ?.withValues(alpha: 0.7),
                   ),
             ),
             const SizedBox(height: 48),
@@ -999,7 +999,7 @@ class _PermissionsStepState extends ConsumerState<PermissionsStep> {
         border: Border.all(
           color: granted
               ? Theme.of(context).colorScheme.primary
-              : Theme.of(context).colorScheme.outline.withOpacity(0.5),
+              : Theme.of(context).colorScheme.outline.withValues(alpha: 0.5),
           width: granted ? 2 : 1,
         ),
       ),
@@ -1014,7 +1014,7 @@ class _PermissionsStepState extends ConsumerState<PermissionsStep> {
                     .textTheme
                     .bodyMedium
                     ?.color
-                    ?.withOpacity(0.5),
+                    ?.withValues(alpha: 0.5),
           ),
           const SizedBox(width: 16),
           Expanded(
@@ -1035,7 +1035,7 @@ class _PermissionsStepState extends ConsumerState<PermissionsStep> {
                             .textTheme
                             .bodyMedium
                             ?.color
-                            ?.withOpacity(0.6),
+                            ?.withValues(alpha: 0.6),
                       ),
                 ),
               ],
@@ -1073,7 +1073,7 @@ class ReadyStep extends ConsumerWidget {
               height: 120,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: Colors.green.withOpacity(0.2),
+                color: Colors.green.withValues(alpha: 0.2),
               ),
               child: const Icon(
                 Icons.check_circle,
@@ -1097,7 +1097,7 @@ class ReadyStep extends ConsumerWidget {
                         .textTheme
                         .bodyMedium
                         ?.color
-                        ?.withOpacity(0.7),
+                        ?.withValues(alpha: 0.7),
                   ),
             ),
             const SizedBox(height: 48),
@@ -1107,7 +1107,7 @@ class ReadyStep extends ConsumerWidget {
                 color: Theme.of(context).colorScheme.surface,
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
-                  color: Theme.of(context).colorScheme.outline.withOpacity(0.5),
+                  color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.5),
                 ),
               ),
               child: Column(
@@ -1198,7 +1198,7 @@ class ReadyStep extends ConsumerWidget {
                       .textTheme
                       .bodyMedium
                       ?.color
-                      ?.withOpacity(0.8),
+                      ?.withValues(alpha: 0.8),
                 ),
           ),
         ),
@@ -1206,3 +1206,4 @@ class ReadyStep extends ConsumerWidget {
     );
   }
 }
+
