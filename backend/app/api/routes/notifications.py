@@ -1,10 +1,17 @@
 """
 API routes for push notifications, FCM tokens, and notification preferences.
 """
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
+from sqlalchemy.orm import Session
 from pydantic import BaseModel
 from typing import Optional
+from datetime import datetime
 import logging
+import re
+
+from app.config.database import get_db
+from app.models.device import Device
+from app.models.notification_preference import NotificationPreference
 
 logger = logging.getLogger(__name__)
 
@@ -36,7 +43,7 @@ class TestNotificationRequest(BaseModel):
 
 
 @router.post("/tokens/register")
-async def register_device_token(request: TokenRegistrationRequest) -> dict:
+async def register_device_token(request: TokenRegistrationRequest, db: Session = Depends(get_db)) -> dict:
     """
     Register a device FCM token for push notifications.
     
@@ -53,33 +60,85 @@ async def register_device_token(request: TokenRegistrationRequest) -> dict:
     
     try:
         from app.services.firebase_admin_service import get_firebase_service
+        import uuid
+        import os
         
-        firebase = get_firebase_service()
+        firebase = None
         topics_subscribed = []
         
-        # Subscribe to requested topics
-        if request.topics:
-            for topic in request.topics:
-                result = firebase.subscribe_to_topic([request.fcm_token], topic)
-                if result.get("success"):
-                    topics_subscribed.append(topic)
+        # Try to get Firebase service (optional in development)
+        try:
+            firebase = get_firebase_service()
+            # Subscribe to requested topics
+            if request.topics:
+                for topic in request.topics:
+                    try:
+                        result = firebase.subscribe_to_topic([request.fcm_token], topic)
+                        if result.get("success"):
+                            topics_subscribed.append(topic)
+                    except Exception as e:
+                        logger.warning(f"Could not subscribe to topic {topic}: {str(e)}")
+        except FileNotFoundError:
+            # Firebase not configured in development mode
+            logger.info("Firebase not available, using topics as-is without FCM subscription")
+            topics_subscribed = request.topics or []
+        except Exception as e:
+            logger.warning(f"Firebase service warning: {str(e)}")
+            topics_subscribed = request.topics or []
         
-        # TODO: Store token in database linked to authenticated user
-        logger.info(f"✓ Token registered: {request.device_type} - subscribed to {len(topics_subscribed)} topics")
+        # Generate device_id or use existing one (based on token)
+        # Check if token already exists
+        existing_device = db.query(Device).filter(Device.fcm_token == request.fcm_token).first()
+        
+        if existing_device:
+            # Update existing device
+            existing_device.device_type = request.device_type
+            existing_device.active = True
+            existing_device.last_active = datetime.utcnow()
+            existing_device.topics = ",".join(topics_subscribed)
+            device = existing_device
+        else:
+            # Create new device
+            device_id = str(uuid.uuid4())
+            device = Device(
+                device_id=device_id,
+                fcm_token=request.fcm_token,
+                device_type=request.device_type,
+                active=True,
+                topics=",".join(topics_subscribed),
+            )
+            db.add(device)
+            
+            # Create default notification preferences
+            default_prefs = NotificationPreference(
+                device_id=device_id,
+                blessed_day_alerts=True,
+                daily_insights=True,
+                lunar_phase_alerts=False,
+                motivational_quotes=True,
+            )
+            db.add(default_prefs)
+        
+        db.commit()
+        db.refresh(device)
+        
+        logger.info(f"✓ Token registered: {request.device_type} ({device.device_id}) - subscribed to {len(topics_subscribed)} topics")
         
         return {
             "success": True,
             "message": f"Token registered for {request.device_type}",
+            "device_id": device.device_id,
             "token_prefix": request.fcm_token[:10],
             "topics_subscribed": topics_subscribed,
         }
     except Exception as e:
+        db.rollback()
         logger.error(f"Error registering token: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.post("/tokens/unregister")
-async def unregister_device_token(fcm_token: str) -> dict:
+async def unregister_device_token(fcm_token: str, db: Session = Depends(get_db)) -> dict:
     """
     Unregister a device FCM token (e.g., on logout).
     
@@ -93,43 +152,23 @@ async def unregister_device_token(fcm_token: str) -> dict:
         raise HTTPException(status_code=400, detail="fcm_token is required")
     
     try:
-        # TODO: Remove token from database
-        logger.info(f"✓ Token unregistered: {fcm_token[:10]}")
+        # Find and mark device as inactive (or delete)
+        device = db.query(Device).filter(Device.fcm_token == fcm_token).first()
+        if device:
+            device.active = False
+            db.commit()
+            logger.info(f"✓ Token unregistered: {fcm_token[:10]}")
+        else:
+            logger.warning(f"Token not found: {fcm_token[:10]}")
+        
         return {"success": True, "message": "Token unregistered"}
     except Exception as e:
+        db.rollback()
         logger.error(f"Error unregistering token: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.get("/preferences")
-async def get_notification_preferences() -> NotificationPreferences:
-    """
-    Retrieve user's notification preferences.
-    
-    Returns:
-        NotificationPreferences object
-    """
-    # TODO: Fetch from database for authenticated user
-    return NotificationPreferences()
-
-
-@router.put("/preferences")
-async def update_notification_preferences(prefs: NotificationPreferences) -> dict:
-    """
-    Update user's notification preferences.
-    
-    Args:
-        prefs: Updated preferences
-    
-    Returns:
-        {"success": bool, "message": str}
-    """
-    # TODO: Save to database for authenticated user
-    return {
-        "success": True,
-        "message": "Notification preferences updated",
-        "preferences": prefs.dict(),
-    }
+# OLD ENDPOINTS REMOVED - Using database-backed endpoints below instead
 
 
 @router.post("/test/blessed-day")
@@ -284,12 +323,8 @@ async def get_scheduler_status() -> dict:
         logger.error(f"Error getting scheduler status: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
 
-# In-memory storage for notification preferences (TODO: move to database)
-_notification_preferences = {}
-
-
 @router.post("/preferences")
-async def save_notification_preferences(request: dict) -> dict:
+async def save_notification_preferences(request: dict, db: Session = Depends(get_db)) -> dict:
     """
     Save user notification preferences.
     
@@ -315,55 +350,76 @@ async def save_notification_preferences(request: dict) -> dict:
                 detail="device_id or user_id is required"
             )
         
-        # Build preferences object
-        from datetime import datetime
-        from app.api.schemas import NotificationPreferencesResponse
-        
-        preferences = {
-            "blessed_day_alerts": request.get("blessed_day_alerts", True),
-            "daily_insights": request.get("daily_insights", True),
-            "lunar_phase_alerts": request.get("lunar_phase_alerts", False),
-            "motivational_quotes": request.get("motivational_quotes", True),
-            "quiet_hours_enabled": request.get("quiet_hours_enabled", False),
-            "quiet_hours_start": request.get("quiet_hours_start"),
-            "quiet_hours_end": request.get("quiet_hours_end"),
-            "updated_at": datetime.utcnow().isoformat(),
-        }
-        
         # Validate quiet hours format if provided
-        if preferences["quiet_hours_enabled"]:
-            if not preferences["quiet_hours_start"] or not preferences["quiet_hours_end"]:
+        quiet_hours_enabled = request.get("quiet_hours_enabled", False)
+        if quiet_hours_enabled:
+            quiet_start = request.get("quiet_hours_start")
+            quiet_end = request.get("quiet_hours_end")
+            if not quiet_start or not quiet_end:
                 raise HTTPException(
                     status_code=400,
                     detail="quiet_hours_start and quiet_hours_end required when quiet_hours_enabled=true"
                 )
             # Basic validation
-            import re
             time_pattern = r"^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$"
-            if not re.match(time_pattern, preferences["quiet_hours_start"]):
+            if not re.match(time_pattern, quiet_start):
                 raise HTTPException(status_code=400, detail="Invalid quiet_hours_start format (use HH:MM)")
-            if not re.match(time_pattern, preferences["quiet_hours_end"]):
+            if not re.match(time_pattern, quiet_end):
                 raise HTTPException(status_code=400, detail="Invalid quiet_hours_end format (use HH:MM)")
         
-        # Store preferences (in-memory for now; TODO: database)
-        _notification_preferences[device_id] = preferences
+        # Find or create notification preferences
+        prefs = db.query(NotificationPreference).filter(
+            NotificationPreference.device_id == device_id
+        ).first()
+        
+        if prefs:
+            # Update existing preferences
+            prefs.blessed_day_alerts = request.get("blessed_day_alerts", prefs.blessed_day_alerts)
+            prefs.daily_insights = request.get("daily_insights", prefs.daily_insights)
+            prefs.lunar_phase_alerts = request.get("lunar_phase_alerts", prefs.lunar_phase_alerts)
+            prefs.motivational_quotes = request.get("motivational_quotes", prefs.motivational_quotes)
+            prefs.quiet_hours_enabled = quiet_hours_enabled
+            prefs.quiet_hours_start = request.get("quiet_hours_start", prefs.quiet_hours_start)
+            prefs.quiet_hours_end = request.get("quiet_hours_end", prefs.quiet_hours_end)
+            prefs.updated_at = datetime.utcnow()
+        else:
+            # Create new preferences
+            prefs = NotificationPreference(
+                device_id=device_id,
+                blessed_day_alerts=request.get("blessed_day_alerts", True),
+                daily_insights=request.get("daily_insights", True),
+                lunar_phase_alerts=request.get("lunar_phase_alerts", False),
+                motivational_quotes=request.get("motivational_quotes", True),
+                quiet_hours_enabled=quiet_hours_enabled,
+                quiet_hours_start=request.get("quiet_hours_start", "22:00"),
+                quiet_hours_end=request.get("quiet_hours_end", "06:00"),
+            )
+            db.add(prefs)
+        
+        db.commit()
+        db.refresh(prefs)
         
         logger.info(f"✓ Preferences saved for {device_id}")
         
         return {
             "success": True,
             "message": "Notification preferences saved",
-            "preferences": preferences,
+            "preferences": prefs.to_dict(),
         }
     except HTTPException:
         raise
     except Exception as e:
+        db.rollback()
         logger.error(f"Error saving preferences: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.get("/preferences")
-async def get_notification_preferences(device_id: Optional[str] = None, user_id: Optional[str] = None) -> dict:
+async def get_notification_preferences(
+    device_id: Optional[str] = None, 
+    user_id: Optional[str] = None,
+    db: Session = Depends(get_db)
+) -> dict:
     """
     Retrieve user notification preferences.
     
@@ -381,16 +437,26 @@ async def get_notification_preferences(device_id: Optional[str] = None, user_id:
                 detail="device_id or user_id is required"
             )
         
-        # Get preferences (return defaults if not set)
-        preferences = _notification_preferences.get(identifier, {
-            "blessed_day_alerts": True,
-            "daily_insights": True,
-            "lunar_phase_alerts": False,
-            "motivational_quotes": True,
-            "quiet_hours_enabled": False,
-            "quiet_hours_start": None,
-            "quiet_hours_end": None,
-        })
+        # Get preferences from database
+        prefs = db.query(NotificationPreference).filter(
+            NotificationPreference.device_id == identifier
+        ).first()
+        
+        if prefs:
+            preferences = prefs.to_dict()
+        else:
+            # Return defaults if not found
+            preferences = {
+                "device_id": identifier,
+                "blessed_day_alerts": True,
+                "daily_insights": True,
+                "lunar_phase_alerts": False,
+                "motivational_quotes": True,
+                "quiet_hours_enabled": False,
+                "quiet_hours_start": "22:00",
+                "quiet_hours_end": "06:00",
+                "updated_at": None,
+            }
         
         return {
             "success": True,

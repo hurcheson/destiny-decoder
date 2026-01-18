@@ -1,3 +1,6 @@
+// ARCHIVED/LEGACY: Legacy onboarding flow retained only for reference.
+// The app now uses features/onboarding/presentation/onboarding_page.dart.
+// Do not import this file in new code; remove once no longer needed.
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:permission_handler/permission_handler.dart';

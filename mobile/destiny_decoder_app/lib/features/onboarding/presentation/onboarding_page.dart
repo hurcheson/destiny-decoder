@@ -3,6 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../decode/presentation/decode_form_page.dart';
+import '../widgets/progress_tracker.dart';
+import '../widgets/example_preview_cards.dart';
+import '../widgets/skip_button.dart';
 import 'onboarding_controller.dart';
 
 class OnboardingPage extends ConsumerStatefulWidget {
@@ -25,6 +28,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage>
           'Discover your numerological destiny. Unlock insights into your Life Seal, Soul Number, and Personality Number.',
       icon: Icons.auto_awesome,
       color: AppColors.primary,
+      showExamples: true, // Show preview on first step
     ),
     OnboardingStep(
       title: '📊 Your Life Seal',
@@ -32,6 +36,11 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage>
           'Your Life Seal is your foundational life number, derived from your birth date. It reveals your core life purpose and direction.',
       icon: Icons.favorite,
       color: const Color(0xFFFF6B6B),
+      features: [
+        'Discover your core life purpose',
+        'Understand your natural strengths',
+        'See your life path direction',
+      ],
     ),
     OnboardingStep(
       title: '✨ Numerological Insights',
@@ -39,6 +48,11 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage>
           'Explore detailed interpretations of your core numbers: Soul Number, Personality Number, and Personal Year influence.',
       icon: Icons.lightbulb,
       color: const Color(0xFFFFA500),
+      features: [
+        'Soul Number - Your inner desires',
+        'Personality Number - How others see you',
+        'Personal Year - Current life phase',
+      ],
     ),
     OnboardingStep(
       title: '📈 Your Life Journey',
@@ -46,6 +60,11 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage>
           'View your life cycles, turning points, and major transitions. Understand the phases of your life path.',
       icon: Icons.timeline,
       color: const Color(0xFF4ECDC4),
+      features: [
+        'Track important life transitions',
+        'See major turning points',
+        'Understand your life cycles',
+      ],
     ),
     OnboardingStep(
       title: '👥 Compatibility Analysis',
@@ -53,6 +72,11 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage>
           'Compare numerological profiles with your partner or loved ones. Discover compatibility insights.',
       icon: Icons.people,
       color: const Color(0xFFB19CD9),
+      features: [
+        'Check relationship compatibility',
+        'Understand partner dynamics',
+        'Improve communication',
+      ],
     ),
   ];
 
@@ -75,6 +99,23 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage>
   }
 
   Future<void> _completeOnboarding() async {
+    // Show completion celebration
+    await OnboardingCompleteDialog.show(
+      context: context,
+      onGetStarted: () async {
+        await ref.read(onboardingControllerProvider.notifier).completeOnboarding();
+        if (!mounted) return;
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(builder: (_) => const DecodeFormPage()),
+          (route) => false,
+        );
+      },
+      stepsCompleted: _currentPage + 1,
+      totalSteps: _steps.length,
+    );
+  }
+
+  Future<void> _skipOnboarding() async {
     await ref.read(onboardingControllerProvider.notifier).completeOnboarding();
     if (!mounted) return;
     Navigator.of(context).pushAndRemoveUntil(
@@ -107,6 +148,32 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage>
                 isDarkMode,
               );
             },
+          ),
+
+          // Progress indicator at top
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            child: SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    // Compact progress dots
+                    CompactProgressIndicator(
+                      currentStep: _currentPage,
+                      totalSteps: _steps.length,
+                    ),
+                    // Skip button
+                    SkipOnboardingButton(
+                      onSkip: _skipOnboarding,
+                    ),
+                  ],
+                ),
+              ),
+            ),
           ),
 
           // Bottom navigation and indicators
@@ -151,6 +218,19 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage>
                         ),
                       ),
                     ),
+                    const SizedBox(height: AppSpacing.md),
+
+                    // Step title
+                    Text(
+                      'Step ${_currentPage + 1} of ${_steps.length}',
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: Theme.of(context)
+                                .textTheme
+                                .bodySmall
+                                ?.color
+                                ?.withOpacity(0.6),
+                          ),
+                    ),
                     const SizedBox(height: AppSpacing.xl),
 
                     // Navigation buttons
@@ -173,16 +253,23 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage>
                           const SizedBox(width: 60),
 
                         // Skip button
-                        TextButton(
-                          onPressed: _completeOnboarding,
-                          child: Text(
-                            _currentPage == _steps.length - 1 ? 'Get Started' : 'Skip',
-                            style: const TextStyle(
-                              fontWeight: FontWeight.w600,
-                              color: AppColors.primary,
+                        if (_currentPage < _steps.length - 1)
+                          TextButton(
+                            onPressed: () {
+                              _pageController.nextPage(
+                                duration: const Duration(milliseconds: 300),
+                                curve: Curves.easeInOut,
+                              );
+                            },
+                            child: const Text(
+                              'Next',
+                              style: TextStyle(
+                                fontWeight: FontWeight.w600,
+                              ),
                             ),
-                          ),
-                        ),
+                          )
+                        else
+                          const SizedBox.shrink(),
 
                         // Next button
                         if (_currentPage < _steps.length - 1)
@@ -231,8 +318,13 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage>
           ),
         ),
         child: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.all(AppSpacing.xl),
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.fromLTRB(
+              AppSpacing.xl,
+              AppSpacing.xxl * 2, // Space for top progress bar
+              AppSpacing.xl,
+              AppSpacing.xxl * 3, // Space for bottom navigation
+            ),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -282,6 +374,49 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage>
                     height: 1.5,
                   ),
                 ),
+                
+                // Show example previews on first step
+                if (step.showExamples == true) ...[
+                  const SizedBox(height: AppSpacing.xxl),
+                  ExampleDecodePreview(
+                    onTryIt: () {
+                      _pageController.nextPage(
+                        duration: const Duration(milliseconds: 300),
+                        curve: Curves.easeInOut,
+                      );
+                    },
+                  ),
+                ],
+
+                // Show features list for other steps
+                if (step.features != null && step.features!.isNotEmpty) ...[
+                  const SizedBox(height: AppSpacing.xxl),
+                  ...step.features!.map((feature) => Padding(
+                        padding: const EdgeInsets.symmetric(
+                          vertical: AppSpacing.sm,
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.check_circle,
+                              color: step.color,
+                              size: 24,
+                            ),
+                            const SizedBox(width: AppSpacing.md),
+                            Expanded(
+                              child: Text(
+                                feature,
+                                style: AppTypography.bodyMedium.copyWith(
+                                  color: isDarkMode
+                                      ? AppColors.darkText
+                                      : AppColors.textDark,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      )),
+                ],
               ],
             ),
           ),
@@ -296,11 +431,15 @@ class OnboardingStep {
   final String description;
   final IconData icon;
   final Color color;
+  final bool? showExamples; // Show example preview cards
+  final List<String>? features; // Feature bullet points
 
   OnboardingStep({
     required this.title,
     required this.description,
     required this.icon,
     required this.color,
+    this.showExamples,
+    this.features,
   });
 }

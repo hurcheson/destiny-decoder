@@ -16,6 +16,7 @@ import 'widgets/cards.dart';
 import 'widgets/animated_number.dart';
 import 'widgets/export_dialog.dart';
 import 'widgets/recommended_articles_widget.dart';
+import 'widgets/share_dialog_widget.dart';
 import '../../sharing/widgets/share_widget.dart';
 import '../../sharing/models/share_models.dart';
 import '../../history/presentation/history_controller.dart';
@@ -285,6 +286,35 @@ class _DecodeResultPageState extends ConsumerState<DecodeResultPage>
     }
   }
 
+  /// Show the share dialog with platform-specific sharing options.
+  void _showShareDialog(BuildContext context, dynamic lifeSeal, dynamic result) {
+    final keyTakeaway = _extractKeySentence(
+      result.interpretation?.elementAt(0)['summary'] ?? 'Check your life reading!'
+    );
+    final interpretation = (result.interpretation?.elementAt(0)?['summary'] ?? '')
+        .toString()
+        .split('.')
+        .first;
+
+    showDialog(
+      context: context,
+      builder: (context) => ShareDialogWidget(
+        lifeSealNumber: lifeSeal.number,
+        keyTakeaway: keyTakeaway,
+        shareText: interpretation,
+        onShareComplete: () {
+          // Optional: Show confirmation or close dialog
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Share recorded! Thanks for sharing your reading.'),
+              duration: Duration(seconds: 2),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
   Widget _buildInterpretationAccordion(
     BuildContext context,
     bool isDarkMode,
@@ -297,6 +327,8 @@ class _DecodeResultPageState extends ConsumerState<DecodeResultPage>
     final textColor = isDarkMode ? AppColors.darkText : AppColors.textDark;
     final bg = color.withValues(alpha: isDarkMode ? 0.14 : 0.08);
     final border = color.withValues(alpha: isDarkMode ? 0.35 : 0.25);
+    final keySentence = _extractKeySentence(interpretation['summary']);
+    final actionPlan = _extractActionPlan(interpretation);
 
     return Container(
       margin: const EdgeInsets.only(bottom: AppSpacing.md),
@@ -337,6 +369,38 @@ class _DecodeResultPageState extends ConsumerState<DecodeResultPage>
                 interpretation['summary'] ?? '',
                 style: AppTypography.bodyMedium.copyWith(color: textColor),
               ),
+              if (keySentence.isNotEmpty) ...[
+                const SizedBox(height: AppSpacing.md),
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(AppSpacing.md),
+                  decoration: BoxDecoration(
+                    color: color.withValues(alpha: isDarkMode ? 0.16 : 0.10),
+                    borderRadius: BorderRadius.circular(AppRadius.lg),
+                    border: Border.all(color: border, width: 1.2),
+                  ),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Icon(Icons.star, color: color, size: 20),
+                      const SizedBox(width: AppSpacing.sm),
+                      Expanded(
+                        child: Text(
+                          keySentence,
+                          style: AppTypography.bodyMedium.copyWith(
+                            color: textColor,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+              if (_hasActionPlan(actionPlan)) ...[
+                const SizedBox(height: AppSpacing.lg),
+                _buildActionPlan(actionPlan, color, textColor, isDarkMode),
+              ],
               const SizedBox(height: AppSpacing.lg),
               ..._buildBulletList(
                 'Strengths',
@@ -422,6 +486,13 @@ class _DecodeResultPageState extends ConsumerState<DecodeResultPage>
                   elevation: 0,
                   backgroundColor: Theme.of(context).colorScheme.surface,
                   scrolledUnderElevation: 0,
+                  actions: [
+                    IconButton(
+                      icon: Icon(Icons.share, color: AppColors.getAccentColorForTheme(isDarkMode)),
+                      tooltip: 'Share your reading',
+                      onPressed: () => _showShareDialog(context, lifeSeal, result),
+                    ),
+                  ],
                   bottom: TabBar(
                     indicatorColor: AppColors.getAccentColorForTheme(isDarkMode),
                     labelColor: Theme.of(context).colorScheme.onSurface,
@@ -611,6 +682,130 @@ class _DecodeResultPageState extends ConsumerState<DecodeResultPage>
         ),
       ),
     ];
+  }
+
+  Map<String, List<String>> _extractActionPlan(Map<String, dynamic> interpretation) {
+    final today = _asStringList(interpretation['actions_today'])
+      ..addAll(_asStringList(interpretation['today']));
+    final week = _asStringList(interpretation['actions_week'])
+      ..addAll(_asStringList(interpretation['this_week']))
+      ..addAll(_asStringList(interpretation['actions_this_week']));
+    final always = _asStringList(interpretation['actions'])
+      ..addAll(_asStringList(interpretation['next_steps']))
+      ..addAll(_asStringList(interpretation['growth']))
+      ..addAll(_asStringList(interpretation['tips']));
+
+    return {
+      'today': today,
+      'week': week,
+      'always': always,
+    };
+  }
+
+  bool _hasActionPlan(Map<String, List<String>> plan) {
+    return plan.values.any((items) => items.isNotEmpty);
+  }
+
+  Widget _buildActionPlan(
+    Map<String, List<String>> plan,
+    Color accentColor,
+    Color textColor,
+    bool isDarkMode,
+  ) {
+    if (!_hasActionPlan(plan)) return const SizedBox.shrink();
+
+    Widget buildSection(String title, List<String> items) {
+      if (items.isEmpty) return const SizedBox.shrink();
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            style: AppTypography.labelMedium.copyWith(color: accentColor),
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          ...items.map(
+            (item) => Padding(
+              padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Icon(Icons.check_circle, color: accentColor, size: 18),
+                  const SizedBox(width: AppSpacing.sm),
+                  Expanded(
+                    child: Text(
+                      item,
+                      style: AppTypography.bodySmall.copyWith(color: textColor),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      );
+    }
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(AppSpacing.lg),
+      decoration: BoxDecoration(
+        color: accentColor.withValues(alpha: isDarkMode ? 0.12 : 0.08),
+        borderRadius: BorderRadius.circular(AppRadius.lg),
+        border: Border.all(color: accentColor.withValues(alpha: 0.25), width: 1.2),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.bolt, color: accentColor, size: 20),
+              const SizedBox(width: AppSpacing.sm),
+              Text(
+                'Actionable guidance',
+                style: AppTypography.labelLarge.copyWith(
+                  color: textColor,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.md),
+          if (plan['today']!.isNotEmpty) ...[
+            buildSection('Today', plan['today']!),
+            const SizedBox(height: AppSpacing.md),
+          ],
+          if (plan['week']!.isNotEmpty) ...[
+            buildSection('This week', plan['week']!),
+            const SizedBox(height: AppSpacing.md),
+          ],
+          if (plan['always']!.isNotEmpty) buildSection('Ongoing focus', plan['always']!),
+        ],
+      ),
+    );
+  }
+
+  String _extractKeySentence(dynamic summary) {
+    if (summary == null) return '';
+    final text = summary.toString().trim();
+    if (text.isEmpty) return '';
+    final split = text.split(RegExp(r'[.!?]'));
+    return split.isNotEmpty ? split.first.trim() : text;
+  }
+
+  List<String> _asStringList(dynamic value) {
+    if (value == null) return [];
+    if (value is List) {
+      return value.map((e) => e.toString()).where((e) => e.trim().isNotEmpty).toList();
+    }
+    if (value is String) {
+      final trimmed = value.trim();
+      if (trimmed.isEmpty) return [];
+      // Split on sentences or commas to provide multiple action items
+      final parts = trimmed.split(RegExp(r'[.;\n]')).map((e) => e.trim()).where((e) => e.isNotEmpty).toList();
+      return parts.isEmpty ? [trimmed] : parts;
+    }
+    return [];
   }
 
   /// Calculate age from date of birth string (format: YYYY-MM-DD).

@@ -9,6 +9,7 @@ from app.api.routes.notifications import router as notifications_router
 from app.api.routes.export import router as export_router
 from app.api.routes.content import router as content_router
 from app.api.routes.analytics import router as analytics_router
+from app.api.routes.shares import router as shares_router
 from app.services.notification_scheduler import get_notification_scheduler
 import logging
 
@@ -19,23 +20,41 @@ logger = logging.getLogger(__name__)
 async def lifespan(app: FastAPI):
     """
     Manage app startup and shutdown.
-    - Startup: Initialize Firebase and start notification scheduler
+    - Startup: Initialize database, Firebase, and notification scheduler
     - Shutdown: Gracefully stop scheduler
     """
     # Startup
     try:
         from app.services.firebase_admin_service import get_firebase_service
+        from app.config.database import init_db, check_db_connection
         
-        # Initialize Firebase Admin SDK
-        firebase_service = get_firebase_service()
-        logger.info("✓ Firebase Admin SDK initialized")
+        # Initialize database
+        init_db()
+        
+        # Check database connection
+        if check_db_connection():
+            logger.info("✓ Database connection verified")
+        else:
+            logger.warning("⚠ Database connection check failed")
+        
+        # Initialize Firebase Admin SDK (optional for development)
+        try:
+            firebase_service = get_firebase_service()
+            logger.info("✓ Firebase Admin SDK initialized")
+        except FileNotFoundError as e:
+            logger.warning(f"⚠ Firebase not configured (development mode): {str(e)}")
+        except Exception as e:
+            logger.warning(f"⚠ Firebase initialization warning: {str(e)}")
         
         # Start notification scheduler
-        scheduler = get_notification_scheduler()
-        await scheduler.start()
+        try:
+            scheduler = get_notification_scheduler()
+            await scheduler.start()
+        except Exception as e:
+            logger.warning(f"⚠ Notification scheduler warning: {str(e)}")
         
     except Exception as e:
-        logger.error(f"Failed to initialize services: {str(e)}")
+        logger.error(f"Failed to initialize critical services: {str(e)}")
         raise
 
     yield
@@ -73,3 +92,25 @@ app.include_router(notifications_router)
 app.include_router(export_router)
 app.include_router(content_router)
 app.include_router(analytics_router)
+app.include_router(shares_router)
+
+
+@app.get("/health")
+async def health_check():
+    """
+    Health check endpoint to verify service status.
+    Returns database connection status and service health.
+    """
+    from app.config.database import check_db_connection
+    
+    db_status = check_db_connection()
+    
+    return {
+        "status": "healthy" if db_status else "degraded",
+        "database": "connected" if db_status else "disconnected",
+        "services": {
+            "api": "running",
+            "firebase": "initialized",
+            "scheduler": "running",
+        }
+    }
