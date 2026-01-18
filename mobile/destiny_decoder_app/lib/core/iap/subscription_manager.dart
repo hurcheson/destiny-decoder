@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../config/android_config.dart';
 
 /// Subscription tier enumeration
 enum SubscriptionTier {
@@ -196,8 +197,9 @@ class SubscriptionManager {
 
 /// Riverpod provider for SubscriptionManager
 final subscriptionManagerProvider = Provider<SubscriptionManager>((ref) {
-  // TODO: Get base URL from config
-  return SubscriptionManager(baseUrl: 'http://localhost:8000');
+  // Get base URL from Android config
+  final baseUrl = EnvironmentConfig.getBackendUrl();
+  return SubscriptionManager(baseUrl: baseUrl);
 });
 
 /// Provider for current subscription status

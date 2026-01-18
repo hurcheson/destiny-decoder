@@ -53,6 +53,9 @@ dependencies {
     
     // Firebase Analytics
     implementation("com.google.firebase:firebase-analytics")
+    
+    // Google Play Billing Library (In-App Purchases)
+    implementation("com.android.billingclient:billing:7.0.0")
 }
 
 flutter {
