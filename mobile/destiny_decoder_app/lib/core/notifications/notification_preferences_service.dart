@@ -3,7 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class NotificationPreferencesService {
-  static const String _apiBaseUrl = 'http://localhost:8000/api'; // Update for production
+  static const String _apiBaseUrl = 'https://destiny-decoder-production.up.railway.app/api'; // Production Railway
   static const String _deviceIdKey = 'device_id';
 
   late Dio _dio;

@@ -5,7 +5,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 /// Service for tracking and managing social shares via backend API.
 /// Handles share event logging and share statistics retrieval.
 class ShareTrackingService {
-  static const String _apiBaseUrl = 'http://localhost:8000/api'; // Update for production
+  static const String _apiBaseUrl = 'https://destiny-decoder-production.up.railway.app/api'; // Production Railway
   static const String _deviceIdKey = 'device_id';
 
   late Dio _dio;
