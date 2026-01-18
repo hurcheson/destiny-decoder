@@ -283,3 +283,121 @@ async def get_scheduler_status() -> dict:
     except Exception as e:
         logger.error(f"Error getting scheduler status: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
+
+# In-memory storage for notification preferences (TODO: move to database)
+_notification_preferences = {}
+
+
+@router.post("/preferences")
+async def save_notification_preferences(request: dict) -> dict:
+    """
+    Save user notification preferences.
+    
+    Args:
+        device_id or user_id: Identifier for the user (required)
+        blessed_day_alerts: Enable/disable blessed day notifications
+        daily_insights: Enable/disable daily insights
+        lunar_phase_alerts: Enable/disable lunar phase updates
+        motivational_quotes: Enable/disable motivational quotes
+        quiet_hours_enabled: Enable quiet hours (no notifications)
+        quiet_hours_start: Quiet hours start time (HH:MM format, 24h)
+        quiet_hours_end: Quiet hours end time (HH:MM format, 24h)
+    
+    Returns:
+        Saved preferences with timestamp
+    """
+    try:
+        # Get device/user identifier
+        device_id = request.get("device_id") or request.get("user_id")
+        if not device_id:
+            raise HTTPException(
+                status_code=400,
+                detail="device_id or user_id is required"
+            )
+        
+        # Build preferences object
+        from datetime import datetime
+        from app.api.schemas import NotificationPreferencesResponse
+        
+        preferences = {
+            "blessed_day_alerts": request.get("blessed_day_alerts", True),
+            "daily_insights": request.get("daily_insights", True),
+            "lunar_phase_alerts": request.get("lunar_phase_alerts", False),
+            "motivational_quotes": request.get("motivational_quotes", True),
+            "quiet_hours_enabled": request.get("quiet_hours_enabled", False),
+            "quiet_hours_start": request.get("quiet_hours_start"),
+            "quiet_hours_end": request.get("quiet_hours_end"),
+            "updated_at": datetime.utcnow().isoformat(),
+        }
+        
+        # Validate quiet hours format if provided
+        if preferences["quiet_hours_enabled"]:
+            if not preferences["quiet_hours_start"] or not preferences["quiet_hours_end"]:
+                raise HTTPException(
+                    status_code=400,
+                    detail="quiet_hours_start and quiet_hours_end required when quiet_hours_enabled=true"
+                )
+            # Basic validation
+            import re
+            time_pattern = r"^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$"
+            if not re.match(time_pattern, preferences["quiet_hours_start"]):
+                raise HTTPException(status_code=400, detail="Invalid quiet_hours_start format (use HH:MM)")
+            if not re.match(time_pattern, preferences["quiet_hours_end"]):
+                raise HTTPException(status_code=400, detail="Invalid quiet_hours_end format (use HH:MM)")
+        
+        # Store preferences (in-memory for now; TODO: database)
+        _notification_preferences[device_id] = preferences
+        
+        logger.info(f"✓ Preferences saved for {device_id}")
+        
+        return {
+            "success": True,
+            "message": "Notification preferences saved",
+            "preferences": preferences,
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error saving preferences: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/preferences")
+async def get_notification_preferences(device_id: Optional[str] = None, user_id: Optional[str] = None) -> dict:
+    """
+    Retrieve user notification preferences.
+    
+    Query Parameters:
+        device_id or user_id: Identifier for the user (required)
+    
+    Returns:
+        Saved preferences
+    """
+    try:
+        identifier = device_id or user_id
+        if not identifier:
+            raise HTTPException(
+                status_code=400,
+                detail="device_id or user_id is required"
+            )
+        
+        # Get preferences (return defaults if not set)
+        preferences = _notification_preferences.get(identifier, {
+            "blessed_day_alerts": True,
+            "daily_insights": True,
+            "lunar_phase_alerts": False,
+            "motivational_quotes": True,
+            "quiet_hours_enabled": False,
+            "quiet_hours_start": None,
+            "quiet_hours_end": None,
+        })
+        
+        return {
+            "success": True,
+            "preferences": preferences,
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error retrieving preferences: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))

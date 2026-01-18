@@ -100,3 +100,26 @@ class PersonalMonthResponse(BaseModel):
     calendar_year: int
     month_name: str
     theme: str
+
+# Notification Preferences Schemas
+class NotificationPreferencesRequest(BaseModel):
+    """User notification preferences"""
+    blessed_day_alerts: Optional[bool] = True
+    daily_insights: Optional[bool] = True
+    lunar_phase_alerts: Optional[bool] = False
+    motivational_quotes: Optional[bool] = True
+    quiet_hours_enabled: Optional[bool] = False
+    quiet_hours_start: Optional[str] = None  # HH:MM format (24h)
+    quiet_hours_end: Optional[str] = None    # HH:MM format (24h)
+
+
+class NotificationPreferencesResponse(BaseModel):
+    """User notification preferences response"""
+    blessed_day_alerts: bool
+    daily_insights: bool
+    lunar_phase_alerts: bool
+    motivational_quotes: bool
+    quiet_hours_enabled: bool
+    quiet_hours_start: Optional[str]
+    quiet_hours_end: Optional[str]
+    updated_at: str  # ISO timestamp

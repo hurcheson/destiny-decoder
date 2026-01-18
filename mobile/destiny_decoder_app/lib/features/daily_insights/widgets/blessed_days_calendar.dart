@@ -113,40 +113,119 @@ class _BlessedDaysCalendarState extends ConsumerState<BlessedDaysCalendar> {
                     final date = DateTime(_currentMonth.year, _currentMonth.month, dayNum);
                     final iso = "${date.year.toString().padLeft(4, '0')}-${date.month.toString().padLeft(2, '0')}-${dayNum.toString().padLeft(2, '0')}";
                     final isBlessed = blessed.contains(iso);
+                    final isToday = date.year == DateTime.now().year &&
+                        date.month == DateTime.now().month &&
+                        date.day == DateTime.now().day;
 
                     return InkWell(
                       onTap: widget.onSelectDate == null ? null : () => widget.onSelectDate!(date),
-                      child: Container(
+                      borderRadius: BorderRadius.circular(8),
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 200),
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(8),
-                          color: isBlessed
-                              ? Colors.green.withValues(alpha: 0.18)
-                              : Theme.of(context).colorScheme.surface,
+                          color: isToday
+                              ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.1)
+                              : isBlessed
+                                  ? Colors.green.withValues(alpha: 0.15)
+                                  : Theme.of(context).colorScheme.surface,
                           border: Border.all(
-                            color: isBlessed ? Colors.green : Theme.of(context).dividerColor,
+                            color: isToday
+                                ? Theme.of(context).colorScheme.primary
+                                : isBlessed
+                                    ? Colors.green
+                                    : Theme.of(context).dividerColor,
+                            width: isToday ? 2 : 1,
                           ),
                         ),
-                        child: Center(
-                          child: Text(
-                            dayNum.toString(),
-                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                  fontWeight: isBlessed ? FontWeight.bold : FontWeight.normal,
-                                  color: isBlessed ? Colors.green.shade800 : null,
+                        child: Stack(
+                          alignment: Alignment.center,
+                          children: [
+                            Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  dayNum.toString(),
+                                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                        fontWeight: isBlessed || isToday ? FontWeight.bold : FontWeight.normal,
+                                        color: isToday
+                                            ? Theme.of(context).colorScheme.primary
+                                            : isBlessed
+                                                ? Colors.green.shade700
+                                                : null,
+                                      ),
                                 ),
-                          ),
+                                if (isBlessed)
+                                  Container(
+                                    width: 4,
+                                    height: 4,
+                                    margin: const EdgeInsets.only(top: 2),
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      color: Colors.green.shade600,
+                                    ),
+                                  ),
+                              ],
+                            ),
+                            if (isToday)
+                              Positioned(
+                                top: 2,
+                                right: 2,
+                                child: Container(
+                                  width: 6,
+                                  height: 6,
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    color: Theme.of(context).colorScheme.primary,
+                                  ),
+                                ),
+                              ),
+                          ],
                         ),
                       ),
                     );
                   },
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 12),
                 Align(
                   alignment: Alignment.centerLeft,
-                  child: Row(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Container(width: 14, height: 14, decoration: BoxDecoration(color: Colors.green.withValues(alpha: 0.18), border: Border.all(color: Colors.green), borderRadius: BorderRadius.circular(3))),
-                      const SizedBox(width: 6),
-                      Text('Blessed day', style: Theme.of(context).textTheme.bodySmall),
+                      Row(
+                        children: [
+                          Container(
+                            width: 14,
+                            height: 14,
+                            decoration: BoxDecoration(
+                              color: Colors.green.withValues(alpha: 0.15),
+                              border: Border.all(color: Colors.green),
+                              borderRadius: BorderRadius.circular(3),
+                            ),
+                          ),
+                          const SizedBox(width: 6),
+                          Text('Blessed day', style: Theme.of(context).textTheme.bodySmall),
+                        ],
+                      ),
+                      const SizedBox(height: 6),
+                      Row(
+                        children: [
+                          Container(
+                            width: 14,
+                            height: 14,
+                            decoration: BoxDecoration(
+                              color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
+                              border: Border.all(
+                                color: Theme.of(context).colorScheme.primary,
+                                width: 2,
+                              ),
+                              borderRadius: BorderRadius.circular(3),
+                            ),
+                          ),
+                          const SizedBox(width: 6),
+                          Text('Today', style: Theme.of(context).textTheme.bodySmall),
+                        ],
+                      ),
                     ],
                   ),
                 ),

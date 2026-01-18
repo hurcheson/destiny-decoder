@@ -31,7 +31,8 @@ class _DecodeFormPageState extends ConsumerState<DecodeFormPage> {
   }
 
   void _submit() async {
-    if (!_formKey.currentState!.validate()) return;
+    final isValid = _formKey.currentState?.validate() ?? false;
+    if (!isValid) return;
 
     await ref.read(decodeControllerProvider.notifier).decode(
           fullName: _fullNameController.text.trim(),
@@ -47,13 +48,14 @@ class _DecodeFormPageState extends ConsumerState<DecodeFormPage> {
           duration: const Duration(seconds: 5),
         ),
       );
-    } else if (state.hasValue && state.value != null && mounted) {
+    } else if (state.hasValue && mounted) {
       // Log successful calculation
-      final result = state.value!;
-      if (result.lifeSeal != null) {
-        await AnalyticsService.logCalculationCompleted(result.lifeSeal!.number);
+      final result = state.value;
+      final lifeSealNumber = result?.lifeSeal?.number;
+      if (lifeSealNumber != null) {
+        await AnalyticsService.logCalculationCompleted(lifeSealNumber);
       }
-      
+
       if (mounted) {
         Navigator.of(context).push(
           MaterialPageRoute(

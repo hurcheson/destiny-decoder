@@ -1,6 +1,11 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/firebase/firebase_service.dart';
+import '../../../core/onboarding/onboarding_service.dart';
+import '../../onboarding/view/onboarding_page.dart';
 import '../../../core/notifications/notification_service.dart';
+import 'widgets/notification_preferences_widget.dart';
 
 class SettingsPage extends ConsumerStatefulWidget {
   const SettingsPage({super.key});
@@ -22,15 +27,23 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
   }
 
   Future<void> _loadFcmToken() async {
+    // Only load FCM token in debug mode for development/testing
+    if (!kDebugMode) {
+      setState(() {
+        _fcmToken = 'Push notifications enabled';
+      });
+      return;
+    }
+
     try {
-      final notificationService = NotificationService();
-      final token = await notificationService.getDeviceToken();
+      final firebaseService = FirebaseService();
+      final token = await firebaseService.getFCMToken();
       setState(() {
         _fcmToken = token ?? 'Firebase not configured';
       });
     } catch (e) {
       setState(() {
-        _fcmToken = 'Firebase not configured';
+        _fcmToken = 'Firebase not configured: $e';
       });
     }
   }
@@ -90,46 +103,92 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      'FCM Device Token',
-                      style: Theme.of(context).textTheme.titleSmall,
-                    ),
-                    const SizedBox(height: 8),
-                    Container(
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: _fcmToken == 'Firebase not configured'
-                            ? Colors.orange.withValues(alpha: 0.1)
-                            : Theme.of(context).colorScheme.surface,
-                        borderRadius: BorderRadius.circular(8),
-                        border: _fcmToken == 'Firebase not configured'
-                            ? Border.all(color: Colors.orange, width: 1)
-                            : null,
+                    // Show FCM token only in debug mode
+                    if (kDebugMode) ...[
+                      Text(
+                        'FCM Device Token (Debug Only)',
+                        style: Theme.of(context).textTheme.titleSmall,
                       ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          SelectableText(
-                            _fcmToken ?? 'Loading...',
-                            style: Theme.of(context).textTheme.bodySmall,
-                          ),
-                          if (_fcmToken == 'Firebase not configured') ...[
-                            const SizedBox(height: 8),
-                            Text(
-                              '⚠️ Optional: Push notifications require Firebase setup (google-services.json)',
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .bodySmall
-                                  ?.copyWith(
-                                    color: Colors.orange,
-                                    fontSize: 11,
-                                  ),
+                      const SizedBox(height: 8),
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: _fcmToken == 'Firebase not configured'
+                              ? Colors.orange.withValues(alpha: 0.1)
+                              : Theme.of(context).colorScheme.surface,
+                          borderRadius: BorderRadius.circular(8),
+                          border: _fcmToken == 'Firebase not configured'
+                              ? Border.all(color: Colors.orange, width: 1)
+                              : null,
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            SelectableText(
+                              _fcmToken ?? 'Loading...',
+                              style: Theme.of(context).textTheme.bodySmall,
+                            ),
+                            if (_fcmToken == 'Firebase not configured') ...[
+                              const SizedBox(height: 8),
+                              Text(
+                                '⚠️ For development: Ensure google-services.json is in android/app/',
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .bodySmall
+                                    ?.copyWith(
+                                      color: Colors.orange,
+                                      fontSize: 11,
+                                    ),
+                              ),
+                            ] else if (_fcmToken != null && _fcmToken != 'Push notifications enabled') ...[
+                              const SizedBox(height: 8),
+                              Text(
+                                '✓ This token is unique to your device. Use for testing notifications.',
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .bodySmall
+                                    ?.copyWith(
+                                      color: Colors.green,
+                                      fontSize: 11,
+                                    ),
+                              ),
+                            ],
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                    ] else ...[
+                      // Production mode: just show status
+                      Text(
+                        'Push Notifications',
+                        style: Theme.of(context).textTheme.titleSmall,
+                      ),
+                      const SizedBox(height: 8),
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: Colors.green.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color: Colors.green, width: 1),
+                        ),
+                        child: Row(
+                          children: [
+                            const Icon(Icons.check_circle, color: Colors.green),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Text(
+                                'Push notifications are enabled on this device',
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .bodySmall
+                                    ?.copyWith(color: Colors.green),
+                              ),
                             ),
                           ],
-                        ],
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 16),
+                      const SizedBox(height: 16),
+                    ],
                     Text(
                       'Test Notifications',
                       style: Theme.of(context).textTheme.titleSmall,
@@ -137,7 +196,8 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                     const SizedBox(height: 12),
                     ElevatedButton.icon(
                       onPressed: (_testingBlessedDay ||
-                              _fcmToken == 'Firebase not configured')
+                              (!kDebugMode && _fcmToken == 'Firebase not configured') ||
+                              (kDebugMode && _fcmToken == 'Firebase not configured'))
                           ? null
                           : _testBlessedDay,
                       icon: _testingBlessedDay
@@ -149,12 +209,13 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                               ),
                             )
                           : const Icon(Icons.star),
-                      label: const Text('Test Blessed Day Alert'),
+                      label: const Text('Test Blessed Day'),
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: 8),
                     ElevatedButton.icon(
                       onPressed: (_testingPersonalYear ||
-                              _fcmToken == 'Firebase not configured')
+                              (!kDebugMode && _fcmToken == 'Firebase not configured') ||
+                              (kDebugMode && _fcmToken == 'Firebase not configured'))
                           ? null
                           : _testPersonalYear,
                       icon: _testingPersonalYear
@@ -166,21 +227,16 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                               ),
                             )
                           : const Icon(Icons.cake),
-                      label: const Text('Test Personal Year Alert'),
+                      label: const Text('Test Personal Year'),
                     ),
                     if (_message.isNotEmpty) ...[
                       const SizedBox(height: 12),
                       Container(
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                          color: _message.startsWith('✅')
+                          color: _message.contains('✅')
                               ? Colors.green.withValues(alpha: 0.1)
                               : Colors.red.withValues(alpha: 0.1),
-                          border: Border.all(
-                            color: _message.startsWith('✅')
-                                ? Colors.green
-                                : Colors.red,
-                          ),
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: Text(
@@ -193,6 +249,60 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                 ),
               ),
             ),
+            const SizedBox(height: 24),
+            // Onboarding section
+            Text(
+              'Onboarding',
+              style: Theme.of(context).textTheme.titleLarge,
+            ),
+            const SizedBox(height: 16),
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Restart Onboarding',
+                      style: Theme.of(context).textTheme.titleSmall,
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Reset onboarding progress and walk through the setup again. Useful for testing.',
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
+                    const SizedBox(height: 12),
+                    Row(
+                      children: [
+                        ElevatedButton.icon(
+                          onPressed: () async {
+                            try {
+                              // Reset service state and SharedPreferences flag
+                              await ref.read(onboardingStateProvider.notifier).reset();
+
+                              // Navigate to onboarding
+                              if (!mounted) return;
+                              Navigator.of(context).push(
+                                MaterialPageRoute(builder: (_) => const OnboardingPage()),
+                              );
+                            } catch (e) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text('Failed to restart onboarding: $e')),
+                              );
+                            }
+                          },
+                          icon: const Icon(Icons.refresh),
+                          label: const Text('Restart Onboarding'),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 24),
+            // Notification Preferences Section
+            const NotificationPreferencesWidget(),
             const SizedBox(height: 24),
             // About section
             Text(

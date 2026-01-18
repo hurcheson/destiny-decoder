@@ -1,6 +1,7 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
+import '../firebase/firebase_service.dart';
 
 /// Firebase Cloud Messaging notification handler.
 class NotificationService {
@@ -20,36 +21,38 @@ class NotificationService {
   Future<void> initialize() async {
     if (_isInitialized) return;
 
-    // Initialize Firebase
-    await Firebase.initializeApp();
+    try {
+      // Initialize using FirebaseService (which initializes Firebase)
+      final firebaseService = FirebaseService();
+      await firebaseService.initialize();
+      
+      _fcm = FirebaseMessaging.instance;
 
-    // Now safe to access FCM
-    _fcm = FirebaseMessaging.instance;
+      // Listen to foreground messages
+      FirebaseMessaging.onMessage.listen(_handleForegroundMessage);
 
-    // Request notification permissions
-    final _ = await _fcm.requestPermission(
-      alert: true,
-      announcement: true,
-      badge: true,
-      carPlay: false,
-      criticalAlert: false,
-      provisional: false,
-      sound: true,
-    );
+      // Listen to background messages (via handler)
+      FirebaseMessaging.onBackgroundMessage(_handleBackgroundMessage);
 
-    // Listen to foreground messages
-    FirebaseMessaging.onMessage.listen(_handleForegroundMessage);
-
-    // Listen to background messages (via handler)
-    FirebaseMessaging.onBackgroundMessage(_handleBackgroundMessage);
-
-    _isInitialized = true;
+      _isInitialized = true;
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error initializing NotificationService: $e');
+      }
+    }
   }
 
-  /// Get FCM device token for registration.
+  /// Get FCM device token for registration (uses FirebaseService).
   Future<String?> getDeviceToken() async {
-    if (!_isInitialized) return null;
-    return await _fcm.getToken();
+    try {
+      final firebaseService = FirebaseService();
+      return await firebaseService.getFCMToken();
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error getting device token: $e');
+      }
+      return null;
+    }
   }
 
   /// Handle foreground messages (app is open).

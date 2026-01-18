@@ -15,6 +15,49 @@ from typing import Optional, List
 logger = logging.getLogger(__name__)
 
 
+def _check_quiet_hours(preferences: dict) -> bool:
+    """
+    Check if current time is within quiet hours.
+    
+    Args:
+        preferences: User notification preferences dict
+        
+    Returns:
+        True if currently in quiet hours, False otherwise
+    """
+    if not preferences.get("quiet_hours_enabled"):
+        return False
+    
+    try:
+        from datetime import datetime
+        
+        start_str = preferences.get("quiet_hours_start")
+        end_str = preferences.get("quiet_hours_end")
+        
+        if not start_str or not end_str:
+            return False
+        
+        # Parse times (HH:MM format)
+        start_h, start_m = map(int, start_str.split(":"))
+        end_h, end_m = map(int, end_str.split(":"))
+        
+        now = datetime.now()
+        current_time = now.time()
+        
+        start_time = time(start_h, start_m)
+        end_time = time(end_h, end_m)
+        
+        # Handle case where quiet hours span midnight
+        if start_time <= end_time:
+            return start_time <= current_time < end_time
+        else:
+            return current_time >= start_time or current_time < end_time
+    except Exception as e:
+        logger.error(f"Error checking quiet hours: {str(e)}")
+        return False
+
+
+
 class NotificationScheduler:
     """
     Manages scheduled push notifications using APScheduler.
@@ -108,9 +151,20 @@ class NotificationScheduler:
         try:
             from app.services.firebase_admin_service import get_firebase_service
             from app.services.daily_insights_service import DailyInsightsService
+            from app.api.routes.notifications import _notification_preferences
             
             firebase = get_firebase_service()
             insights_service = DailyInsightsService()
+            
+            # Check if any users have daily insights enabled
+            users_to_notify = [
+                device_id for device_id, prefs in _notification_preferences.items()
+                if prefs.get("daily_insights", True) and not _check_quiet_hours(prefs)
+            ]
+            
+            if not users_to_notify:
+                logger.info("No users subscribed to daily insights or all in quiet hours")
+                return
             
             # Get today's insights
             daily_insights = await insights_service.get_daily_insights(
@@ -134,16 +188,27 @@ class NotificationScheduler:
                     notification=notification
                 )
                 
-                logger.info(f"Daily insights sent: {result}")
+                logger.info(f"Daily insights sent to {len(users_to_notify)} users: {result}")
         except Exception as e:
             logger.error(f"Error sending daily insights: {str(e)}")
 
     async def _send_blessed_day_alert(self):
-        """Send blessed day alert."""
+        """Send blessed day alert to subscribed users."""
         try:
             from app.services.firebase_admin_service import get_firebase_service, FCMNotification
+            from app.api.routes.notifications import _notification_preferences
             
             firebase = get_firebase_service()
+            
+            # Check if any users have blessed day alerts enabled
+            users_to_notify = [
+                device_id for device_id, prefs in _notification_preferences.items()
+                if prefs.get("blessed_day_alerts", True) and not _check_quiet_hours(prefs)
+            ]
+            
+            if not users_to_notify:
+                logger.info("No users subscribed to blessed day alerts or all in quiet hours")
+                return
             
             notification = FCMNotification(
                 title="🌟 Blessed Day Alert",
@@ -159,19 +224,30 @@ class NotificationScheduler:
                 notification=notification
             )
             
-            logger.info(f"Blessed day alert sent: {result}")
+            logger.info(f"Blessed day alert sent to {len(users_to_notify)} users: {result}")
         except Exception as e:
             logger.error(f"Error sending blessed day alert: {str(e)}")
 
     async def _send_lunar_phase_update(self):
-        """Send lunar phase update."""
+        """Send lunar phase update to subscribed users."""
         try:
             from app.services.firebase_admin_service import get_firebase_service, FCMNotification
+            from app.services.daily_insights_service import DailyInsightsService
+            from app.api.routes.notifications import _notification_preferences
             
             firebase = get_firebase_service()
             
+            # Check if any users have lunar phase alerts enabled
+            users_to_notify = [
+                device_id for device_id, prefs in _notification_preferences.items()
+                if prefs.get("lunar_phase_alerts", False) and not _check_quiet_hours(prefs)
+            ]
+            
+            if not users_to_notify:
+                logger.info("No users subscribed to lunar phase alerts or all in quiet hours")
+                return
+            
             # Get current lunar phase
-            from app.services.daily_insights_service import DailyInsightsService
             insights_service = DailyInsightsService()
             lunar_info = insights_service.get_lunar_phase_info(datetime.now().date())
             
@@ -190,16 +266,27 @@ class NotificationScheduler:
                 notification=notification
             )
             
-            logger.info(f"Lunar phase update sent: {result}")
+            logger.info(f"Lunar phase update sent to {len(users_to_notify)} users: {result}")
         except Exception as e:
             logger.error(f"Error sending lunar phase update: {str(e)}")
 
     async def _send_motivational_quote(self):
-        """Send a motivational quote."""
+        """Send a motivational quote to subscribed users."""
         try:
             from app.services.firebase_admin_service import get_firebase_service, FCMNotification
+            from app.api.routes.notifications import _notification_preferences
             
             firebase = get_firebase_service()
+            
+            # Check if any users have motivational quotes enabled
+            users_to_notify = [
+                device_id for device_id, prefs in _notification_preferences.items()
+                if prefs.get("motivational_quotes", True) and not _check_quiet_hours(prefs)
+            ]
+            
+            if not users_to_notify:
+                logger.info("No users subscribed to motivational quotes or all in quiet hours")
+                return
             
             quotes = [
                 "Your life is a divine journey of discovery and growth.",
@@ -207,6 +294,11 @@ class NotificationScheduler:
                 "Every day brings new opportunities for transformation.",
                 "Trust the cosmic forces guiding your path.",
                 "Your numerology is the key to understanding your purpose.",
+                "Embrace the wisdom your numbers hold for you.",
+                "Today is a gift—live it with intention and gratitude.",
+                "Your journey is unique, your purpose is clear.",
+                "Let your numbers guide you to your highest self.",
+                "Every challenge is an opportunity for growth.",
             ]
             
             import random
@@ -226,7 +318,7 @@ class NotificationScheduler:
                 notification=notification
             )
             
-            logger.info(f"Motivational quote sent: {result}")
+            logger.info(f"Motivational quote sent to {len(users_to_notify)} users: {result}")
         except Exception as e:
             logger.error(f"Error sending motivational quote: {str(e)}")
 

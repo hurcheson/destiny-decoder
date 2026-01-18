@@ -4,16 +4,21 @@ import '../providers.dart';
 import '../widgets/daily_insight_tile.dart';
 import '../widgets/weekly_preview_carousel.dart';
 import '../widgets/blessed_days_calendar.dart';
+import '../../monthly_guidance/personal_month_guidance_card.dart';
 
 class DailyInsightsPage extends ConsumerWidget {
   final int lifeSeal;
   final int dayOfBirth;
+  final int monthOfBirth;
+  final int yearOfBirth;
   final String? targetDate; // ISO YYYY-MM-DD
 
   const DailyInsightsPage({
     super.key,
     required this.lifeSeal,
     required this.dayOfBirth,
+    required this.monthOfBirth,
+    required this.yearOfBirth,
     this.targetDate,
   });
 
@@ -32,6 +37,7 @@ class DailyInsightsPage extends ConsumerWidget {
       body: insightAsync.when(
         data: (data) => RefreshIndicator(
           onRefresh: () async {
+            // ignore: unused_result
             ref.refresh(dailyInsightProvider(params).future);
           },
           child: ListView(
@@ -49,6 +55,8 @@ class DailyInsightsPage extends ConsumerWidget {
                       builder: (_) => DailyInsightsPage(
                         lifeSeal: lifeSeal,
                         dayOfBirth: dayOfBirth,
+                        monthOfBirth: monthOfBirth,
+                        yearOfBirth: yearOfBirth,
                         targetDate: preview.date,
                       ),
                     ),
@@ -70,11 +78,21 @@ class DailyInsightsPage extends ConsumerWidget {
                       builder: (_) => DailyInsightsPage(
                         lifeSeal: lifeSeal,
                         dayOfBirth: dayOfBirth,
+                        monthOfBirth: monthOfBirth,
+                        yearOfBirth: yearOfBirth,
                         targetDate: iso,
                       ),
                     ),
                   );
                 },
+              ),
+              const SizedBox(height: 24),
+              Text('Personal Month Guidance', style: Theme.of(context).textTheme.titleMedium),
+              const SizedBox(height: 8),
+              PersonalMonthGuidanceCard(
+                dayOfBirth: dayOfBirth,
+                monthOfBirth: monthOfBirth,
+                yearOfBirth: yearOfBirth,
               ),
             ],
           ),

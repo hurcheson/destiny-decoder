@@ -8,7 +8,7 @@ import 'core/firebase/firebase_service.dart';
 import 'core/network/api_client_provider.dart';
 import 'core/analytics/analytics_service.dart';
 import 'features/decode/presentation/decode_form_page.dart';
-import 'features/onboarding/presentation/onboarding_page.dart';
+import 'features/onboarding/view/onboarding_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();

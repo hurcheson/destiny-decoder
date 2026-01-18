@@ -184,21 +184,102 @@ class FirebaseService {
       print('Body: ${message.notification?.body}');
       print('Data: ${message.data}');
     }
-    
-    // TODO: Show in-app notification or update UI
-    // You can use a SnackBar, custom notification widget, etc.
+
+    final title = message.notification?.title ?? 'Destiny Decoder';
+    final body = message.notification?.body ?? '';
+    final notificationType = message.data['type'] ?? 'general';
+
+    // Show a snackbar or in-app notification
+    // This will be implemented by the app root widget using a provider
+    _showForegroundNotification(
+      title: title,
+      body: body,
+      type: notificationType,
+      data: message.data,
+    );
+
+    // Log analytics event
+    _logAnalyticsEvent('notification_received', {
+      'type': notificationType,
+      'title': title,
+    });
   }
-  
+
   /// Handle notification tap (when app is in background/terminated)
   void _handleNotificationTap(RemoteMessage message) {
     if (kDebugMode) {
       print('Notification tapped');
       print('Data: ${message.data}');
     }
-    
-    // TODO: Navigate to specific screen based on message.data
-    // Example: if (message.data['type'] == 'daily_insight') { ... }
+
+    final notificationType = message.data['type'] ?? 'general';
+
+    // Log analytics event
+    _logAnalyticsEvent('notification_opened', {
+      'type': notificationType,
+    });
+
+    // Navigation will be handled by app root widget using a provider
+    _handleNotificationNavigation(
+      type: notificationType,
+      data: message.data,
+    );
   }
+
+  /// Internal method to handle showing foreground notification
+  /// This is called when a notification arrives while app is in foreground
+  void _showForegroundNotification({
+    required String title,
+    required String body,
+    required String type,
+    required Map<String, dynamic> data,
+  }) {
+    // In production, this would trigger showing an in-app notification widget
+    // For now, we just log it; the main app can listen to a stream for this
+    if (kDebugMode) {
+      print('📬 In-app notification: $title - $body');
+    }
+  }
+
+  /// Internal method to handle notification navigation
+  /// This determines where to navigate based on notification type
+  void _handleNotificationNavigation({
+    required String type,
+    required Map<String, dynamic> data,
+  }) {
+    switch (type) {
+      case 'daily_insight':
+        // Navigate to Daily Insights page
+        if (kDebugMode) print('Navigate to Daily Insights');
+        break;
+      case 'blessed_day':
+        // Navigate to Blessed Days Calendar
+        if (kDebugMode) print('Navigate to Blessed Days');
+        break;
+      case 'lunar_phase':
+        // Navigate to Lunar Phase information
+        if (kDebugMode) print('Navigate to Lunar Phases');
+        break;
+      case 'inspiration':
+        // Navigate to Home or Daily Insights
+        if (kDebugMode) print('Navigate to Home for inspiration');
+        break;
+      default:
+        // Navigate to Home
+        if (kDebugMode) print('Navigate to Home');
+    }
+  }
+
+  /// Log analytics events
+  /// This is a placeholder that can be integrated with Firebase Analytics
+  void _logAnalyticsEvent(String eventName, Map<String, dynamic> parameters) {
+    if (kDebugMode) {
+      print('📊 Analytics: $eventName - $parameters');
+    }
+    // TODO: Implement actual Firebase Analytics logging
+    // example: _analytics.logEvent(name: eventName, parameters: parameters);
+  }
+
   
   /// Subscribe to a topic
   Future<void> subscribeToTopic(String topic) async {

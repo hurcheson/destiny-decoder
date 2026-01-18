@@ -435,12 +435,17 @@ class _DecodeResultPageState extends ConsumerState<DecodeResultPage>
                       heroTag: 'daily_insights',
                       onPressed: () {
                         final lifeSealNumber = lifeSeal.number;
-                        final dayOfBirth = DateTime.parse(result.input.dateOfBirth).day;
+                        final dob = DateTime.parse(result.input.dateOfBirth);
+                        final dayOfBirth = dob.day;
+                        final monthOfBirth = dob.month;
+                        final yearOfBirth = dob.year;
                         Navigator.of(context).push(
                           MaterialPageRoute(
                             builder: (_) => DailyInsightsPage(
                               lifeSeal: lifeSealNumber,
                               dayOfBirth: dayOfBirth,
+                              monthOfBirth: monthOfBirth,
+                              yearOfBirth: yearOfBirth,
                               // If you want a specific date, pass ISO yyyy-MM-dd; else omit for today
                               // targetDate: DateTime.now().toIso8601String().split('T').first,
                             ),
