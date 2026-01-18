@@ -13,7 +13,7 @@ LIFE_SEAL_INTERPRETATIONS = {
             "Pioneering spirit that enjoys being first to explore uncharted territory",
             "Natural charisma that attracts followers and supporters to your vision"
         ],
-        "challenges": [
+        "weaknesses": [
             "May become overly dominant or controlling in relationships and team settings",
             "Impatience with slower processes or people who need more time to understand",
             "Difficulty accepting help or delegating tasks, believing you can do it better alone",
@@ -54,7 +54,7 @@ LIFE_SEAL_INTERPRETATIONS = {
             "Supportive presence that empowers others to shine",
             "Natural peacemaker who can de-escalate tense situations"
         ],
-        "challenges": [
+        "weaknesses": [
             "Overly sensitive to criticism, taking things personally even when not intended",
             "Indecisiveness stemming from ability to see validity in all viewpoints",
             "Tendency to avoid necessary confrontations to maintain peace at any cost",
@@ -95,7 +95,7 @@ LIFE_SEAL_INTERPRETATIONS = {
             "Genuine enthusiasm that motivates and inspires others to action",
             "Ability to articulate complex ideas in accessible, engaging ways"
         ],
-        "challenges": [
+        "weaknesses": [
             "Scattered energy that starts many projects but struggles to complete them",
             "Superficiality when you skim surfaces rather than develop depth",
             "Prioritizing fun and social activities over responsibilities and commitments",
@@ -136,7 +136,7 @@ LIFE_SEAL_INTERPRETATIONS = {
             "Ability to create and follow systematic processes",
             "Patience to see long-term projects through to completion"
         ],
-        "challenges": [
+        "weaknesses": [
             "Rigidity that resists change even when adaptation would be beneficial",
             "Workaholism that sacrifices relationships and health for productivity",
             "Excessive focus on material security at the expense of emotional or spiritual needs",
@@ -177,7 +177,7 @@ LIFE_SEAL_INTERPRETATIONS = {
             "Resourcefulness that finds creative solutions with limited resources",
             "Infectious enthusiasm that inspires others to step out of comfort zones"
         ],
-        "challenges": [
+        "weaknesses": [
             "Restlessness that prevents deep commitment to people, places, or projects",
             "Impulsiveness that leads to decisions without considering long-term consequences",
             "Difficulty with routine, structure, or repetitive tasks",
@@ -218,7 +218,7 @@ LIFE_SEAL_INTERPRETATIONS = {
             "Teaching ability that patiently guides others to understanding",
             "Service-oriented mindset that finds fulfillment in helping others"
         ],
-        "challenges": [
+        "weaknesses": [
             "Overly sacrificial, neglecting your own needs to serve others",
             "May become controlling or interfering, believing you know what's best",
             "Difficulty accepting help or admitting vulnerability",
@@ -259,7 +259,7 @@ LIFE_SEAL_INTERPRETATIONS = {
             "Discernment that distinguishes genuine from false",
             "Teaching ability that shares complex concepts with clarity"
         ],
-        "challenges": [
+        "weaknesses": [
             "Tendency toward isolation that limits human connection",
             "Over-intellectualization that avoids feeling emotions",
             "May be overly critical or skeptical, dismissing what can't be proven",
@@ -291,7 +291,7 @@ LIFE_SEAL_INTERPRETATIONS = {
         "summary": "Symbolizes power, abundance, and material success. Individuals with this life seal are driven to achieve goals and manifest prosperity. You are the master of the material realm, capable of transforming vision into tangible wealth and influential accomplishment.",
         "core_essence": "As a Life Seal 8, you carry the vibration of manifestation, power, and material mastery. Your soul purpose involves demonstrating how spiritual principles can create abundance in the physical world. You have an innate understanding of systems, hierarchies, and the mechanics of success. You are naturally drawn to positions of authority and influence, not from ego but from genuine capacity to lead organizations and create wealth. Your presence commands respect, and people instinctively recognize your executive abilities. You understand that money and power are neutral tools that amplify the values of those who wield them. You are here to build prosperity not just for yourself but as a demonstration of divine abundance available to all. Your success is meant to inspire and create opportunities for others.",
         "strengths": ["Exceptional business acumen and strategic thinking", "Natural leadership in corporate and organizational settings", "Financial intelligence that understands money dynamics", "Ability to see the big picture while managing complex details", "Persistence that overcomes obstacles through sheer determination", "Courage to make bold decisions that others fear", "Organizational skills that create efficient, profitable systems", "Authority and executive presence that inspires confidence"],
-        "challenges": ["May prioritize material success over relationships and spiritual growth", "Workaholic tendencies that sacrifice health and personal life", "Can become ruthless in pursuit of goals, damaging relationships", "Difficulty delegating or trusting others with important tasks", "May equate self-worth with net worth and professional achievement", "Tendency to control situations and people", "Can be intimidating or domineering without realizing it", "Risk of ethical compromise when success is the primary focus"],
+        "weaknesses": ["May prioritize material success over relationships and spiritual growth", "Workaholic tendencies that sacrifice health and personal life", "Can become ruthless in pursuit of goals, damaging relationships", "Difficulty delegating or trusting others with important tasks", "May equate self-worth with net worth and professional achievement", "Tendency to control situations and people", "Can be intimidating or domineering without realizing it", "Risk of ethical compromise when success is the primary focus"],
         "career_guidance": "You excel in executive leadership, entrepreneurship, and any role involving financial management and strategic planning. Ideal careers include CEO, CFO, investment banker, corporate executive, business owner, real estate developer, attorney, financial advisor, or venture capitalist. You thrive in competitive environments where performance is rewarded handsomely. Consider roles in mergers and acquisitions, private equity, corporate law, or high-level consulting. Your ability to see opportunities and mobilize resources makes you valuable in turnaround situations and growth ventures. Avoid subordinate roles that don't utilize your leadership capacity. You need authority, significant responsibility, and compensation that reflects your contribution. Your career satisfaction comes from measurable achievement, building successful enterprises, and creating wealth that provides security and opportunities for yourself and others.",
         "relationship_guidance": "In relationships, you are generous provider and loyal partner, but may struggle with vulnerability and work-life balance. You show love through financial provision and problem-solving but may miss the emotional intimacy your partner craves. Your challenge is remembering that relationships require time and emotional presence, not just material provision. Healthy relationships require partners who respect your ambition while insisting you prioritize the relationship. You need someone strong enough to call out your workaholic tendencies without being intimidated by your success. Practice being present when home rather than mentally solving business problems. In friendships, be mindful that not everyone operates at your intensity level or shares your focus on achievement. As a parent, teach your children about success while demonstrating that their worth isn't tied to their accomplishments. Your greatest relationship growth comes from learning that love, connection, and presence are achievements that matter as much as professional success.",
         "financial_guidance": "Your financial strength is obvious—you have natural money-making ability and understand wealth creation intuitively. You think in terms of systems, leverage, and scalability rather than trading time for money. Build wealth through business ownership, real estate, strategic investments, and opportunities that create passive income streams. You have the risk tolerance and strategic thinking to build significant wealth if you maintain ethical standards. Your challenge is knowing when enough is enough—endless pursuit of more can prevent enjoying what you've already built. Avoid measuring success only in financial terms, which can lead to ethical compromises or neglecting other life areas. You benefit from philanthropic giving that fulfills your soul while creating tax advantages. Use wealth to create positive impact, not just accumulate zeros in accounts. Your financial prosperity grows when you align money-making with purpose and use success to bless others generously. Remember that you can't take it with you—build legacy through impact, not just accumulation.",
@@ -306,7 +306,7 @@ LIFE_SEAL_INTERPRETATIONS = {
         "summary": "Embodies compassion, idealism, and global awareness. This life seal signifies visionaries who work for the greater good of humanity. You are the bridge between what is and what could be, holding space for humanity's highest potential while working tirelessly to manifest it.",
         "core_essence": "As a Life Seal 9, you carry the vibration of universal love, completion, and global consciousness. Your soul purpose involves serving humanity's evolution, whether through arts, activism, healing, or any work that elevates collective consciousness. You feel deeply connected to all of humanity, experiencing others' suffering as your own and celebrating their joy with genuine delight. You are naturally drawn to causes larger than yourself, seeing individual problems as symptoms of systemic issues requiring comprehensive solutions. Your presence brings compassion and perspective to difficult situations. You understand that we are all interconnected, and that healing anywhere contributes to healing everywhere. You are here to be a light-bearer, showing others what's possible when we lead with love rather than fear.",
         "strengths": ["Deep compassion for all beings regardless of background or circumstance", "Visionary thinking that sees possibilities for transformation", "Artistic and creative abilities that inspire and heal", "Global perspective that transcends narrow self-interest", "Charismatic presence that attracts people to worthy causes", "Ability to see the divine in everyone and everything", "Natural teaching and mentoring abilities", "Courage to champion unpopular but necessary truths"],
-        "challenges": ["Overly idealistic expectations that lead to disappointment", "Emotional intensity that can overwhelm both yourself and others", "Tendency to take on the world's problems as personal responsibility", "May neglect practical details in pursuit of grand visions", "Burnout from giving too much without adequate self-care", "Can be judgmental toward those with less evolved consciousness", "Difficulty with boundaries, wanting to help everyone", "May struggle with endings, completion, and letting go"],
+        "weaknesses": ["Overly idealistic expectations that lead to disappointment", "Emotional intensity that can overwhelm both yourself and others", "Tendency to take on the world's problems as personal responsibility", "May neglect practical details in pursuit of grand visions", "Burnout from giving too much without adequate self-care", "Can be judgmental toward those with less evolved consciousness", "Difficulty with boundaries, wanting to help everyone", "May struggle with endings, completion, and letting go"],
         "career_guidance": "You excel in careers serving the greater good and creating positive change. Ideal roles include non-profit director, social activist, counselor, artist, musician, writer, healer, teacher, humanitarian aid worker, environmental advocate, or spiritual teacher. You thrive in purpose-driven organizations addressing global challenges. Consider careers in international development, human rights, environmental protection, or any field working toward systemic change. Your artistic abilities can be powerful vehicles for social commentary and transformation. Avoid purely profit-driven corporations or work that conflicts with your values. You need to feel your work contributes to making the world better. Your career satisfaction comes from knowing your efforts have helped people and advanced humanity's evolution, not from personal glory or wealth.",
         "relationship_guidance": "In relationships, you are deeply loving, accepting, and devoted to your partner's growth. Your challenge is maintaining healthy boundaries and not losing yourself in the relationship or trying to rescue your partner from their journey. You may attract wounded people who need healing, but be careful not to confuse love with codependency. Healthy relationships require partners who share your values and commitment to growth but don't need you to save them. You need someone who supports your humanitarian work while ensuring you don't sacrifice your well-being. Practice receiving love as freely as you give it—this is difficult for you because giving feels more natural. In friendships, you attract diverse people and serve as the compassionate listener everyone seeks. As a parent, you raise conscious, compassionate children but must balance idealism with practical life skills. Your greatest relationship growth comes from learning that you cannot heal everyone, and that sometimes love means allowing people to face their own lessons.",
         "financial_guidance": "Your financial challenge is valuing your own needs while serving others. You may give away money impulsively to causes or people in need, leaving yourself financially vulnerable. Your income potential varies depending on whether you monetize your gifts appropriately. Artists, writers, and healers can earn well if they overcome beliefs that spirituality and money don't mix. Build wealth by creating income streams aligned with your values—teaching, creating transformative content, consulting, or building social enterprises that do well by doing good. You benefit from having a financial advisor or partner who handles practical money management while you focus on service. Avoid financial martyrdom—you cannot serve effectively if you're struggling financially. Your prosperity grows when you understand that abundance allows you to serve more powerfully and that receiving supports the cycle of giving. Practice believing you deserve prosperity for the tremendous value you provide to the world.",
