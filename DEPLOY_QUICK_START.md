@@ -1,5 +1,7 @@
 # ⚡ DEPLOY BACKEND - QUICK START
 
+**Status:** ✅ Fixed & Ready! (SQLAlchemy version constraint fixed)
+
 **Everything is ready! Follow these 3 steps:**
 
 ---

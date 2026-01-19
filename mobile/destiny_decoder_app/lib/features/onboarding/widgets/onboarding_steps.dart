@@ -11,7 +11,7 @@ import 'package:destiny_decoder_app/core/analytics/analytics_service.dart';
 class WelcomeStep extends ConsumerWidget {
   final VoidCallback onNext;
 
-  const WelcomeStep({Key? key, required this.onNext}) : super(key: key);
+  const WelcomeStep({super.key, required this.onNext});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -168,11 +168,11 @@ class BirthInfoStep extends ConsumerStatefulWidget {
   final VoidCallback onPrevious;
 
   const BirthInfoStep({
-    Key? key,
+    super.key,
     required this.onNext,
     required this.onSkip,
     required this.onPrevious,
-  }) : super(key: key);
+  });
 
   @override
   ConsumerState<BirthInfoStep> createState() => _BirthInfoStepState();
@@ -374,11 +374,11 @@ class CalculateStep extends ConsumerWidget {
   final VoidCallback onPrevious;
 
   const CalculateStep({
-    Key? key,
+    super.key,
     required this.onNext,
     required this.onSkip,
     required this.onPrevious,
-  }) : super(key: key);
+  });
 
   String _calculateLifeSeal(int day, int month, int year) {
     // Numerology calculation: reduce birth date to single digit
@@ -563,11 +563,11 @@ class LifeSealDisplayStep extends ConsumerWidget {
   final VoidCallback onPrevious;
 
   const LifeSealDisplayStep({
-    Key? key,
+    super.key,
     required this.onNext,
     required this.onSkip,
     required this.onPrevious,
-  }) : super(key: key);
+  });
 
   String _getLifeSealMeaning(String lifeSeal) {
     const meanings = {
@@ -684,11 +684,11 @@ class FeaturesStep extends ConsumerWidget {
   final VoidCallback onPrevious;
 
   const FeaturesStep({
-    Key? key,
+    super.key,
     required this.onNext,
     required this.onSkip,
     required this.onPrevious,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -832,11 +832,11 @@ class PermissionsStep extends ConsumerStatefulWidget {
   final VoidCallback onPrevious;
 
   const PermissionsStep({
-    Key? key,
+    super.key,
     required this.onNext,
     required this.onSkip,
     required this.onPrevious,
-  }) : super(key: key);
+  });
 
   @override
   ConsumerState<PermissionsStep> createState() => _PermissionsStepState();
@@ -1059,7 +1059,7 @@ class _PermissionsStepState extends ConsumerState<PermissionsStep> {
 class ReadyStep extends ConsumerWidget {
   final VoidCallback onComplete;
 
-  const ReadyStep({Key? key, required this.onComplete}) : super(key: key);
+  const ReadyStep({super.key, required this.onComplete});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

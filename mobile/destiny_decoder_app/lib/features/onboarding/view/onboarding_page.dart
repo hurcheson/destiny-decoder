@@ -203,7 +203,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage>
   Widget _buildOnboardingContent(BuildContext context, OnboardingState state) {
     return PopScope(
       canPop: state.currentStep == 0,
-      onPopInvoked: (didPop) {
+      onPopInvokedWithResult: (didPop, result) {
         if (!didPop && state.currentStep > 0) {
           _goToPreviousStep();
         }

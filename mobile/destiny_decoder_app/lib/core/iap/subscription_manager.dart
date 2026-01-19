@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../config/android_config.dart';
+import '../utils/logger.dart';
 
 /// Subscription tier enumeration
 enum SubscriptionTier {
@@ -105,10 +105,10 @@ class SubscriptionManager {
         return data['success'] == true;
       }
 
-      print('❌ Validation failed: ${response.statusCode}');
+      Logger.e('❌ Validation failed: ${response.statusCode}');
       return false;
     } catch (e) {
-      print('❌ Error validating purchase: $e');
+      Logger.e('❌ Error validating purchase: $e');
       return false;
     }
   }
@@ -126,10 +126,10 @@ class SubscriptionManager {
         return SubscriptionStatus.fromJson(data);
       }
 
-      print('❌ Failed to get status: ${response.statusCode}');
+      Logger.e('❌ Failed to get status: ${response.statusCode}');
       return null;
     } catch (e) {
-      print('❌ Error getting status: $e');
+      Logger.e('❌ Error getting status: $e');
       return null;
     }
   }
@@ -150,7 +150,7 @@ class SubscriptionManager {
 
       return false;
     } catch (e) {
-      print('❌ Error cancelling subscription: $e');
+      Logger.e('❌ Error cancelling subscription: $e');
       return false;
     }
   }
@@ -170,7 +170,7 @@ class SubscriptionManager {
 
       return [];
     } catch (e) {
-      print('❌ Error getting history: $e');
+      Logger.e('❌ Error getting history: $e');
       return [];
     }
   }
@@ -189,7 +189,7 @@ class SubscriptionManager {
 
       return {};
     } catch (e) {
-      print('❌ Error getting features: $e');
+      Logger.e('❌ Error getting features: $e');
       return {};
     }
   }
@@ -197,9 +197,8 @@ class SubscriptionManager {
 
 /// Riverpod provider for SubscriptionManager
 final subscriptionManagerProvider = Provider<SubscriptionManager>((ref) {
-  // Get base URL from Android config
-  final baseUrl = EnvironmentConfig.getBackendUrl();
-  return SubscriptionManager(baseUrl: baseUrl);
+  // TODO: Get base URL from config
+  return SubscriptionManager(baseUrl: 'http://localhost:8000');
 });
 
 /// Provider for current subscription status

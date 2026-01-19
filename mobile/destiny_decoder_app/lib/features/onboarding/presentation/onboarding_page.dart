@@ -228,7 +228,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage>
                                 .textTheme
                                 .bodySmall
                                 ?.color
-                                ?.withOpacity(0.6),
+                                ?.withValues(alpha: 0.6),
                           ),
                     ),
                     const SizedBox(height: AppSpacing.xl),

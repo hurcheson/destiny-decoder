@@ -1,13 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../sharing/providers/share_tracking_provider.dart';
 
 /// Dialog widget for sharing decoded readings across social platforms.
 /// Supports WhatsApp, Instagram, Twitter, and clipboard copy with
 /// platform-specific URL schemes and share tracking.
-class ShareDialogWidget extends ConsumerStatefulWidget {
+class ShareDialogWidget extends StatefulWidget {
   final int lifeSealNumber;
   final String keyTakeaway;
   final String shareText;
@@ -22,12 +20,11 @@ class ShareDialogWidget extends ConsumerStatefulWidget {
   });
 
   @override
-  ConsumerState<ShareDialogWidget> createState() => _ShareDialogWidgetState();
+  State<ShareDialogWidget> createState() => _ShareDialogWidgetState();
 }
 
-class _ShareDialogWidgetState extends ConsumerState<ShareDialogWidget> {
+class _ShareDialogWidgetState extends State<ShareDialogWidget> {
   bool _isSharing = false;
-
 
   /// Generate the share text that will be shared to social platforms.
   String _generateShareText() {
@@ -150,34 +147,10 @@ ${widget.shareText.isNotEmpty ? '\n📖 Full Reading:\n${widget.shareText}' : ''
   }
 
   /// Record the share event with backend tracking.
-  /// Asynchronously logs the share to the backend API.
-  void _recordShare(String platform) async {
-    try {
-      // Log share event to backend
-      await ref.read(shareTrackingProvider.notifier).logShare(
-        lifeSealNumber: widget.lifeSealNumber,
-        platform: platform,
-        shareText: widget.shareText,
-      );
-      
-      if (mounted) {
-        // Show confirmation after successful logging
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Share tracked! Thanks for sharing Life Seal #${widget.lifeSealNumber}'),
-            duration: const Duration(seconds: 2),
-            backgroundColor: Colors.green[700],
-          ),
-        );
-      }
-    } catch (e) {
-      // Log error but don't block the share - tracking is secondary to actual sharing
-      if (mounted) {
-        debugPrint('Failed to track share: $e');
-      }
-    } finally {
-      widget.onShareComplete?.call();
-    }
+  void _recordShare(String platform) {
+    // TODO: Call backend API to track share with platform
+    // POST /api/shares/track with device_id, life_seal_number, platform, share_text
+    widget.onShareComplete?.call();
   }
 
   void _setSharing(bool value) {

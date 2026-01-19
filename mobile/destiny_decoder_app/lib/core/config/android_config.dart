@@ -2,6 +2,9 @@
 ///
 /// This file contains configuration settings specific to Android platform,
 /// including Google Play Billing setup and backend URLs.
+library;
+
+import '../utils/logger.dart';
 
 class AndroidConfig {
   /// Backend API base URL
@@ -57,7 +60,7 @@ class AndroidConfig {
   /// Logging helper
   static void log(String tag, String message) {
     if (debugLogging) {
-      print('[$tag] $message');
+      Logger.d('[$tag] $message');
     }
   }
 

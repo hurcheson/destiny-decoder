@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import '../config/app_config.dart';
+import '../utils/logger.dart';
 
 /// Analytics API client for tracking share events and referrals
 class AnalyticsApiClient {
@@ -39,7 +40,7 @@ class AnalyticsApiClient {
     } catch (e) {
       // Silent fail - don't block user experience
       // In production, you might log to a monitoring service
-      print('Analytics tracking failed (non-blocking): $e');
+      Logger.d('Analytics tracking failed (non-blocking): $e');
     }
   }
 
@@ -59,7 +60,7 @@ class AnalyticsApiClient {
         },
       );
     } catch (e) {
-      print('Referral tracking failed (non-blocking): $e');
+      Logger.d('Referral tracking failed (non-blocking): $e');
     }
   }
 }

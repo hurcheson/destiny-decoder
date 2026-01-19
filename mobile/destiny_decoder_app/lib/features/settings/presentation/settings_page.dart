@@ -283,10 +283,13 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
 
                               // Navigate to onboarding
                               if (!mounted) return;
+                              // ignore: use_build_context_synchronously
                               Navigator.of(context).push(
                                 MaterialPageRoute(builder: (_) => const OnboardingPage()),
                               );
                             } catch (e) {
+                              if (!mounted) return;
+                              // ignore: use_build_context_synchronously
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(content: Text('Failed to restart onboarding: $e')),
                               );

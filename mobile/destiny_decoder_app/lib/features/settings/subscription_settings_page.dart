@@ -78,7 +78,7 @@ class SubscriptionSettingsPage extends ConsumerWidget {
       child: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
-            colors: [tierColor, tierColor.withOpacity(0.7)],
+            colors: [tierColor, tierColor.withValues(alpha: 0.7)],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
@@ -241,7 +241,7 @@ class SubscriptionSettingsPage extends ConsumerWidget {
                   ],
                 ),
               );
-            }).toList(),
+            }),
           ],
         ),
       ),

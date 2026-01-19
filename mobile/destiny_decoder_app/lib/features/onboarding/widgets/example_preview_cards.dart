@@ -34,35 +34,35 @@ class ExampleDecodePreview extends StatelessWidget {
           gradient: LinearGradient(
             colors: [
               Theme.of(context).colorScheme.primary,
-              Theme.of(context).colorScheme.primary.withOpacity(0.7),
+              Theme.of(context).colorScheme.primary.withValues(alpha: 0.7),
             ],
           ),
         ),
         const SizedBox(height: 12),
 
         // Example Soul Number Card
-        _ExampleCard(
+        const _ExampleCard(
           icon: '✨',
           title: 'Soul Number',
           subtitle: 'Your Inner Desires',
           exampleValue: '3',
           exampleDescription:
               'You seek creative expression and joy in life.',
-          gradient: const LinearGradient(
+          gradient: LinearGradient(
             colors: [Color(0xFFFF6B6B), Color(0xFFFF8E53)],
           ),
         ),
         const SizedBox(height: 12),
 
         // Example Personality Number Card
-        _ExampleCard(
+        const _ExampleCard(
           icon: '👤',
           title: 'Personality Number',
           subtitle: 'How Others See You',
           exampleValue: '5',
           exampleDescription:
               'You appear adventurous and free-spirited to others.',
-          gradient: const LinearGradient(
+          gradient: LinearGradient(
             colors: [Color(0xFF4ECDC4), Color(0xFF44A08D)],
           ),
         ),
@@ -113,7 +113,7 @@ class _ExampleCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
+            color: Colors.black.withValues(alpha: 0.1),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -146,7 +146,7 @@ class _ExampleCard extends StatelessWidget {
                       Text(
                         subtitle,
                         style: TextStyle(
-                          color: Colors.white.withOpacity(0.9),
+                          color: Colors.white.withValues(alpha: 0.9),
                           fontSize: 12,
                         ),
                       ),
@@ -157,7 +157,7 @@ class _ExampleCard extends StatelessWidget {
                   width: 40,
                   height: 40,
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.2),
+                    color: Colors.white.withValues(alpha: 0.2),
                     shape: BoxShape.circle,
                   ),
                   child: Center(
@@ -177,7 +177,7 @@ class _ExampleCard extends StatelessWidget {
             Text(
               exampleDescription,
               style: TextStyle(
-                color: Colors.white.withOpacity(0.95),
+                color: Colors.white.withValues(alpha: 0.95),
                 fontSize: 13,
               ),
             ),
@@ -228,10 +228,10 @@ class _InteractiveFeatureCardState extends State<InteractiveFeatureCard> {
         curve: Curves.easeOutCubic,
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
-          color: color.withOpacity(0.1),
+          color: color.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: color.withOpacity(0.3),
+            color: color.withValues(alpha: 0.3),
             width: 2,
           ),
         ),
@@ -334,12 +334,12 @@ class BeforeAfterComparison extends StatelessWidget {
         const SizedBox(height: 24),
         Row(
           children: [
-            Expanded(
+            const Expanded(
               child: _ComparisonCard(
                 title: 'Before',
                 icon: '😕',
                 color: Colors.grey,
-                items: const [
+                items: [
                   'Feeling lost',
                   'Unclear purpose',
                   'Relationship confusion',
@@ -391,10 +391,10 @@ class _ComparisonCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: color.withOpacity(0.3),
+          color: color.withValues(alpha: 0.3),
           width: 2,
         ),
       ),

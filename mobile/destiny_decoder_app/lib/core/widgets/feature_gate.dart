@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../core/iap/subscription_manager.dart';
-import '../features/paywall/paywall_page.dart';
+import '../iap/subscription_manager.dart';
+import '../../features/paywall/paywall_page.dart';
 
 /// Feature gate widget that shows paywall if feature is locked
 class FeatureGate extends ConsumerWidget {
@@ -208,9 +208,9 @@ class TruncatedTextWidget extends ConsumerWidget {
                   color: Colors.amber,
                   borderRadius: BorderRadius.circular(16),
                 ),
-                child: Row(
+                child: const Row(
                   mainAxisSize: MainAxisSize.min,
-                  children: const [
+                  children: [
                     Icon(Icons.lock_open, size: 16, color: Colors.black),
                     SizedBox(width: 4),
                     Text(

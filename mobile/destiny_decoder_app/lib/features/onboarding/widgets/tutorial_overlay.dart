@@ -102,7 +102,7 @@ class _TutorialOverlayState extends State<TutorialOverlay>
 
     final screenSize = MediaQuery.of(context).size;
     final highlightColor = widget.highlightColor ??
-        Theme.of(context).colorScheme.primary.withOpacity(0.3);
+        Theme.of(context).colorScheme.primary.withValues(alpha: 0.3);
 
     return FadeTransition(
       opacity: _fadeAnimation,
@@ -175,7 +175,7 @@ class _TutorialOverlayState extends State<TutorialOverlay>
             borderRadius: BorderRadius.circular(16),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.3),
+                color: Colors.black.withValues(alpha: 0.3),
                 blurRadius: 20,
                 offset: const Offset(0, 10),
               ),
@@ -212,7 +212,7 @@ class _TutorialOverlayState extends State<TutorialOverlay>
                           .textTheme
                           .bodyMedium
                           ?.color
-                          ?.withOpacity(0.7),
+                          ?.withValues(alpha: 0.7),
                     ),
               ),
               if (widget.actionButton != null) ...[
@@ -227,7 +227,7 @@ class _TutorialOverlayState extends State<TutorialOverlay>
   }
 
   Offset _calculateTooltipPosition(Size screenSize) {
-    final padding = 20.0;
+    const padding = 20.0;
     final tooltipWidth = screenSize.width * 0.8;
 
     double left = (screenSize.width - tooltipWidth) / 2;
@@ -310,13 +310,13 @@ class SpotlightWidget extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         border: Border.all(
-          color: Theme.of(context).colorScheme.primary.withOpacity(0.5),
+          color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.5),
           width: 2,
         ),
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Theme.of(context).colorScheme.primary.withOpacity(0.2),
+            color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.2),
             blurRadius: 8,
             spreadRadius: 2,
           ),

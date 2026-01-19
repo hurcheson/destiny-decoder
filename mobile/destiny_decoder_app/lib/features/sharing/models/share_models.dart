@@ -1,4 +1,5 @@
 /// Share helpers for Life Seal and articles (no code generation required)
+library;
 
 /// Maps Life Seal numbers to names for sharing
 class LifeSealNames {

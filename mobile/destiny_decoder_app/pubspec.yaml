@@ -51,6 +51,9 @@ dependencies:
   # Image generation for social cards
   image: ^4.2.0
   
+  # HTTP client (for backend communication)
+  http: ^1.1.0
+  
   # In-app purchases
   in_app_purchase: ^3.1.11
   in_app_purchase_android: ^0.3.0+17

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
 import '../../core/iap/purchase_service.dart';
-import '../../core/iap/subscription_manager.dart';
 
 /// Paywall trigger context
 enum PaywallTrigger {
@@ -221,7 +220,7 @@ class _PaywallPageState extends ConsumerState<PaywallPage> {
             margin: const EdgeInsets.only(bottom: 12),
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: isSelected ? Colors.amber.withOpacity(0.2) : Colors.white10,
+              color: isSelected ? Colors.amber.withValues(alpha: 0.2) : Colors.white10,
               border: Border.all(
                 color: isSelected ? Colors.amber : Colors.white24,
                 width: 2,
@@ -342,9 +341,9 @@ class _PaywallPageState extends ConsumerState<PaywallPage> {
         children: [
           const Icon(Icons.error_outline, color: Colors.red, size: 48),
           const SizedBox(height: 16),
-          Text(
+          const Text(
             'Failed to load products',
-            style: const TextStyle(color: Colors.white, fontSize: 18),
+            style: TextStyle(color: Colors.white, fontSize: 18),
           ),
           const SizedBox(height: 8),
           Text(

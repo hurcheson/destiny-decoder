@@ -156,9 +156,9 @@ class _LifeSealShareWidgetState extends State<LifeSealShareWidget> {
 
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: const Text('Copied to clipboard!'),
-          duration: const Duration(seconds: 2),
+        const SnackBar(
+          content: Text('Copied to clipboard!'),
+          duration: Duration(seconds: 2),
           behavior: SnackBarBehavior.floating,
         ),
       );
@@ -410,9 +410,9 @@ class _ArticleShareWidgetState extends State<ArticleShareWidget> {
 
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: const Text('Copied to clipboard!'),
-          duration: const Duration(seconds: 2),
+        const SnackBar(
+          content: Text('Copied to clipboard!'),
+          duration: Duration(seconds: 2),
           behavior: SnackBarBehavior.floating,
         ),
       );

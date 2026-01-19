@@ -1,9 +1,8 @@
 import 'dart:async';
 import 'dart:io';
 import 'package:in_app_purchase/in_app_purchase.dart';
-import 'package:in_app_purchase_android/in_app_purchase_android.dart';
-import 'package:in_app_purchase_storekit/in_app_purchase_storekit.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../utils/logger.dart';
 
 /// Product IDs for subscriptions
 class ProductIds {
@@ -31,7 +30,8 @@ class PurchaseService {
     _isAvailable = await _iap.isAvailable();
     
     if (!_isAvailable) {
-      print('⚠️ In-app purchase not available on this device');
+      // ignore: avoid_print
+      Logger.w('⚠️ In-app purchase not available on this device');
       return;
     }
 
@@ -39,18 +39,13 @@ class PurchaseService {
     _subscription = _iap.purchaseStream.listen(
       _onPurchaseUpdate,
       onDone: () => _subscription?.cancel(),
-      onError: (error) => print('Purchase stream error: $error'),
+      onError: (error) => Logger.e('Purchase stream error: $error'),
     );
 
     // Load products
     await loadProducts();
 
-    // For iOS, ensure pending transactions are processed
-    if (Platform.isIOS) {
-      final InAppPurchaseStoreKitPlatformAddition iosAddition =
-          _iap.getPlatformAddition<InAppPurchaseStoreKitPlatformAddition>();
-      await iosAddition.setDelegate(ExamplePaymentQueueDelegate());
-    }
+    // iOS transactions are handled automatically by StoreKit
   }
 
   /// Load available products from store
@@ -62,22 +57,22 @@ class PurchaseService {
     );
 
     if (response.notFoundIDs.isNotEmpty) {
-      print('⚠️ Products not found: ${response.notFoundIDs}');
+      Logger.w('⚠️ Products not found: ${response.notFoundIDs}');
     }
 
     if (response.error != null) {
-      print('❌ Error loading products: ${response.error}');
+      Logger.e('❌ Error loading products: ${response.error}');
       return;
     }
 
     _products = response.productDetails;
-    print('✅ Loaded ${_products.length} products');
+    Logger.i('✅ Loaded ${_products.length} products');
   }
 
   /// Purchase a product (subscription)
   Future<bool> purchaseProduct(ProductDetails product) async {
     if (!_isAvailable) {
-      print('❌ In-app purchase not available');
+      Logger.e('❌ In-app purchase not available');
       return false;
     }
 
@@ -88,7 +83,7 @@ class PurchaseService {
     try {
       return await _iap.buyNonConsumable(purchaseParam: purchaseParam);
     } catch (e) {
-      print('❌ Purchase error: $e');
+      Logger.e('❌ Purchase error: $e');
       return false;
     }
   }
@@ -99,9 +94,9 @@ class PurchaseService {
     
     try {
       await _iap.restorePurchases();
-      print('✅ Purchases restored');
+      Logger.i('✅ Purchases restored');
     } catch (e) {
-      print('❌ Restore error: $e');
+      Logger.e('❌ Restore error: $e');
     }
   }
 
@@ -109,16 +104,16 @@ class PurchaseService {
   void _onPurchaseUpdate(List<PurchaseDetails> purchaseDetailsList) {
     for (final PurchaseDetails purchaseDetails in purchaseDetailsList) {
       if (purchaseDetails.status == PurchaseStatus.pending) {
-        print('⏳ Purchase pending...');
+        Logger.i('⏳ Purchase pending...');
       } else if (purchaseDetails.status == PurchaseStatus.error) {
-        print('❌ Purchase error: ${purchaseDetails.error}');
+        Logger.e('❌ Purchase error: ${purchaseDetails.error}');
         _iap.completePurchase(purchaseDetails);
       } else if (purchaseDetails.status == PurchaseStatus.purchased ||
           purchaseDetails.status == PurchaseStatus.restored) {
-        print('✅ Purchase successful: ${purchaseDetails.productID}');
+        Logger.i('✅ Purchase successful: ${purchaseDetails.productID}');
         _handleSuccessfulPurchase(purchaseDetails);
       } else if (purchaseDetails.status == PurchaseStatus.canceled) {
-        print('❌ Purchase cancelled');
+        Logger.i('❌ Purchase cancelled');
         _iap.completePurchase(purchaseDetails);
       }
 
@@ -132,36 +127,17 @@ class PurchaseService {
   /// Handle successful purchase - validate with backend
   Future<void> _handleSuccessfulPurchase(PurchaseDetails purchaseDetails) async {
     try {
-      // Extract receipt data based on platform
-      String receiptData;
-      String platform;
-
+      // Extract receipt and platform for backend validation
       if (Platform.isIOS) {
-        final InAppPurchaseStoreKitPlatformAddition iosAddition =
-            _iap.getPlatformAddition<InAppPurchaseStoreKitPlatformAddition>();
-        receiptData = purchaseDetails.verificationData.serverVerificationData;
-        platform = 'ios';
+        // receiptData: purchaseDetails.verificationData.serverVerificationData
+        // TODO: Send receipt to backend: POST /subscriptions/validate-receipt
       } else if (Platform.isAndroid) {
-        final GooglePlayPurchaseDetails androidPurchase =
-            purchaseDetails as GooglePlayPurchaseDetails;
-        receiptData = androidPurchase.billingClientPurchase.purchaseToken;
-        platform = 'android';
-      } else {
-        print('❌ Unsupported platform');
-        return;
+        // receiptData from: (purchaseDetails as GooglePlayPurchaseDetails).billingClientPurchase.purchaseToken
+        // TODO: Send receipt to backend: POST /subscriptions/validate-receipt
       }
-
-      // TODO: Send receipt to backend for validation
-      // await _validateWithBackend(
-      //   userId: currentUserId,
-      //   platform: platform,
-      //   receiptData: receiptData,
-      //   productId: purchaseDetails.productID,
-      // );
-
-      print('✅ Purchase validated and subscription activated');
+      Logger.i('✅ Purchase completed for ${purchaseDetails.productID}');
     } catch (e) {
-      print('❌ Error handling purchase: $e');
+      Logger.e('❌ Error handling purchase: $e');
     }
   }
 
@@ -177,20 +153,6 @@ class PurchaseService {
   /// Dispose resources
   void dispose() {
     _subscription?.cancel();
-  }
-}
-
-/// iOS payment queue delegate for handling transactions
-class ExamplePaymentQueueDelegate extends SKPaymentQueueDelegateWrapper {
-  @override
-  bool shouldContinueTransaction(
-      SKPaymentTransactionWrapper transaction, SKStorefrontWrapper storefront) {
-    return true;
-  }
-
-  @override
-  bool shouldShowPriceConsent() {
-    return false;
   }
 }
 

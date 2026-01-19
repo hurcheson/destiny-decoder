@@ -27,13 +27,13 @@ class LifeSealCardGenerator {
         ],
       );
     canvas.drawRect(
-      Rect.fromLTWH(0, 0, width, height),
+      const Rect.fromLTWH(0, 0, width, height),
       paint,
     );
 
     // Dark overlay for text readability
     canvas.drawRect(
-      Rect.fromLTWH(0, 0, width, height),
+      const Rect.fromLTWH(0, 0, width, height),
       Paint()..color = Colors.black.withValues(alpha: 0.3),
     );
 

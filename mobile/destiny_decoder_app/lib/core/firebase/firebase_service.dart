@@ -3,15 +3,16 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'dart:io';
 import 'firebase_options.dart';
+import '../utils/logger.dart';
 
 /// Background message handler (must be top-level function)
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   if (kDebugMode) {
-    print('Handling background message: ${message.messageId}');
-    print('Title: ${message.notification?.title}');
-    print('Body: ${message.notification?.body}');
+    Logger.i('Handling background message: ${message.messageId}');
+    Logger.i('Title: ${message.notification?.title}');
+    Logger.i('Body: ${message.notification?.body}');
   }
 }
 
@@ -274,7 +275,7 @@ class FirebaseService {
   /// This is a placeholder that can be integrated with Firebase Analytics
   void _logAnalyticsEvent(String eventName, Map<String, dynamic> parameters) {
     if (kDebugMode) {
-      print('📊 Analytics: $eventName - $parameters');
+      Logger.d('📊 Analytics: $eventName - $parameters');
     }
     // TODO: Implement actual Firebase Analytics logging
     // example: _analytics.logEvent(name: eventName, parameters: parameters);

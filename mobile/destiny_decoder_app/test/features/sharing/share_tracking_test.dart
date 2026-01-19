@@ -49,9 +49,9 @@ void main() {
     });
 
     test('Share text generation includes key elements', () {
-      final lifeSeal = 7;
-      final keyTakeaway = 'Seeker of spiritual truth';
-      final fullText = 'Trust your intuition';
+      const lifeSeal = 7;
+      const keyTakeaway = 'Seeker of spiritual truth';
+      const fullText = 'Trust your intuition';
 
       final shareText = '''
 ✨ Check out my Life Seal #$lifeSeal reading from Destiny Decoder!

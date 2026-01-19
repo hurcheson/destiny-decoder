@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'models/article_models.dart';
+import '../../../core/utils/logger.dart';
 
 class ContentApiClient {
   final Dio _dio;
@@ -85,7 +86,7 @@ class ContentApiClient {
       await _dio.post('$baseUrl/content/articles/$slug/view');
     } catch (e) {
       // Silently fail - analytics tracking shouldn't break UX
-      print('Failed to track article view: $e');
+      Logger.d('Failed to track article view: $e');
     }
   }
 }

@@ -28,13 +28,13 @@ class ArticleCardGenerator {
         ],
       );
     canvas.drawRect(
-      Rect.fromLTWH(0, 0, width, height),
+      const Rect.fromLTWH(0, 0, width, height),
       paint,
     );
 
     // Dark overlay
     canvas.drawRect(
-      Rect.fromLTWH(0, 0, width, height),
+      const Rect.fromLTWH(0, 0, width, height),
       Paint()..color = Colors.black.withValues(alpha: 0.4),
     );
     
@@ -125,8 +125,8 @@ class ArticleCardGenerator {
 
     // Decorative line
     canvas.drawLine(
-      Offset(150, 1350),
-      Offset(width - 150, 1350),
+      const Offset(150, 1350),
+      const Offset(width - 150, 1350),
       Paint()
         ..color = Colors.white30
         ..strokeWidth = 2,

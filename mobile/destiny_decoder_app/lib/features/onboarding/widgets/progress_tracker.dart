@@ -71,7 +71,7 @@ class OnboardingProgressTracker extends StatelessWidget {
                         .textTheme
                         .bodySmall
                         ?.color
-                        ?.withOpacity(0.6),
+                        ?.withValues(alpha: 0.6),
                   ),
             ),
           const SizedBox(height: 12),
@@ -163,7 +163,7 @@ class OnboardingProgressTracker extends StatelessWidget {
                             .textTheme
                             .bodyMedium
                             ?.color
-                            ?.withOpacity(0.4)
+                            ?.withValues(alpha: 0.4)
                         : null,
                   ),
             ),
@@ -199,7 +199,7 @@ class CompactProgressIndicator extends StatelessWidget {
           decoration: BoxDecoration(
             color: currentStep >= index
                 ? Theme.of(context).colorScheme.primary
-                : Theme.of(context).colorScheme.outline.withOpacity(0.3),
+                : Theme.of(context).colorScheme.outline.withValues(alpha: 0.3),
             borderRadius: BorderRadius.circular(4),
           ),
         ),
