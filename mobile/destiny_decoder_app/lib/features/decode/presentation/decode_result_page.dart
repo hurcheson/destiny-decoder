@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:screenshot/screenshot.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:url_launcher/url_launcher.dart';
+import 'package:open_filex/open_filex.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../core/analytics/analytics_service.dart';
@@ -102,7 +102,8 @@ class _DecodeResultPageState extends ConsumerState<DecodeResultPage>
               number: lifeSeal.number,
               label: 'YOUR LIFE SEAL',
               subtitle: lifeSeal.planet,
-              backgroundColor: AppColors.getPlanetColorForTheme(lifeSeal.number, isDarkMode),
+              backgroundColor:
+                  AppColors.getPlanetColorForTheme(lifeSeal.number, isDarkMode),
             ),
           ),
           const SizedBox(height: AppSpacing.xl),
@@ -133,7 +134,8 @@ class _DecodeResultPageState extends ConsumerState<DecodeResultPage>
             lifeSealNumber: lifeSeal.number,
             lifeSealName: LifeSealNames.getName(lifeSeal.number),
             planet: lifeSeal.planet,
-            description: 'Life Seal #${lifeSeal.number} - ${lifeSeal.planet}\n\nExplore your unique numerological profile and unlock personalized daily guidance.',
+            description:
+                'Life Seal #${lifeSeal.number} - ${lifeSeal.planet}\n\nExplore your unique numerological profile and unlock personalized daily guidance.',
           ),
         ],
       ),
@@ -265,7 +267,7 @@ class _DecodeResultPageState extends ConsumerState<DecodeResultPage>
   void _scrollToTop() {
     // Get the current tab index from the tab controller
     final currentTabIndex = _tabController?.index ?? 0;
-    
+
     ScrollController controller;
     switch (currentTabIndex) {
       case 1:
@@ -287,14 +289,16 @@ class _DecodeResultPageState extends ConsumerState<DecodeResultPage>
   }
 
   /// Show the share dialog with platform-specific sharing options.
-  void _showShareDialog(BuildContext context, dynamic lifeSeal, dynamic result) {
+  void _showShareDialog(
+      BuildContext context, dynamic lifeSeal, dynamic result) {
     final keyTakeaway = _extractKeySentence(
-      result.interpretation?.elementAt(0)['summary'] ?? 'Check your life reading!'
-    );
-    final interpretation = (result.interpretation?.elementAt(0)?['summary'] ?? '')
-        .toString()
-        .split('.')
-        .first;
+        result.interpretation?.elementAt(0)['summary'] ??
+            'Check your life reading!');
+    final interpretation =
+        (result.interpretation?.elementAt(0)?['summary'] ?? '')
+            .toString()
+            .split('.')
+            .first;
 
     showDialog(
       context: context,
@@ -444,8 +448,8 @@ class _DecodeResultPageState extends ConsumerState<DecodeResultPage>
     final exportState = ref.watch(pdfExportStateProvider);
     final dispatcher = WidgetsBinding.instance.platformDispatcher;
     final reduceMotion =
-      MediaQuery.maybeOf(context)?.disableAnimations == true ||
-        dispatcher.accessibilityFeatures.disableAnimations == true;
+        MediaQuery.maybeOf(context)?.disableAnimations == true ||
+            dispatcher.accessibilityFeatures.disableAnimations == true;
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
     return state.when(
@@ -471,7 +475,8 @@ class _DecodeResultPageState extends ConsumerState<DecodeResultPage>
                 .toList() ??
             [];
 
-        final isExporting = exportState.isLoading || (exportState.value ?? false);
+        final isExporting =
+            exportState.isLoading || (exportState.value ?? false);
 
         return DefaultTabController(
           length: 3,
@@ -488,16 +493,21 @@ class _DecodeResultPageState extends ConsumerState<DecodeResultPage>
                   scrolledUnderElevation: 0,
                   actions: [
                     IconButton(
-                      icon: Icon(Icons.share, color: AppColors.getAccentColorForTheme(isDarkMode)),
+                      icon: Icon(Icons.share,
+                          color: AppColors.getAccentColorForTheme(isDarkMode)),
                       tooltip: 'Share your reading',
-                      onPressed: () => _showShareDialog(context, lifeSeal, result),
+                      onPressed: () =>
+                          _showShareDialog(context, lifeSeal, result),
                     ),
                   ],
                   bottom: TabBar(
-                    indicatorColor: AppColors.getAccentColorForTheme(isDarkMode),
+                    indicatorColor:
+                        AppColors.getAccentColorForTheme(isDarkMode),
                     labelColor: Theme.of(context).colorScheme.onSurface,
-                    unselectedLabelColor:
-                        Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.65),
+                    unselectedLabelColor: Theme.of(context)
+                        .colorScheme
+                        .onSurface
+                        .withValues(alpha: 0.65),
                     labelStyle: const TextStyle(
                       fontWeight: FontWeight.w700,
                       fontSize: 14,
@@ -538,16 +548,20 @@ class _DecodeResultPageState extends ConsumerState<DecodeResultPage>
                           ),
                         );
                       },
-                      backgroundColor: AppColors.getAccentColorForTheme(isDarkMode),
-                      foregroundColor: isDarkMode ? AppColors.darkBackground : Colors.black,
+                      backgroundColor:
+                          AppColors.getAccentColorForTheme(isDarkMode),
+                      foregroundColor:
+                          isDarkMode ? AppColors.darkBackground : Colors.black,
                       icon: const Icon(Icons.today),
                       label: const Text('Daily Insights'),
                     ),
                     const SizedBox(height: 12),
                     EnhancedExportFAB(
                       isLoading: isExporting,
-                      backgroundColor: AppColors.getAccentColorForTheme(isDarkMode),
-                      foregroundColor: isDarkMode ? AppColors.darkBackground : Colors.black,
+                      backgroundColor:
+                          AppColors.getAccentColorForTheme(isDarkMode),
+                      foregroundColor:
+                          isDarkMode ? AppColors.darkBackground : Colors.black,
                       onPressed: () {
                         showDialog(
                           context: context,
@@ -567,13 +581,15 @@ class _DecodeResultPageState extends ConsumerState<DecodeResultPage>
                       heroTag: 'back_to_top',
                       mini: true,
                       onPressed: _scrollToTop,
-                      backgroundColor: AppColors.getPrimaryColorForTheme(isDarkMode),
+                      backgroundColor:
+                          AppColors.getPrimaryColorForTheme(isDarkMode),
                       foregroundColor: Colors.white,
                       child: const Icon(Icons.arrow_upward),
                     ),
                   ],
                 ),
-                floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+                floatingActionButtonLocation:
+                    FloatingActionButtonLocation.endFloat,
                 body: Screenshot(
                   controller: _screenshotController,
                   child: Container(
@@ -596,30 +612,30 @@ class _DecodeResultPageState extends ConsumerState<DecodeResultPage>
                             ),
                             _wrapAnimated(
                               _buildNumbersTab(
-                              context,
-                              isDarkMode,
-                              lifeSeal,
-                              soulNumber,
-                              personalityNumber,
-                              personalYear,
-                              result,
-                              _numbersController,
+                                context,
+                                isDarkMode,
+                                lifeSeal,
+                                soulNumber,
+                                personalityNumber,
+                                personalYear,
+                                result,
+                                _numbersController,
+                              ),
+                              reduceMotion,
                             ),
-                            reduceMotion,
-                          ),
-                          _wrapAnimated(
-                            _buildTimelineTab(
-                              context,
-                              isDarkMode,
-                              lifeCycles,
-                              turningPoints,
-                              result.input.dateOfBirth,
-                              _timelineController,
+                            _wrapAnimated(
+                              _buildTimelineTab(
+                                context,
+                                isDarkMode,
+                                lifeCycles,
+                                turningPoints,
+                                result.input.dateOfBirth,
+                                _timelineController,
+                              ),
+                              reduceMotion,
                             ),
-                            reduceMotion,
-                          ),
-                        ],
-                      ),
+                          ],
+                        ),
                       ),
                     ),
                   ),
@@ -629,7 +645,8 @@ class _DecodeResultPageState extends ConsumerState<DecodeResultPage>
           ),
         );
       },
-      loading: () => const Scaffold(body: Center(child: CircularProgressIndicator())),
+      loading: () =>
+          const Scaffold(body: Center(child: CircularProgressIndicator())),
       error: (e, _) => Scaffold(
         body: Center(
           child: Text(
@@ -684,7 +701,8 @@ class _DecodeResultPageState extends ConsumerState<DecodeResultPage>
     ];
   }
 
-  Map<String, List<String>> _extractActionPlan(Map<String, dynamic> interpretation) {
+  Map<String, List<String>> _extractActionPlan(
+      Map<String, dynamic> interpretation) {
     final today = _asStringList(interpretation['actions_today'])
       ..addAll(_asStringList(interpretation['today']));
     final week = _asStringList(interpretation['actions_week'])
@@ -752,7 +770,8 @@ class _DecodeResultPageState extends ConsumerState<DecodeResultPage>
       decoration: BoxDecoration(
         color: accentColor.withValues(alpha: isDarkMode ? 0.12 : 0.08),
         borderRadius: BorderRadius.circular(AppRadius.lg),
-        border: Border.all(color: accentColor.withValues(alpha: 0.25), width: 1.2),
+        border:
+            Border.all(color: accentColor.withValues(alpha: 0.25), width: 1.2),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -779,7 +798,8 @@ class _DecodeResultPageState extends ConsumerState<DecodeResultPage>
             buildSection('This week', plan['week']!),
             const SizedBox(height: AppSpacing.md),
           ],
-          if (plan['always']!.isNotEmpty) buildSection('Ongoing focus', plan['always']!),
+          if (plan['always']!.isNotEmpty)
+            buildSection('Ongoing focus', plan['always']!),
         ],
       ),
     );
@@ -796,13 +816,20 @@ class _DecodeResultPageState extends ConsumerState<DecodeResultPage>
   List<String> _asStringList(dynamic value) {
     if (value == null) return [];
     if (value is List) {
-      return value.map((e) => e.toString()).where((e) => e.trim().isNotEmpty).toList();
+      return value
+          .map((e) => e.toString())
+          .where((e) => e.trim().isNotEmpty)
+          .toList();
     }
     if (value is String) {
       final trimmed = value.trim();
       if (trimmed.isEmpty) return [];
       // Split on sentences or commas to provide multiple action items
-      final parts = trimmed.split(RegExp(r'[.;\n]')).map((e) => e.trim()).where((e) => e.isNotEmpty).toList();
+      final parts = trimmed
+          .split(RegExp(r'[.;\n]'))
+          .map((e) => e.trim())
+          .where((e) => e.isNotEmpty)
+          .toList();
       return parts.isEmpty ? [trimmed] : parts;
     }
     return [];
@@ -844,9 +871,10 @@ class _DecodeResultPageState extends ConsumerState<DecodeResultPage>
       );
 
       // Save file with user-chosen location
+      final sanitizedName = _sanitizeFilename(result.input.fullName);
       final filePath = await _saveFileMobile(
         pdfBytes,
-        'destiny_reading_${result.input.fullName.replaceAll(' ', '_')}.pdf',
+        'destiny_reading_$sanitizedName.pdf',
       );
 
       if (!mounted) return;
@@ -863,14 +891,11 @@ class _DecodeResultPageState extends ConsumerState<DecodeResultPage>
             label: 'Open',
             onPressed: () async {
               try {
-                final uri = Uri.file(filePath);
-                if (!await launchUrl(
-                  uri,
-                  mode: LaunchMode.externalApplication,
-                )) {
+                final result = await OpenFilex.open(filePath);
+                if (result.type != ResultType.done) {
                   messenger.showSnackBar(
-                    const SnackBar(
-                      content: Text('Could not open file'),
+                    SnackBar(
+                      content: Text('Could not open file: ${result.message}'),
                       backgroundColor: Colors.orange,
                     ),
                   );
@@ -946,19 +971,19 @@ class _DecodeResultPageState extends ConsumerState<DecodeResultPage>
 
   Future<void> _saveAsImage(dynamic result) async {
     final messenger = ScaffoldMessenger.of(context);
-    
+
     try {
       final fileName = ScreenshotService.generateFileName(
         result.input.fullName.replaceAll(' ', '_'),
       );
-      
+
       final success = await ScreenshotService.saveToGallery(
         controller: _screenshotController,
         fileName: fileName,
       );
-      
+
       if (!mounted) return;
-      
+
       if (success) {
         messenger.showSnackBar(
           const SnackBar(
@@ -982,12 +1007,12 @@ class _DecodeResultPageState extends ConsumerState<DecodeResultPage>
 
   Future<void> _shareAsImage(dynamic result) async {
     final messenger = ScaffoldMessenger.of(context);
-    
+
     try {
       final fileName = ScreenshotService.generateFileName(
         result.input.fullName.replaceAll(' ', '_'),
       );
-      
+
       await ScreenshotService.shareImage(
         controller: _screenshotController,
         fileName: fileName,
@@ -1006,7 +1031,7 @@ class _DecodeResultPageState extends ConsumerState<DecodeResultPage>
 
   Future<void> _shareWithDetails(dynamic result) async {
     final messenger = ScaffoldMessenger.of(context);
-    
+
     try {
       final formattedText = ShareService.formatDecodeReadingText(result);
       await ShareService.shareReading(
@@ -1110,7 +1135,16 @@ class _DecodeResultPageState extends ConsumerState<DecodeResultPage>
 
     throw Exception('Unable to access a Downloads folder');
   }
+
+  /// Sanitize filename by removing/replacing invalid characters
+  String _sanitizeFilename(String name) {
+    // Replace spaces and invalid characters with underscores
+    // Keep only alphanumeric, underscore, hyphen, and dot
+    return name.replaceAll(RegExp(r'[^a-zA-Z0-9._-]'), '_').replaceAll(
+        RegExp(r'_+'), '_'); // Replace multiple underscores with single
+  }
 }
+
 /// Staggered number grid with cascading animation
 class StaggeredNumberGrid extends StatefulWidget {
   final bool isDarkMode;
@@ -1134,7 +1168,7 @@ class _StaggeredNumberGridState extends State<StaggeredNumberGrid>
   @override
   void initState() {
     super.initState();
-    
+
     _controllers = List<AnimationController>.generate(
       widget.items.length,
       (index) => AnimationController(

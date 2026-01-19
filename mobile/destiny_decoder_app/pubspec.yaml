@@ -31,6 +31,9 @@ dependencies:
   # URL launcher for PDFs
   url_launcher: ^6.2.0
   
+  # File opening
+  open_filex: ^4.4.0
+  
   # Screenshot & Image Export
   screenshot: ^3.0.0
   saver_gallery: ^3.0.6
