@@ -12,7 +12,6 @@ class ShareDialogWidget extends ConsumerStatefulWidget {
   final String keyTakeaway;
   final String shareText;
   final VoidCallback? onShareComplete;
-  final VoidCallback? onShareFullPageImage;
 
   const ShareDialogWidget({
     super.key,
@@ -20,7 +19,6 @@ class ShareDialogWidget extends ConsumerStatefulWidget {
     required this.keyTakeaway,
     required this.shareText,
     this.onShareComplete,
-    this.onShareFullPageImage,
   });
 
   @override
@@ -267,14 +265,6 @@ Discover your destiny: https://destiny-decoder.app
               color: Colors.deepPurple,
               onPressed: _isSharing ? null : _copyToClipboard,
             ),
-            const SizedBox(height: 12),
-            if (widget.onShareFullPageImage != null)
-              _buildShareButton(
-                icon: Icons.image,
-                label: 'Share Full Page Image',
-                color: Colors.purple,
-                onPressed: _isSharing ? null : widget.onShareFullPageImage,
-              ),
 
             const SizedBox(height: 20),
 

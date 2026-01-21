@@ -8,13 +8,11 @@ import 'package:open_filex/open_filex.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../core/analytics/analytics_service.dart';
-import '../../../core/utils/screenshot_service.dart';
 import '../../../core/utils/share_service.dart';
 import 'decode_controller.dart';
 import 'timeline.dart';
 import 'widgets/cards.dart';
 import 'widgets/animated_number.dart';
-import 'widgets/export_dialog.dart';
 import 'widgets/recommended_articles_widget.dart';
 import 'widgets/share_dialog_widget.dart';
 import '../../sharing/widgets/share_widget.dart';
@@ -34,8 +32,6 @@ class _DecodeResultPageState extends ConsumerState<DecodeResultPage>
   final _overviewController = ScrollController();
   final _numbersController = ScrollController();
   final _timelineController = ScrollController();
-  final _screenshotController = ScreenshotController();
-  bool _isSaving = false;
   TabController? _tabController;
 
   @override
@@ -306,7 +302,6 @@ class _DecodeResultPageState extends ConsumerState<DecodeResultPage>
         lifeSealNumber: lifeSeal.number,
         keyTakeaway: keyTakeaway,
         shareText: interpretation,
-        onShareFullPageImage: () => _shareAsImage(result),
         onShareComplete: () {
           // Optional: Show confirmation or close dialog
           ScaffoldMessenger.of(context).showSnackBar(
@@ -557,24 +552,24 @@ class _DecodeResultPageState extends ConsumerState<DecodeResultPage>
                       label: const Text('Daily Insights'),
                     ),
                     const SizedBox(height: 12),
-                    EnhancedExportFAB(
-                      isLoading: isExporting,
+                    FloatingActionButton.extended(
+                      heroTag: 'export_pdf',
+                      onPressed: isExporting ? null : () => _exportPdf(ref, result),
                       backgroundColor:
                           AppColors.getAccentColorForTheme(isDarkMode),
                       foregroundColor:
                           isDarkMode ? AppColors.darkBackground : Colors.black,
-                      onPressed: () {
-                        showDialog(
-                          context: context,
-                          builder: (context) => ExportOptionsDialog(
-                            isLoading: isExporting || _isSaving,
-                            onExportPdf: () => _exportPdf(ref, result),
-                            onSaveLocal: () => _saveReading(ref, result),
-                            onShareImage: () => _shareAsImage(result),
-                            onShareWithDetails: () => _shareWithDetails(result),
-                          ),
-                        );
-                      },
+                      icon: isExporting 
+                          ? const SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                valueColor: AlwaysStoppedAnimation(Colors.black),
+                              ),
+                            )
+                          : const Icon(Icons.picture_as_pdf),
+                      label: Text(isExporting ? 'Exporting...' : 'Export Report'),
                     ),
                     const SizedBox(height: 12),
                     FloatingActionButton(
@@ -590,9 +585,7 @@ class _DecodeResultPageState extends ConsumerState<DecodeResultPage>
                 ),
                 floatingActionButtonLocation:
                     FloatingActionButtonLocation.endFloat,
-                body: Screenshot(
-                  controller: _screenshotController,
-                  child: Container(
+                body: Container(
                     color: Colors.white,
                     child: GradientContainer(
                       child: RefreshIndicator(
@@ -926,182 +919,6 @@ class _DecodeResultPageState extends ConsumerState<DecodeResultPage>
       messenger.showSnackBar(
         SnackBar(
           content: Text('Export failed: ${e.toString()}'),
-          backgroundColor: Colors.red,
-        ),
-      );
-    }
-  }
-
-  Future<void> _saveReading(
-    WidgetRef ref,
-    dynamic result,
-  ) async {
-    if (_isSaving) return;
-
-    final messenger = ScaffoldMessenger.of(context);
-    setState(() {
-      _isSaving = true;
-    });
-
-    try {
-      await ref.read(historyControllerProvider.notifier).addFromResult(result);
-      if (!mounted) return;
-      messenger.showSnackBar(
-        const SnackBar(
-          content: Text('Reading saved to history'),
-          backgroundColor: Colors.green,
-        ),
-      );
-    } catch (e) {
-      if (!mounted) return;
-      messenger.showSnackBar(
-        SnackBar(
-          content: Text('Save failed: ${e.toString()}'),
-          backgroundColor: Colors.red,
-        ),
-      );
-    } finally {
-      if (mounted) {
-        setState(() {
-          _isSaving = false;
-        });
-      }
-    }
-  }
-
-  Future<void> _shareAsImage(dynamic result) async {
-    final messenger = ScaffoldMessenger.of(context);
-
-    try {
-      final fileName = ScreenshotService.generateFileName(
-        result.input.fullName.replaceAll(' ', '_'),
-      );
-      // Build current tab widget for long capture
-      final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-      final exportState = const AsyncValue<bool>.data(false);
-      final currentTabIndex = _tabController?.index ?? 0;
-      Widget exportChild;
-
-      final providerContainer =
-          ProviderScope.containerOf(context, listen: false);
-
-      if (currentTabIndex == 0) {
-        final lifeSeal = result.lifeSeal;
-        exportChild = UncontrolledProviderScope(
-          container: providerContainer,
-          child: MaterialApp(
-            debugShowCheckedModeBanner: false,
-            theme: ThemeData.light(),
-            darkTheme: ThemeData.dark(),
-            themeMode: isDarkMode ? ThemeMode.dark : ThemeMode.light,
-            home: Material(
-              child: Container(
-                color: Colors.white,
-                child: GradientContainer(
-                  child: _buildOverviewTab(
-                    context,
-                    isDarkMode,
-                    lifeSeal,
-                    exportState,
-                    result,
-                    ScrollController(),
-                  ),
-                ),
-              ),
-            ),
-          ),
-        );
-      } else if (currentTabIndex == 1) {
-        final lifeSeal = result.lifeSeal;
-        final soulNumber = result.soulNumber;
-        final personalityNumber = result.personalityNumber;
-        final personalYear = result.personalYear;
-        exportChild = UncontrolledProviderScope(
-          container: providerContainer,
-          child: MaterialApp(
-            debugShowCheckedModeBanner: false,
-            theme: ThemeData.light(),
-            darkTheme: ThemeData.dark(),
-            themeMode: isDarkMode ? ThemeMode.dark : ThemeMode.light,
-            home: Material(
-              child: Container(
-                color: Colors.white,
-                child: GradientContainer(
-                  child: _buildNumbersTab(
-                    context,
-                    isDarkMode,
-                    lifeSeal,
-                    soulNumber,
-                    personalityNumber,
-                    personalYear,
-                    result,
-                    ScrollController(),
-                  ),
-                ),
-              ),
-            ),
-          ),
-        );
-      } else {
-        final lifeCycles = (result.core['life_cycles'] as List<dynamic>? )?.cast<Map<String, dynamic>>() ?? [];
-        final turningPoints = (result.core['turning_points'] as List<dynamic>? )?.cast<Map<String, dynamic>>() ?? [];
-        exportChild = UncontrolledProviderScope(
-          container: providerContainer,
-          child: MaterialApp(
-            debugShowCheckedModeBanner: false,
-            theme: ThemeData.light(),
-            darkTheme: ThemeData.dark(),
-            themeMode: isDarkMode ? ThemeMode.dark : ThemeMode.light,
-            home: Material(
-              child: Container(
-                color: Colors.white,
-                child: GradientContainer(
-                  child: _buildTimelineTab(
-                    context,
-                    isDarkMode,
-                    lifeCycles,
-                    turningPoints,
-                    result.input.dateOfBirth,
-                    ScrollController(),
-                  ),
-                ),
-              ),
-            ),
-          ),
-        );
-      }
-
-      await ScreenshotService.shareLongImage(
-        context: context,
-        widget: exportChild,
-        fileName: fileName,
-        text: 'Check out my Destiny Decoder reading!',
-      );
-    } catch (e) {
-      if (!mounted) return;
-      messenger.showSnackBar(
-        SnackBar(
-          content: Text('Share failed: ${e.toString()}'),
-          backgroundColor: Colors.red,
-        ),
-      );
-    }
-  }
-
-  Future<void> _shareWithDetails(dynamic result) async {
-    final messenger = ScaffoldMessenger.of(context);
-
-    try {
-      final formattedText = ShareService.formatDecodeReadingText(result);
-      await ShareService.shareReading(
-        text: formattedText,
-        subject: 'My Destiny Reading - ${result.input.fullName}',
-      );
-    } catch (e) {
-      if (!mounted) return;
-      messenger.showSnackBar(
-        SnackBar(
-          content: Text('Share failed: ${e.toString()}'),
           backgroundColor: Colors.red,
         ),
       );

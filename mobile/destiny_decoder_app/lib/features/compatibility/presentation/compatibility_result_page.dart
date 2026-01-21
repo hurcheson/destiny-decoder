@@ -8,10 +8,8 @@ import 'package:open_filex/open_filex.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../core/network/api_client_provider.dart';
-import '../../../core/utils/screenshot_service.dart';
 import '../../../core/utils/share_service.dart';
 import '../../decode/presentation/widgets/cards.dart';
-import '../../decode/presentation/widgets/export_dialog.dart';
 import '../../history/presentation/history_controller.dart';
 import '../domain/compatibility_result.dart';
 import '../data/compatibility_repository.dart';
@@ -28,7 +26,6 @@ class CompatibilityResultPage extends ConsumerStatefulWidget {
 class _CompatibilityResultPageState
     extends ConsumerState<CompatibilityResultPage> {
   final _screenshotController = ScreenshotController();
-  bool _isSaving = false;
   bool _isExporting = false;
 
   /// Refresh the compatibility reading - provides visual refresh feedback
@@ -181,36 +178,6 @@ class _CompatibilityResultPageState
         const SizedBox(height: AppSpacing.xl * 2),
       ],
     );
-  }
-
-  Future<void> _saveReading(WidgetRef ref, CompatibilityResult result) async {
-    if (_isSaving) return;
-
-    final messenger = ScaffoldMessenger.of(context);
-    setState(() => _isSaving = true);
-
-    try {
-      await ref
-          .read(historyControllerProvider.notifier)
-          .addFromCompatibility(result);
-      if (!mounted) return;
-      messenger.showSnackBar(
-        const SnackBar(
-          content: Text('Compatibility saved to history'),
-          backgroundColor: Colors.green,
-        ),
-      );
-    } catch (e) {
-      if (!mounted) return;
-      messenger.showSnackBar(
-        SnackBar(
-          content: Text('Save failed: ${e.toString()}'),
-          backgroundColor: Colors.red,
-        ),
-      );
-    } finally {
-      if (mounted) setState(() => _isSaving = false);
-    }
   }
 
   Future<void> _exportPdf(WidgetRef ref, CompatibilityResult result) async {
@@ -371,64 +338,6 @@ class _CompatibilityResultPageState
     // Keep only alphanumeric, underscore, hyphen, and dot
     return name.replaceAll(RegExp(r'[^a-zA-Z0-9._-]'), '_').replaceAll(
         RegExp(r'_+'), '_'); // Replace multiple underscores with single
-  }
-
-  Future<void> _shareAsImage(CompatibilityResult result) async {
-    final messenger = ScaffoldMessenger.of(context);
-
-    try {
-      final fileName = ScreenshotService.generateFileName(
-        'compatibility_${result.personA.input.fullName}_${result.personB.input.fullName}'
-            .replaceAll(' ', '_'),
-      );
-      // Build full page widget for long capture
-      final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-      final exportChild = Container(
-        color: Colors.white,
-        child: GradientContainer(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(AppSpacing.lg),
-            child: _buildCompatibilityContent(context, isDarkMode, result),
-          ),
-        ),
-      );
-
-      await ScreenshotService.shareLongImage(
-        context: context,
-        widget: exportChild,
-        fileName: fileName,
-        text: 'Check out our compatibility analysis!',
-      );
-    } catch (e) {
-      if (!mounted) return;
-      messenger.showSnackBar(
-        SnackBar(
-          content: Text('Share failed: ${e.toString()}'),
-          backgroundColor: Colors.red,
-        ),
-      );
-    }
-  }
-
-  Future<void> _shareWithDetails(CompatibilityResult result) async {
-    final messenger = ScaffoldMessenger.of(context);
-
-    try {
-      final formattedText = ShareService.formatCompatibilityReadingText(result);
-      await ShareService.shareReading(
-        text: formattedText,
-        subject:
-            'Compatibility Analysis - ${result.personA.input.fullName} & ${result.personB.input.fullName}',
-      );
-    } catch (e) {
-      if (!mounted) return;
-      messenger.showSnackBar(
-        SnackBar(
-          content: Text('Share failed: ${e.toString()}'),
-          backgroundColor: Colors.red,
-        ),
-      );
-    }
   }
 
   @override
@@ -611,24 +520,11 @@ class _CompatibilityResultPageState
             ),
           ),
           floatingActionButton: FloatingActionButton.extended(
-            onPressed: (_isSaving || _isExporting)
-                ? null
-                : () {
-                    showDialog(
-                      context: context,
-                      builder: (context) => ExportOptionsDialog(
-                        isLoading: _isSaving || _isExporting,
-                        onExportPdf: () => _exportPdf(ref, result),
-                        onSaveLocal: () => _saveReading(ref, result),
-                        onShareImage: () => _shareAsImage(result),
-                        onShareWithDetails: () => _shareWithDetails(result),
-                      ),
-                    );
-                  },
+            onPressed: _isExporting ? null : () => _exportPdf(ref, result),
             backgroundColor: AppColors.getAccentColorForTheme(isDarkMode),
             foregroundColor:
                 isDarkMode ? AppColors.darkBackground : Colors.black,
-            icon: (_isSaving || _isExporting)
+            icon: _isExporting
                 ? const SizedBox(
                     width: 20,
                     height: 20,
@@ -637,14 +533,8 @@ class _CompatibilityResultPageState
                       valueColor: AlwaysStoppedAnimation(Colors.black),
                     ),
                   )
-                : const Icon(Icons.share),
-            label: Text(
-              _isSaving
-                  ? 'Saving...'
-                  : _isExporting
-                      ? 'Exporting...'
-                      : 'Share',
-            ),
+                : const Icon(Icons.picture_as_pdf),
+            label: Text(_isExporting ? 'Exporting...' : 'Export Report'),
           ),
         );
       },
