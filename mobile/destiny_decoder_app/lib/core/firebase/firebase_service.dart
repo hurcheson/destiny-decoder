@@ -275,7 +275,7 @@ class FirebaseService {
   /// This is a placeholder that can be integrated with Firebase Analytics
   void _logAnalyticsEvent(String eventName, Map<String, dynamic> parameters) {
     if (kDebugMode) {
-      Logger.d('📊 Analytics: $eventName - $parameters');
+      Logger.d('Analytics: $eventName - $parameters');
     }
     // TODO: Implement actual Firebase Analytics logging
     // example: _analytics.logEvent(name: eventName, parameters: parameters);

@@ -1,14 +1,14 @@
-import 'package:riverpod/riverpod.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../data/decode_repository.dart';
 import '../data/decode_providers.dart';
 import '../domain/decode_result.dart';
 
-class DecodeController extends StateNotifier<AsyncValue<DecodeResult?>> {
-  DecodeController(this._repository) : super(const AsyncValue.data(null));
+class DecodeController extends Notifier<AsyncValue<DecodeResult?>> {
+  @override
+  AsyncValue<DecodeResult?> build() => const AsyncValue.data(null);
 
-  final DecodeRepository _repository;
+  DecodeRepository get _repository => ref.read(decodeRepositoryProvider);
 
   Future<void> decode({
     required String fullName,
@@ -46,12 +46,24 @@ class DecodeController extends StateNotifier<AsyncValue<DecodeResult?>> {
 }
 
 final decodeControllerProvider =
-    StateNotifierProvider<DecodeController, AsyncValue<DecodeResult?>>((ref) {
-  final repository = ref.read(decodeRepositoryProvider);
-  return DecodeController(repository);
-});
+    NotifierProvider<DecodeController, AsyncValue<DecodeResult?>>(DecodeController.new);
 
 // State provider for tracking PDF export status
-final pdfExportStateProvider = StateProvider<AsyncValue<bool>>((ref) {
-  return const AsyncValue.data(false);
-});
+class PdfExportState extends Notifier<AsyncValue<bool>> {
+  @override
+  AsyncValue<bool> build() => const AsyncValue.data(false);
+  
+  void setLoading() {
+    state = const AsyncValue.loading();
+  }
+  
+  void setExporting(bool value) {
+    state = AsyncValue.data(value);
+  }
+  
+  void setError(Object error, StackTrace stackTrace) {
+    state = AsyncValue.error(error, stackTrace);
+  }
+}
+
+final pdfExportStateProvider = NotifierProvider<PdfExportState, AsyncValue<bool>>(PdfExportState.new);

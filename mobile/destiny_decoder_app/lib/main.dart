@@ -9,7 +9,8 @@ import 'core/network/api_client_provider.dart';
 import 'core/analytics/analytics_service.dart';
 import 'core/navigation/main_navigation_page.dart';
 import 'core/deep_linking/deep_link_service.dart';
-import 'features/onboarding/view/onboarding_page.dart';
+import 'core/screens/splash_screen.dart';
+import 'features/onboarding/presentation/onboarding_page.dart';
 import 'features/content/presentation/article_reader_page.dart';
 
 void main() async {
@@ -83,6 +84,7 @@ class DestinyDecoderApp extends StatefulWidget {
 class _DestinyDecoderAppState extends State<DestinyDecoderApp> {
   final GlobalKey<NavigatorState> _navigatorKey = GlobalKey<NavigatorState>();
   final _deepLinkService = DeepLinkService();
+  bool _splashComplete = false;
 
   @override
   void initState() {
@@ -126,7 +128,17 @@ class _DestinyDecoderAppState extends State<DestinyDecoderApp> {
       theme: getLightTheme(),
       darkTheme: getDarkTheme(),
       themeMode: ThemeMode.system,
-      home: widget.hasSeenOnboarding ? const MainNavigationPage() : const OnboardingPage(),
+      home: _splashComplete
+          ? (widget.hasSeenOnboarding
+              ? const MainNavigationPage()
+              : const OnboardingPage())
+          : SplashScreen(
+              onSplashComplete: () {
+                setState(() {
+                  _splashComplete = true;
+                });
+              },
+            ),
     );
   }
 }

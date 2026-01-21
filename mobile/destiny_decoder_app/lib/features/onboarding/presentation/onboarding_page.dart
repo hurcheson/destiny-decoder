@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/app_theme.dart';
+import '../../../core/widgets/app_logo.dart';
 import '../../decode/presentation/decode_form_page.dart';
 import '../widgets/progress_tracker.dart';
 import '../widgets/example_preview_cards.dart';
@@ -23,7 +24,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage>
 
   final List<OnboardingStep> _steps = [
     OnboardingStep(
-      title: '🌙 Welcome to Destiny Decoder',
+      title: 'Welcome to Destiny Decoder',
       description:
           'Discover your numerological destiny. Unlock insights into your Life Seal, Soul Number, and Personality Number.',
       icon: Icons.auto_awesome,
@@ -31,10 +32,10 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage>
       showExamples: true, // Show preview on first step
     ),
     OnboardingStep(
-      title: '📊 Your Life Seal',
+      title: 'Your Life Seal',
       description:
           'Your Life Seal is your foundational life number, derived from your birth date. It reveals your core life purpose and direction.',
-      icon: Icons.favorite,
+      icon: Icons.stars,
       color: const Color(0xFFFF6B6B),
       features: [
         'Discover your core life purpose',
@@ -43,10 +44,10 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage>
       ],
     ),
     OnboardingStep(
-      title: '✨ Numerological Insights',
+      title: 'Numerological Insights',
       description:
           'Explore detailed interpretations of your core numbers: Soul Number, Personality Number, and Personal Year influence.',
-      icon: Icons.lightbulb,
+      icon: Icons.lightbulb_outline,
       color: const Color(0xFFFFA500),
       features: [
         'Soul Number - Your inner desires',
@@ -55,7 +56,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage>
       ],
     ),
     OnboardingStep(
-      title: '📈 Your Life Journey',
+      title: 'Your Life Journey',
       description:
           'View your life cycles, turning points, and major transitions. Understand the phases of your life path.',
       icon: Icons.timeline,
@@ -67,10 +68,10 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage>
       ],
     ),
     OnboardingStep(
-      title: '👥 Compatibility Analysis',
+      title: 'Compatibility Analysis',
       description:
           'Compare numerological profiles with your partner or loved ones. Discover compatibility insights.',
-      icon: Icons.people,
+      icon: Icons.people_outline,
       color: const Color(0xFFB19CD9),
       features: [
         'Check relationship compatibility',
@@ -328,28 +329,39 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage>
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                // Icon with animation
-                ScaleTransition(
-                  scale: Tween<double>(begin: 0.5, end: 1).animate(
-                    CurvedAnimation(
-                      parent: _animationController,
-                      curve: const Interval(0, 0.5, curve: Curves.easeOut),
+                // Logo on first step, icon on others
+                if (_currentPage == 0)
+                  ScaleTransition(
+                    scale: Tween<double>(begin: 0.5, end: 1).animate(
+                      CurvedAnimation(
+                        parent: _animationController,
+                        curve: const Interval(0, 0.5, curve: Curves.easeOut),
+                      ),
+                    ),
+                    child: const AppLogo.large(),
+                  )
+                else
+                  ScaleTransition(
+                    scale: Tween<double>(begin: 0.5, end: 1).animate(
+                      CurvedAnimation(
+                        parent: _animationController,
+                        curve: const Interval(0, 0.5, curve: Curves.easeOut),
+                      ),
+                    ),
+                    child: Container(
+                      width: 120,
+                      height: 120,
+                      decoration: BoxDecoration(
+                        color: step.color.withValues(alpha: 0.2),
+                        borderRadius: BorderRadius.circular(AppRadius.xl),
+                      ),
+                      child: Icon(
+                        step.icon,
+                        size: 64,
+                        color: step.color,
+                      ),
                     ),
                   ),
-                  child: Container(
-                    width: 120,
-                    height: 120,
-                    decoration: BoxDecoration(
-                      color: step.color.withValues(alpha: 0.2),
-                      borderRadius: BorderRadius.circular(AppRadius.xl),
-                    ),
-                    child: Icon(
-                      step.icon,
-                      size: 64,
-                      color: step.color,
-                    ),
-                  ),
-                ),
                 const SizedBox(height: AppSpacing.xl),
 
                 // Title
@@ -378,14 +390,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage>
                 // Show example previews on first step
                 if (step.showExamples == true) ...[
                   const SizedBox(height: AppSpacing.xxl),
-                  ExampleDecodePreview(
-                    onTryIt: () {
-                      _pageController.nextPage(
-                        duration: const Duration(milliseconds: 300),
-                        curve: Curves.easeInOut,
-                      );
-                    },
-                  ),
+                  const ExampleDecodePreview(),
                 ],
 
                 // Show features list for other steps

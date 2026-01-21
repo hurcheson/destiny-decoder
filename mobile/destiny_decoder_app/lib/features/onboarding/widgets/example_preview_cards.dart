@@ -3,11 +3,8 @@ import 'package:flutter/material.dart';
 /// Example preview cards showing sample decode results
 /// Gives users a taste of what they'll get before entering their birthdate
 class ExampleDecodePreview extends StatelessWidget {
-  final VoidCallback? onTryIt;
-
   const ExampleDecodePreview({
     super.key,
-    this.onTryIt,
   });
 
   @override
@@ -25,7 +22,7 @@ class ExampleDecodePreview extends StatelessWidget {
 
         // Example Life Seal Card
         _ExampleCard(
-          icon: '🌟',
+          icon: Icons.star,
           title: 'Life Seal Number',
           subtitle: 'Your Core Life Purpose',
           exampleValue: '7',
@@ -42,7 +39,7 @@ class ExampleDecodePreview extends StatelessWidget {
 
         // Example Soul Number Card
         const _ExampleCard(
-          icon: '✨',
+          icon: Icons.auto_awesome,
           title: 'Soul Number',
           subtitle: 'Your Inner Desires',
           exampleValue: '3',
@@ -56,7 +53,7 @@ class ExampleDecodePreview extends StatelessWidget {
 
         // Example Personality Number Card
         const _ExampleCard(
-          icon: '👤',
+          icon: Icons.person_outline,
           title: 'Personality Number',
           subtitle: 'How Others See You',
           exampleValue: '5',
@@ -66,30 +63,13 @@ class ExampleDecodePreview extends StatelessWidget {
             colors: [Color(0xFF4ECDC4), Color(0xFF44A08D)],
           ),
         ),
-        const SizedBox(height: 16),
-
-        if (onTryIt != null)
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton.icon(
-              onPressed: onTryIt,
-              icon: const Icon(Icons.auto_awesome),
-              label: const Text('Try it with your birthdate'),
-              style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-            ),
-          ),
       ],
     );
   }
 }
 
 class _ExampleCard extends StatelessWidget {
-  final String icon;
+  final IconData icon;
   final String title;
   final String subtitle;
   final String exampleValue;
@@ -126,9 +106,10 @@ class _ExampleCard extends StatelessWidget {
           children: [
             Row(
               children: [
-                Text(
+                Icon(
                   icon,
-                  style: const TextStyle(fontSize: 24),
+                  color: Colors.white,
+                  size: 24,
                 ),
                 const SizedBox(width: 12),
                 Expanded(
@@ -337,7 +318,7 @@ class BeforeAfterComparison extends StatelessWidget {
             const Expanded(
               child: _ComparisonCard(
                 title: 'Before',
-                icon: '😕',
+                icon: Icons.help_outline,
                 color: Colors.grey,
                 items: [
                   'Feeling lost',
@@ -357,7 +338,7 @@ class BeforeAfterComparison extends StatelessWidget {
             Expanded(
               child: _ComparisonCard(
                 title: 'After',
-                icon: '✨',
+                icon: Icons.auto_awesome,
                 color: Theme.of(context).colorScheme.primary,
                 items: const [
                   'Clear direction',
@@ -375,7 +356,7 @@ class BeforeAfterComparison extends StatelessWidget {
 
 class _ComparisonCard extends StatelessWidget {
   final String title;
-  final String icon;
+  final IconData icon;
   final Color color;
   final List<String> items;
 
@@ -400,10 +381,7 @@ class _ComparisonCard extends StatelessWidget {
       ),
       child: Column(
         children: [
-          Text(
-            icon,
-            style: const TextStyle(fontSize: 40),
-          ),
+            Icon(icon, color: color, size: 20),
           const SizedBox(height: 8),
           Text(
             title,

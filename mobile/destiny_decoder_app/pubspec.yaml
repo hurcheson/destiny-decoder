@@ -15,18 +15,18 @@ dependencies:
   equatable: ^2.0.5
   
   # State management
-  flutter_riverpod: ^2.5.0
-  riverpod: ^2.5.0
+  flutter_riverpod: ^3.2.0
+  riverpod: ^3.2.0
   
   # Routing
-  go_router: ^14.0.0
+  go_router: ^17.0.1
   
   # File management
   path_provider: ^2.1.0
   shared_preferences: ^2.2.2
   uuid: ^4.4.0
-  file_picker: ^8.0.0+1
-  flutter_secure_storage: ^9.2.0
+  file_picker: ^10.3.8
+  flutter_secure_storage: ^10.0.0
   
   # URL launcher for PDFs
   url_launcher: ^6.2.0
@@ -36,20 +36,20 @@ dependencies:
   
   # Screenshot & Image Export
   screenshot: ^3.0.0
-  saver_gallery: ^3.0.6
-  share_plus: ^7.2.0
+  saver_gallery: ^4.1.0
+  share_plus: ^12.0.1
   
   # Markdown rendering
-  flutter_markdown: ^0.6.18
+  flutter_markdown: ^0.7.7+1
   
   # Push notifications
-  firebase_core: ^2.24.0
-  firebase_messaging: ^14.7.0
-  firebase_analytics: ^10.7.0
-  permission_handler: ^11.0.1
+  firebase_core: ^4.4.0
+  firebase_messaging: ^16.1.1
+  firebase_analytics: ^12.1.1
+  permission_handler: ^12.0.1
   
   # Deep linking
-  app_links: ^6.3.2
+  app_links: ^7.0.0
   
   # Image generation for social cards
   image: ^4.2.0
@@ -59,17 +59,22 @@ dependencies:
   
   # In-app purchases
   in_app_purchase: ^3.1.11
-  in_app_purchase_android: ^0.3.0+17
-  in_app_purchase_storekit: ^0.3.6+7
+  in_app_purchase_android: ^0.4.0+8
+  in_app_purchase_storekit: ^0.4.7
   
   # Internationalization
-  intl: ^0.18.0
+  intl: ^0.20.2
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_lints: ^3.0.0
+  flutter_lints: ^6.0.0
 
 flutter:
   uses-material-design: true
+  
+  # App assets
+  assets:
+    - assets/images/
+    - assets/images/destiny_decoder_logo.png
 

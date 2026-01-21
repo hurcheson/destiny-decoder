@@ -21,10 +21,12 @@ class ShareImageService {
       await file.writeAsBytes(imageBytes);
 
       // Share with image and text
-      await Share.shareXFiles(
-        [XFile(file.path, mimeType: 'image/png')],
-        text: shareText,
-        subject: subject,
+      // Note: SharePlus uses ShareParams with files property instead of shareXFiles
+      await SharePlus.instance.share(
+        ShareParams(
+          text: shareText,
+          files: [XFile(file.path, mimeType: 'image/png')],
+        ),
       );
 
       // Clean up after short delay (user has tapped share)

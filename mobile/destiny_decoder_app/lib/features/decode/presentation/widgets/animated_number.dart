@@ -222,7 +222,7 @@ class _HeroNumberCardContent extends StatelessWidget {
               const SizedBox(height: 16),
             ],
             Text(
-              '✨ $label ✨',
+              label.toUpperCase(),
               textAlign: TextAlign.center,
               style: TextStyle(
                 color: txtColor,

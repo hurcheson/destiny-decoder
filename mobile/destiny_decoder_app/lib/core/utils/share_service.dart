@@ -11,14 +11,14 @@ class ShareService {
     final personalYear = result.personalYear;
 
     return '''
-🌙 My Destiny Reading 🌙
+MY DESTINY READING
 
 Name: ${input.fullName}
 Date of Birth: ${input.dateOfBirth}
 
 ═══════════════════════════════
 
-📊 CORE NUMBERS
+CORE NUMBERS
 
 Life Seal: ${lifeSeal.number} (${lifeSeal.planet})
 Soul Number: ${soulNumber.number}
@@ -27,8 +27,8 @@ Personal Year: ${personalYear.number}
 
 ═══════════════════════════════
 
-✨ Discover your complete reading with the Destiny Decoder app!
-🔗 Available on iOS and Android
+Discover your complete reading with the Destiny Decoder app!
+Available on iOS and Android
 
 Generated: ${DateTime.now().toString().split('.')[0]}
 '''.trim();
@@ -41,7 +41,7 @@ Generated: ${DateTime.now().toString().split('.')[0]}
     final compatibility = result.compatibility;
 
     return '''
-💕 Compatibility Analysis 💕
+COMPATIBILITY ANALYSIS
 
 Person A: ${personA.input.fullName}
 Life Seal: ${personA.interpretations.lifeSeal.number}
@@ -62,8 +62,8 @@ Personality Balance: ${compatibility.personalityNumber}
 
 ═══════════════════════════════
 
-✨ Check our full compatibility reading with the Destiny Decoder app!
-🔗 Available on iOS and Android
+Check our full compatibility reading with the Destiny Decoder app!
+Available on iOS and Android
 
 Generated: ${DateTime.now().toString().split('.')[0]}
 '''.trim();
@@ -75,10 +75,7 @@ Generated: ${DateTime.now().toString().split('.')[0]}
     String subject = 'My Destiny Reading',
   }) async {
     try {
-      await Share.share(
-        text,
-        subject: subject,
-      );
+      await SharePlus.instance.share(ShareParams(text: text));
     } catch (e) {
       throw Exception('Share failed: $e');
     }
@@ -92,10 +89,7 @@ Generated: ${DateTime.now().toString().split('.')[0]}
   }) async {
     try {
       final fullText = '$customMessage\n\n$readingText';
-      await Share.share(
-        fullText,
-        subject: subject,
-      );
+      await SharePlus.instance.share(ShareParams(text: fullText));
     } catch (e) {
       throw Exception('Share failed: $e');
     }

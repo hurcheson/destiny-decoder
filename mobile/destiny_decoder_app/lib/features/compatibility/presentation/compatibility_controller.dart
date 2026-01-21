@@ -3,10 +3,11 @@ import '../data/compatibility_providers.dart';
 import '../data/compatibility_repository.dart';
 import '../domain/compatibility_result.dart';
 
-class CompatibilityController extends StateNotifier<AsyncValue<CompatibilityResult?>> {
-  CompatibilityController(this._repository) : super(const AsyncValue.data(null));
+class CompatibilityController extends Notifier<AsyncValue<CompatibilityResult?>> {
+  @override
+  AsyncValue<CompatibilityResult?> build() => const AsyncValue.data(null);
 
-  final CompatibilityRepository _repository;
+  CompatibilityRepository get _repository => ref.read(compatibilityRepositoryProvider);
 
   Future<void> calculateCompatibility({
     required String nameA,
@@ -38,7 +39,4 @@ class CompatibilityController extends StateNotifier<AsyncValue<CompatibilityResu
 }
 
 final compatibilityControllerProvider =
-    StateNotifierProvider<CompatibilityController, AsyncValue<CompatibilityResult?>>((ref) {
-  final repository = ref.read(compatibilityRepositoryProvider);
-  return CompatibilityController(repository);
-});
+    NotifierProvider<CompatibilityController, AsyncValue<CompatibilityResult?>>(CompatibilityController.new);

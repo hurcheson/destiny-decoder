@@ -48,43 +48,45 @@ class ExportOptionsDialog extends StatelessWidget {
           ),
         ),
         padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Header
-            Row(
-              children: [
-                Icon(Icons.share, color: accent, size: 28),
-                const SizedBox(width: 12),
-                Text(
-                  'Export Options',
-                  style: TextStyle(
-                    fontSize: 22,
-                    fontWeight: FontWeight.w700,
-                    color: textColor,
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Header
+              Row(
+                children: [
+                  Icon(Icons.share, color: accent, size: 28),
+                  const SizedBox(width: 12),
+                  Text(
+                    'Export Options',
+                    style: TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.w700,
+                      color: textColor,
+                    ),
                   ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Choose how to export your reading',
-              style: TextStyle(
-                fontSize: 14,
-                color: primary.withValues(alpha: 0.7),
+                ],
               ),
-            ),
+              const SizedBox(height: 8),
+              Text(
+                'Choose how to export your reading',
+                style: TextStyle(
+                  fontSize: 14,
+                  color: primary.withValues(alpha: 0.7),
+                ),
+              ),
 
-            const SizedBox(height: 24),
+              const SizedBox(height: 24),
 
-            // Export Options Grid
-            GridView.count(
-              crossAxisCount: 2,
-              shrinkWrap: true,
-              mainAxisSpacing: 12,
-              crossAxisSpacing: 12,
-              physics: const NeverScrollableScrollPhysics(),
+              // Export Options Grid
+              GridView.count(
+                crossAxisCount: 2,
+                shrinkWrap: true,
+                mainAxisSpacing: 12,
+                crossAxisSpacing: 12,
+                childAspectRatio: 0.85,
+                physics: const NeverScrollableScrollPhysics(),
               children: [
                 // PDF Export
                 _ExportOption(
@@ -131,7 +133,7 @@ class ExportOptionsDialog extends StatelessWidget {
                 if (onSaveImage != null)
                   _ExportOption(
                     icon: Icons.image,
-                    label: 'Save as Image',
+                    label: 'Save Full Page Image',
                     description: 'Save to photo gallery',
                     color: Colors.blue,
                     isLoading: isLoading,
@@ -145,7 +147,7 @@ class ExportOptionsDialog extends StatelessWidget {
                 if (onShareImage != null)
                   _ExportOption(
                     icon: Icons.photo_camera,
-                    label: 'Share Image',
+                    label: 'Share Full Page Image',
                     description: 'Share as picture',
                     color: Colors.purple,
                     isLoading: isLoading,
@@ -209,7 +211,8 @@ class ExportOptionsDialog extends StatelessWidget {
                 ],
               ),
             ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -256,7 +259,7 @@ class _ExportOption extends StatelessWidget {
             borderRadius: BorderRadius.circular(16),
             color: bgColor,
           ),
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             mainAxisAlignment: MainAxisAlignment.center,
@@ -280,6 +283,8 @@ class _ExportOption extends StatelessWidget {
               Text(
                 label,
                 textAlign: TextAlign.center,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
                 style: TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.w600,
@@ -290,6 +295,8 @@ class _ExportOption extends StatelessWidget {
               Text(
                 description,
                 textAlign: TextAlign.center,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
                 style: TextStyle(
                   fontSize: 10,
                   color: color.withValues(alpha: 0.7),

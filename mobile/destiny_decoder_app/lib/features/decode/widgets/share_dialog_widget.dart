@@ -29,14 +29,14 @@ class _ShareDialogWidgetState extends State<ShareDialogWidget> {
   /// Generate the share text that will be shared to social platforms.
   String _generateShareText() {
     return '''
-✨ Check out my Life Seal #${widget.lifeSealNumber} reading from Destiny Decoder!
+Check out my Life Seal #${widget.lifeSealNumber} reading from Destiny Decoder!
 
-💫 Key Insight:
+KEY INSIGHT:
 ${widget.keyTakeaway}
 
-${widget.shareText.isNotEmpty ? '\n📖 Full Reading:\n${widget.shareText}' : ''}
+${widget.shareText.isNotEmpty ? '\nFULL READING:\n${widget.shareText}' : ''}
 
-🔮 Discover your destiny: https://destiny-decoder.app
+Discover your destiny: https://destiny-decoder.app
 '''.trim();
   }
 

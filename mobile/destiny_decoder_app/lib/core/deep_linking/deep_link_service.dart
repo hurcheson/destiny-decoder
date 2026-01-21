@@ -47,7 +47,7 @@ class DeepLinkService {
   /// Process incoming deep link
   void _handleDeepLink(Uri uri) {
     if (kDebugMode) {
-      print('📎 Deep link received: $uri');
+      print('Deep link received: $uri');
     }
 
     // Extract path and ref code
@@ -62,7 +62,7 @@ class DeepLinkService {
         userAgent: 'mobile_app',
       );
       if (kDebugMode) {
-        print('📊 Tracked referral click: ref=$refCode, path=$path');
+        print('Tracked referral click: ref=$refCode, path=$path');
       }
     }
 

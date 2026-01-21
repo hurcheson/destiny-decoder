@@ -92,7 +92,7 @@ class _DecodeResultPageState extends ConsumerState<DecodeResultPage>
         left: AppSpacing.lg,
         right: AppSpacing.lg,
         top: AppSpacing.lg,
-        bottom: 100, // Extra padding for FAB
+        bottom: 180, // Extra padding for stacked FABs (Daily Insights + Share + Back to Top)
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -160,7 +160,7 @@ class _DecodeResultPageState extends ConsumerState<DecodeResultPage>
         left: AppSpacing.lg,
         right: AppSpacing.lg,
         top: AppSpacing.lg,
-        bottom: 100, // Extra padding for FAB
+        bottom: 180, // Extra padding for stacked FABs (Daily Insights + Share + Back to Top)
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -244,7 +244,7 @@ class _DecodeResultPageState extends ConsumerState<DecodeResultPage>
         left: AppSpacing.lg,
         right: AppSpacing.lg,
         top: AppSpacing.lg,
-        bottom: 100, // Extra padding for FAB
+        bottom: 180, // Extra padding for stacked FABs (Daily Insights + Share + Back to Top)
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -306,6 +306,7 @@ class _DecodeResultPageState extends ConsumerState<DecodeResultPage>
         lifeSealNumber: lifeSeal.number,
         keyTakeaway: keyTakeaway,
         shareText: interpretation,
+        onShareFullPageImage: () => _shareAsImage(result),
         onShareComplete: () {
           // Optional: Show confirmation or close dialog
           ScaffoldMessenger.of(context).showSnackBar(
@@ -569,7 +570,6 @@ class _DecodeResultPageState extends ConsumerState<DecodeResultPage>
                             isLoading: isExporting || _isSaving,
                             onExportPdf: () => _exportPdf(ref, result),
                             onSaveLocal: () => _saveReading(ref, result),
-                            onSaveImage: () => _saveAsImage(result),
                             onShareImage: () => _shareAsImage(result),
                             onShareWithDetails: () => _shareWithDetails(result),
                           ),
@@ -861,7 +861,7 @@ class _DecodeResultPageState extends ConsumerState<DecodeResultPage>
 
     try {
       // Set loading state
-      exportStateNotifier.state = const AsyncValue.loading();
+      exportStateNotifier.setLoading();
 
       // Get controller and export PDF
       final controller = ref.read(decodeControllerProvider.notifier);
@@ -915,11 +915,11 @@ class _DecodeResultPageState extends ConsumerState<DecodeResultPage>
       );
 
       // Set success state
-      exportStateNotifier.state = const AsyncValue.data(false);
+      exportStateNotifier.setExporting(false);
     } catch (e) {
       // Set error state
-      exportStateNotifier.state = AsyncValue.error(e, StackTrace.current);
-      exportStateNotifier.state = const AsyncValue.data(false);
+      exportStateNotifier.setError(e, StackTrace.current);
+      exportStateNotifier.setExporting(false);
 
       // Show error message
       if (!mounted) return;
@@ -969,42 +969,6 @@ class _DecodeResultPageState extends ConsumerState<DecodeResultPage>
     }
   }
 
-  Future<void> _saveAsImage(dynamic result) async {
-    final messenger = ScaffoldMessenger.of(context);
-
-    try {
-      final fileName = ScreenshotService.generateFileName(
-        result.input.fullName.replaceAll(' ', '_'),
-      );
-
-      final success = await ScreenshotService.saveToGallery(
-        controller: _screenshotController,
-        fileName: fileName,
-      );
-
-      if (!mounted) return;
-
-      if (success) {
-        messenger.showSnackBar(
-          const SnackBar(
-            content: Text('Image saved to gallery'),
-            backgroundColor: Colors.green,
-          ),
-        );
-      } else {
-        throw Exception('Failed to save image');
-      }
-    } catch (e) {
-      if (!mounted) return;
-      messenger.showSnackBar(
-        SnackBar(
-          content: Text('Save failed: ${e.toString()}'),
-          backgroundColor: Colors.red,
-        ),
-      );
-    }
-  }
-
   Future<void> _shareAsImage(dynamic result) async {
     final messenger = ScaffoldMessenger.of(context);
 
@@ -1012,9 +976,104 @@ class _DecodeResultPageState extends ConsumerState<DecodeResultPage>
       final fileName = ScreenshotService.generateFileName(
         result.input.fullName.replaceAll(' ', '_'),
       );
+      // Build current tab widget for long capture
+      final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+      final exportState = const AsyncValue<bool>.data(false);
+      final currentTabIndex = _tabController?.index ?? 0;
+      Widget exportChild;
 
-      await ScreenshotService.shareImage(
-        controller: _screenshotController,
+      final providerContainer =
+          ProviderScope.containerOf(context, listen: false);
+
+      if (currentTabIndex == 0) {
+        final lifeSeal = result.lifeSeal;
+        exportChild = UncontrolledProviderScope(
+          container: providerContainer,
+          child: MaterialApp(
+            debugShowCheckedModeBanner: false,
+            theme: ThemeData.light(),
+            darkTheme: ThemeData.dark(),
+            themeMode: isDarkMode ? ThemeMode.dark : ThemeMode.light,
+            home: Material(
+              child: Container(
+                color: Colors.white,
+                child: GradientContainer(
+                  child: _buildOverviewTab(
+                    context,
+                    isDarkMode,
+                    lifeSeal,
+                    exportState,
+                    result,
+                    ScrollController(),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+      } else if (currentTabIndex == 1) {
+        final lifeSeal = result.lifeSeal;
+        final soulNumber = result.soulNumber;
+        final personalityNumber = result.personalityNumber;
+        final personalYear = result.personalYear;
+        exportChild = UncontrolledProviderScope(
+          container: providerContainer,
+          child: MaterialApp(
+            debugShowCheckedModeBanner: false,
+            theme: ThemeData.light(),
+            darkTheme: ThemeData.dark(),
+            themeMode: isDarkMode ? ThemeMode.dark : ThemeMode.light,
+            home: Material(
+              child: Container(
+                color: Colors.white,
+                child: GradientContainer(
+                  child: _buildNumbersTab(
+                    context,
+                    isDarkMode,
+                    lifeSeal,
+                    soulNumber,
+                    personalityNumber,
+                    personalYear,
+                    result,
+                    ScrollController(),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+      } else {
+        final lifeCycles = (result.core['life_cycles'] as List<dynamic>? )?.cast<Map<String, dynamic>>() ?? [];
+        final turningPoints = (result.core['turning_points'] as List<dynamic>? )?.cast<Map<String, dynamic>>() ?? [];
+        exportChild = UncontrolledProviderScope(
+          container: providerContainer,
+          child: MaterialApp(
+            debugShowCheckedModeBanner: false,
+            theme: ThemeData.light(),
+            darkTheme: ThemeData.dark(),
+            themeMode: isDarkMode ? ThemeMode.dark : ThemeMode.light,
+            home: Material(
+              child: Container(
+                color: Colors.white,
+                child: GradientContainer(
+                  child: _buildTimelineTab(
+                    context,
+                    isDarkMode,
+                    lifeCycles,
+                    turningPoints,
+                    result.input.dateOfBirth,
+                    ScrollController(),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+      }
+
+      await ScreenshotService.shareLongImage(
+        context: context,
+        widget: exportChild,
         fileName: fileName,
         text: 'Check out my Destiny Decoder reading!',
       );

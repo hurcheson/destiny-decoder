@@ -6,12 +6,14 @@ import '../data/history_providers.dart';
 import '../data/history_repository.dart';
 import '../domain/history_entry.dart';
 
-class HistoryController extends StateNotifier<AsyncValue<List<HistoryEntry>>> {
-  HistoryController(this._repository) : super(const AsyncValue.loading()) {
+class HistoryController extends Notifier<AsyncValue<List<HistoryEntry>>> {
+  @override
+  AsyncValue<List<HistoryEntry>> build() {
     _load();
+    return const AsyncValue.loading();
   }
 
-  final HistoryRepository _repository;
+  HistoryRepository get _repository => ref.read(historyRepositoryProvider);
 
   Future<void> _load() async {
     try {
@@ -65,8 +67,4 @@ class HistoryController extends StateNotifier<AsyncValue<List<HistoryEntry>>> {
 }
 
 final historyControllerProvider =
-    StateNotifierProvider<HistoryController, AsyncValue<List<HistoryEntry>>>(
-        (ref) {
-  final repo = ref.read(historyRepositoryProvider);
-  return HistoryController(repo);
-});
+    NotifierProvider<HistoryController, AsyncValue<List<HistoryEntry>>>(HistoryController.new);

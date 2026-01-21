@@ -52,7 +52,7 @@ class HeroNumberCard extends StatelessWidget {
               const SizedBox(height: AppSpacing.md),
             ],
             Text(
-              '✨ $label ✨',
+              label.toUpperCase(),
               textAlign: TextAlign.center,
               style: AppTypography.labelLarge.copyWith(
                 color: txtColor, // Pure white for maximum clarity

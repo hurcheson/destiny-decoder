@@ -141,12 +141,10 @@ class _NumerologyLoadingAnimationState extends State<NumerologyLoadingAnimation>
                     ),
                   ),
                   child: Center(
-                    child: Text(
-                      '✨',
-                      style: TextStyle(
-                        fontSize: 32,
-                        color: accent,
-                      ),
+                    child: Icon(
+                      Icons.auto_awesome,
+                      size: 32,
+                      color: accent,
                     ),
                   ),
                 ),

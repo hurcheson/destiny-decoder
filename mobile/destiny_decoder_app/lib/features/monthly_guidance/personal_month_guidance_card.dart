@@ -220,15 +220,15 @@ class PersonalMonthGuidanceCard extends ConsumerWidget {
     ThemeData theme,
   ) {
     final guidanceMap = {
-      1: '✨ Focus on starting new projects and taking initiative. Leadership opportunities abound.',
-      2: '🤝 This is a month for cooperation and partnership. Nurture your relationships.',
-      3: '🎨 Creative expression is enhanced. Share your talents with others.',
-      4: '🏗️ Build solid foundations. Organization and structure bring results.',
-      5: '🚀 Embrace change and new experiences. Flexibility is your strength.',
-      6: '❤️ Service and family matters take center stage. Balance giving with self-care.',
-      7: '🧘 A time for reflection and inner wisdom. Trust your intuition.',
-      8: '💪 Manifest your ambitions. This is your power month for material progress.',
-      9: '🌙 Release what no longer serves. Completion precedes new beginnings.',
+      1: 'Focus on starting new projects and taking initiative. Leadership opportunities abound.',
+      2: 'This is a month for cooperation and partnership. Nurture your relationships.',
+      3: 'Creative expression is enhanced. Share your talents with others.',
+      4: 'Build solid foundations. Organization and structure bring results.',
+      5: 'Embrace change and new experiences. Flexibility is your strength.',
+      6: 'Service and family matters take center stage. Balance giving with self-care.',
+      7: 'A time for reflection and inner wisdom. Trust your intuition.',
+      8: 'Manifest your ambitions. This is your power month for material progress.',
+      9: 'Release what no longer serves. Completion precedes new beginnings.',
     };
 
     final guidance = guidanceMap[monthNumber] ?? 'Trust your journey this month.';

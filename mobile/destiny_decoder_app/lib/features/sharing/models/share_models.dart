@@ -40,14 +40,14 @@ class ShareContentFormatter {
     }
 
     return '''
-🔮 My Life Seal: #$lifeSealNumber - $name
+MY LIFE SEAL: #$lifeSealNumber - $name
 
 $trimmedDesc
 
 Discover your unique numerological profile with Destiny Decoder!
-✨ Know yourself deeper
-📊 Get personalized daily insights
-🌟 Unlock your life's purpose
+• Know yourself deeper
+• Get personalized daily insights
+• Unlock your life's purpose
 
 $linkSection'''.trim();
   }
@@ -71,7 +71,7 @@ $linkSection'''.trim();
         : '';
 
     return '''
-📚 I just found this insightful article:
+I just found this insightful article:
 
 "$title"
 

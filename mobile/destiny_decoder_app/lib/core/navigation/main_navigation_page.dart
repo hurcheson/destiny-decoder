@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../core/widgets/app_logo.dart';
 import '../../features/decode/presentation/decode_form_page.dart';
 import '../../features/content/presentation/content_hub_page.dart';
 
@@ -26,6 +27,23 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const AppLogo.small(),
+            const SizedBox(width: 12),
+            Text(
+              'Destiny Decoder',
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        ),
+        centerTitle: true,
+        elevation: 0,
+      ),
       body: IndexedStack(
         index: _selectedIndex,
         children: _pages,

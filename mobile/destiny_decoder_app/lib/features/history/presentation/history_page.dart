@@ -26,7 +26,7 @@ class HistoryPage extends ConsumerWidget {
         actions: [
           IconButton(
             tooltip: 'Clear history',
-            onPressed: state.valueOrNull?.isNotEmpty == true
+            onPressed: state.value?.isNotEmpty == true
                 ? () => _confirmClear(context, controller)
                 : null,
             icon: const Icon(Icons.delete_sweep_outlined),
@@ -133,19 +133,23 @@ class _HistoryCard extends StatelessWidget {
     // Handle different entry types
     if (entry.type == EntryType.compatibility && entry.compatibilityResult != null) {
       final compat = entry.compatibilityResult!;
-      return Card(
-        elevation: AppElevation.sm,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(AppRadius.lg),
-          side: BorderSide(
-            color: Colors.pink.withValues(alpha: 0.5),
-            width: 1.5,
+      return Hero(
+        tag: 'history-${entry.id}',
+        child: Card(
+          elevation: AppElevation.md,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(AppRadius.xl),
+            side: BorderSide(
+              color: Colors.pink.withValues(alpha: 0.3),
+              width: 2,
+            ),
           ),
-        ),
-        child: InkWell(
-          onTap: onTap,
-          borderRadius: BorderRadius.circular(AppRadius.lg),
-          child: Padding(
+          child: InkWell(
+            onTap: onTap,
+            borderRadius: BorderRadius.circular(AppRadius.xl),
+            splashColor: Colors.pink.withValues(alpha: 0.1),
+            highlightColor: Colors.pink.withValues(alpha: 0.05),
+            child: Padding(
             padding: const EdgeInsets.all(AppSpacing.lg),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -188,6 +192,7 @@ class _HistoryCard extends StatelessWidget {
                 ),
               ],
             ),
+            ),
           ),
         ),
       );
@@ -202,19 +207,23 @@ class _HistoryCard extends StatelessWidget {
     final lifeSealNumber = result.lifeSeal.number;
     final personalYear = result.personalYear.number;
 
-    return Card(
-      elevation: AppElevation.sm,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(AppRadius.lg),
-        side: BorderSide(
-          color: AppColors.getPlanetColorBorder(lifeSealNumber),
-          width: 1.5,
+    return Hero(
+      tag: 'history-${entry.id}',
+      child: Card(
+        elevation: AppElevation.md,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppRadius.xl),
+          side: BorderSide(
+            color: AppColors.getPlanetColorBorder(lifeSealNumber),
+            width: 2,
+          ),
         ),
-      ),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(AppRadius.lg),
-        child: Padding(
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(AppRadius.xl),
+          splashColor: AppColors.getPlanetColorLight(lifeSealNumber),
+          highlightColor: AppColors.getPlanetColorLight(lifeSealNumber).withValues(alpha: 0.05),
+          child: Padding(
         padding: const EdgeInsets.all(AppSpacing.lg),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -261,7 +270,8 @@ class _HistoryCard extends StatelessWidget {
             ),
           ],
         ),
-      ),
+          ),
+        ),
       ),
     );
   }

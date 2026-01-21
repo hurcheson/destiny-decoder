@@ -56,10 +56,7 @@ class _LifeSealShareWidgetState extends State<LifeSealShareWidget> {
     );
 
     try {
-      await Share.share(
-        shareText,
-        subject: 'My Life Seal: ${widget.lifeSealNumber} - ${widget.lifeSealName}',
-      );
+      await SharePlus.instance.share(ShareParams(text: shareText));
       widget.onShare?.call();
       // Track share event
       _analyticsClient.recordShareEvent(
@@ -294,10 +291,7 @@ class _ArticleShareWidgetState extends State<ArticleShareWidget> {
     );
 
     try {
-      await Share.share(
-        shareText,
-        subject: widget.title,
-      );
+      await SharePlus.instance.share(ShareParams(text: shareText));
       widget.onShare?.call();
       // Track share event
       _analyticsClient.recordShareEvent(

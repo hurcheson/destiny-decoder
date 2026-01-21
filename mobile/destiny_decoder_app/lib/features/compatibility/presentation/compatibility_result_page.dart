@@ -37,6 +37,152 @@ class _CompatibilityResultPageState
     await Future.delayed(const Duration(milliseconds: 300));
   }
 
+  /// Build the full compatibility content column for export/preview
+  Widget _buildCompatibilityContent(
+    BuildContext context,
+    bool isDarkMode,
+    CompatibilityResult result,
+  ) {
+    final compat = result.compatibility;
+    final personA = result.personA;
+    final personB = result.personB;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        // Overall compatibility score
+        Card(
+          elevation: AppElevation.lg,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(AppRadius.xl),
+          ),
+          child: Container(
+            padding: const EdgeInsets.all(AppSpacing.xl),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(AppRadius.xl),
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  _getCompatibilityColor(compat.overall, isDarkMode)
+                      .withValues(alpha: 0.2),
+                  _getCompatibilityColor(compat.overall, isDarkMode)
+                      .withValues(alpha: 0.05),
+                ],
+              ),
+            ),
+            child: Column(
+              children: [
+                Icon(
+                  _getCompatibilityIcon(compat.overall),
+                  size: 64,
+                  color: _getCompatibilityColor(compat.overall, isDarkMode),
+                ),
+                const SizedBox(height: AppSpacing.md),
+                Text(
+                  compat.overall,
+                  style: AppTypography.headingLarge.copyWith(
+                    color:
+                        _getCompatibilityColor(compat.overall, isDarkMode),
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.sm),
+                Text(
+                  '${compat.score} / ${compat.maxScore} points',
+                  style: AppTypography.bodyLarge.copyWith(
+                    color: isDarkMode
+                        ? AppColors.darkText
+                        : AppColors.textDark,
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.md),
+                LinearProgressIndicator(
+                  value: compat.percentage / 100,
+                  minHeight: 8,
+                  borderRadius: BorderRadius.circular(4),
+                  backgroundColor: Colors.grey.withValues(alpha: 0.2),
+                  valueColor: AlwaysStoppedAnimation(
+                    _getCompatibilityColor(compat.overall, isDarkMode),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+
+        const SizedBox(height: AppSpacing.xl),
+
+        // Detailed scores
+        Text(
+          'Compatibility Breakdown',
+          style: AppTypography.headingMedium.copyWith(
+            color: isDarkMode ? AppColors.darkText : AppColors.textDark,
+          ),
+        ),
+        const SizedBox(height: AppSpacing.md),
+
+        _CompatibilityMetric(
+          label: 'Life Path Compatibility',
+          value: compat.lifeSeal,
+          isDarkMode: isDarkMode,
+          icon: Icons.auto_awesome,
+        ),
+        const SizedBox(height: AppSpacing.md),
+
+        _CompatibilityMetric(
+          label: 'Soul Connection',
+          value: compat.soulNumber,
+          isDarkMode: isDarkMode,
+          icon: Icons.favorite,
+        ),
+        const SizedBox(height: AppSpacing.md),
+
+        _CompatibilityMetric(
+          label: 'Personality Match',
+          value: compat.personalityNumber,
+          isDarkMode: isDarkMode,
+          icon: Icons.people,
+        ),
+
+        const SizedBox(height: AppSpacing.xl),
+
+        // Side-by-side comparison
+        Text(
+          'Individual Profiles',
+          style: AppTypography.headingMedium.copyWith(
+            color: isDarkMode ? AppColors.darkText : AppColors.textDark,
+          ),
+        ),
+        const SizedBox(height: AppSpacing.md),
+
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: _PersonCard(
+                person: personA,
+                label: 'Person A',
+                color: AppColors.primary,
+                isDarkMode: isDarkMode,
+              ),
+            ),
+            const SizedBox(width: AppSpacing.md),
+            Expanded(
+              child: _PersonCard(
+                person: personB,
+                label: 'Person B',
+                color: AppColors.accent,
+                isDarkMode: isDarkMode,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: AppSpacing.xl * 2),
+      ],
+    );
+  }
+
   Future<void> _saveReading(WidgetRef ref, CompatibilityResult result) async {
     if (_isSaving) return;
 
@@ -227,43 +373,6 @@ class _CompatibilityResultPageState
         RegExp(r'_+'), '_'); // Replace multiple underscores with single
   }
 
-  Future<void> _saveAsImage(CompatibilityResult result) async {
-    final messenger = ScaffoldMessenger.of(context);
-
-    try {
-      final fileName = ScreenshotService.generateFileName(
-        'compatibility_${result.personA.input.fullName}_${result.personB.input.fullName}'
-            .replaceAll(' ', '_'),
-      );
-
-      final success = await ScreenshotService.saveToGallery(
-        controller: _screenshotController,
-        fileName: fileName,
-      );
-
-      if (!mounted) return;
-
-      if (success) {
-        messenger.showSnackBar(
-          const SnackBar(
-            content: Text('Image saved to gallery'),
-            backgroundColor: Colors.green,
-          ),
-        );
-      } else {
-        throw Exception('Failed to save image');
-      }
-    } catch (e) {
-      if (!mounted) return;
-      messenger.showSnackBar(
-        SnackBar(
-          content: Text('Save failed: ${e.toString()}'),
-          backgroundColor: Colors.red,
-        ),
-      );
-    }
-  }
-
   Future<void> _shareAsImage(CompatibilityResult result) async {
     final messenger = ScaffoldMessenger.of(context);
 
@@ -272,9 +381,21 @@ class _CompatibilityResultPageState
         'compatibility_${result.personA.input.fullName}_${result.personB.input.fullName}'
             .replaceAll(' ', '_'),
       );
+      // Build full page widget for long capture
+      final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+      final exportChild = Container(
+        color: Colors.white,
+        child: GradientContainer(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(AppSpacing.lg),
+            child: _buildCompatibilityContent(context, isDarkMode, result),
+          ),
+        ),
+      );
 
-      await ScreenshotService.shareImage(
-        controller: _screenshotController,
+      await ScreenshotService.shareLongImage(
+        context: context,
+        widget: exportChild,
         fileName: fileName,
         text: 'Check out our compatibility analysis!',
       );
@@ -499,7 +620,6 @@ class _CompatibilityResultPageState
                         isLoading: _isSaving || _isExporting,
                         onExportPdf: () => _exportPdf(ref, result),
                         onSaveLocal: () => _saveReading(ref, result),
-                        onSaveImage: () => _saveAsImage(result),
                         onShareImage: () => _shareAsImage(result),
                         onShareWithDetails: () => _shareWithDetails(result),
                       ),

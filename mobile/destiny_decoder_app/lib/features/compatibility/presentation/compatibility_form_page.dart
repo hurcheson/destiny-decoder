@@ -71,10 +71,11 @@ class _CompatibilityFormPageState extends ConsumerState<CompatibilityFormPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Compatibility Check'),
+        centerTitle: true,
       ),
       body: GradientContainer(
-        startColor: AppColors.primary.withValues(alpha: 0.08),
-        endColor: AppColors.accent.withValues(alpha: 0.03),
+        startColor: AppColors.primary.withValues(alpha: 0.05),
+        endColor: AppColors.accent.withValues(alpha: 0.02),
         child: SafeArea(
           child: SingleChildScrollView(
             padding: const EdgeInsets.all(AppSpacing.lg),
@@ -83,18 +84,47 @@ class _CompatibilityFormPageState extends ConsumerState<CompatibilityFormPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  const SizedBox(height: AppSpacing.lg),
+                  const SizedBox(height: AppSpacing.md),
                   
-                  // Header
-                  Text(
-                    '💫 Compare Two Souls 💫',
-                    textAlign: TextAlign.center,
-                    style: AppTypography.headingLarge.copyWith(
-                      color: AppColors.primary,
-                      fontWeight: FontWeight.w700,
+                  // Header with icon
+                  Center(
+                    child: Container(
+                      padding: const EdgeInsets.all(AppSpacing.lg),
+                      decoration: BoxDecoration(
+                        gradient: const LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [
+                            Color(0xFFFF6B9D),
+                            Color(0xFFC239B3),
+                          ],
+                        ),
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: const Color(0xFFFF6B9D).withValues(alpha: 0.3),
+                            blurRadius: 20,
+                            offset: const Offset(0, 8),
+                          ),
+                        ],
+                      ),
+                      child: const Icon(
+                        Icons.favorite_rounded,
+                        size: 48,
+                        color: Colors.white,
+                      ),
                     ),
                   ),
-                  const SizedBox(height: AppSpacing.md),
+                  const SizedBox(height: AppSpacing.lg),
+                  Text(
+                    'Compare Two Souls',
+                    textAlign: TextAlign.center,
+                    style: AppTypography.headingLarge.copyWith(
+                      color: AppColors.textDark,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.sm),
                   Text(
                     'Discover the numerological compatibility between two people',
                     textAlign: TextAlign.center,

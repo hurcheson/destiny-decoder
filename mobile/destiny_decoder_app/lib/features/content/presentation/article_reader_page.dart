@@ -173,7 +173,7 @@ class _ArticleReaderPageState extends ConsumerState<ArticleReaderPage> {
     }
   }
 
-  void _shareArticle(Article article) {
+  Future<void> _shareArticle(Article article) async {
     final refCode = _generateRefCode();
     final text = ShareContentFormatter.formatArticleShare(
       article.title,
@@ -182,10 +182,7 @@ class _ArticleReaderPageState extends ConsumerState<ArticleReaderPage> {
       AppConfig.appShareUrl,
       refCode,
     );
-    Share.share(
-      text,
-      subject: article.title,
-    );
+    await SharePlus.instance.share(ShareParams(text: text));
   }
 
   String _generateRefCode([int length = 8]) {

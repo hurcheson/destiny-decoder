@@ -85,7 +85,7 @@ class NotificationService {
   /// Test: Show a blessed day notification (via print for now).
   Future<void> showTestBlessedDayNotification() async {
     if (kDebugMode) {
-      print('✨ Test Blessed Day Notification: Today is Your Blessed Day!');
+      print('Test Blessed Day Notification: Today is Your Blessed Day!');
       print(
           'Harness the divine energy. This is an auspicious day for important decisions.');
     }
@@ -94,7 +94,7 @@ class NotificationService {
   /// Test: Show a personal year notification (via print for now).
   Future<void> showTestPersonalYearNotification() async {
     if (kDebugMode) {
-      print('🎂 Test Personal Year Notification: Personal Year 7 Begins!');
+      print('Test Personal Year Notification: Personal Year 7 Begins!');
       print(
           'Happy numerological birthday! You\'re entering a year of wisdom and introspection.');
     }

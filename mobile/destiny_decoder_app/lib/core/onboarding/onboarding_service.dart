@@ -213,23 +213,22 @@ final onboardingServiceProvider =
 
 /// Riverpod provider for onboarding state
 final onboardingStateProvider =
-    StateNotifierProvider<OnboardingStateNotifier, OnboardingState>((ref) {
-  return OnboardingStateNotifier(ref);
-});
+    NotifierProvider<OnboardingStateNotifier, OnboardingState>(OnboardingStateNotifier.new);
 
 /// State notifier for managing onboarding state
-class OnboardingStateNotifier extends StateNotifier<OnboardingState> {
-  final Ref _ref;
+class OnboardingStateNotifier extends Notifier<OnboardingState> {
   OnboardingService? _service;
   bool _isInitialized = false;
 
-  OnboardingStateNotifier(this._ref) : super(OnboardingState()) {
+  @override
+  OnboardingState build() {
     _initialize();
+    return OnboardingState();
   }
 
   Future<void> _initialize() async {
     try {
-      _service = await _ref.read(onboardingServiceProvider.future);
+      _service = await ref.read(onboardingServiceProvider.future);
       _isInitialized = true;
       state = _service!.getState();
     } catch (e) {

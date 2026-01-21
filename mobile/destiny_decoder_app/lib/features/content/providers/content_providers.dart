@@ -65,12 +65,13 @@ final recommendationsProvider = FutureProvider.family<List<ArticleListItem>, int
 );
 
 // Search/Filter State Provider
-final articleFiltersProvider = StateNotifierProvider<ArticleFiltersNotifier, ArticleFilters>(
-  (ref) => ArticleFiltersNotifier(),
+final articleFiltersProvider = NotifierProvider<ArticleFiltersNotifier, ArticleFilters>(
+  ArticleFiltersNotifier.new,
 );
 
-class ArticleFiltersNotifier extends StateNotifier<ArticleFilters> {
-  ArticleFiltersNotifier() : super(const ArticleFilters());
+class ArticleFiltersNotifier extends Notifier<ArticleFilters> {
+  @override
+  ArticleFilters build() => const ArticleFilters();
 
   void setCategory(String? category) {
     state = state.copyWith(category: category);
@@ -122,13 +123,15 @@ class ArticleFilters {
 }
 
 // Bookmarks Provider (using SharedPreferences for persistence)
-final bookmarksProvider = StateNotifierProvider<BookmarksNotifier, Set<String>>(
-  (ref) => BookmarksNotifier(),
+final bookmarksProvider = NotifierProvider<BookmarksNotifier, Set<String>>(
+  BookmarksNotifier.new,
 );
 
-class BookmarksNotifier extends StateNotifier<Set<String>> {
-  BookmarksNotifier() : super({}) {
+class BookmarksNotifier extends Notifier<Set<String>> {
+  @override
+  Set<String> build() {
     _loadBookmarks();
+    return {};
   }
 
   Future<void> _loadBookmarks() async {
@@ -144,7 +147,7 @@ class BookmarksNotifier extends StateNotifier<Set<String>> {
 
   void toggleBookmark(String slug) {
     if (state.contains(slug)) {
-      state = {...state}..remove(slug);
+      state = Set<String>.from(state)..remove(slug);
     } else {
       state = {...state, slug};
     }

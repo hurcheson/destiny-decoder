@@ -109,7 +109,7 @@ class DailyInsightTile extends StatelessWidget {
 
   void _shareInsight(BuildContext context) {
     final text = '''
-🔮 Daily Insight for ${data.date}
+Daily Insight for ${data.date}
 
 Power Number: ${data.powerNumber}
 ${data.insight.title}
@@ -125,6 +125,6 @@ ${data.insight.affirmation}
 Shared from Destiny Decoder
     '''.trim();
 
-    Share.share(text, subject: '${data.insight.title} - ${data.date}');
+    SharePlus.instance.share(ShareParams(text: text));
   }
 }

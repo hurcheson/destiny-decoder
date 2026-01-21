@@ -106,7 +106,7 @@ class ArticleCardGenerator {
     // Read time badge
     final readTimePainter = TextPainter(
       text: TextSpan(
-        text: '📖 $readTime min read',
+        text: '$readTime min read',
         style: const TextStyle(
           color: Colors.white70,
           fontSize: 28,
@@ -133,7 +133,7 @@ class ArticleCardGenerator {
     );
 
     // Footer text
-    const footerText = 'Explore numerology insights\nwith Destiny Decoder 🔮';
+    const footerText = 'Explore numerology insights\nwith Destiny Decoder';
     final footerPainter = TextPainter(
       text: const TextSpan(
         text: footerText,

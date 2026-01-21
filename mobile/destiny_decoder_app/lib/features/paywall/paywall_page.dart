@@ -109,19 +109,19 @@ class _PaywallPageState extends ConsumerState<PaywallPage> {
 
     switch (widget.trigger) {
       case PaywallTrigger.postCalculation:
-        title = '✨ Unlock Your Full Potential';
+        title = 'Unlock Your Full Potential';
         subtitle = 'Get unlimited readings and detailed insights';
         break;
       case PaywallTrigger.readingLimit:
-        title = '🔒 Reading Limit Reached';
+        title = 'Reading Limit Reached';
         subtitle = 'Upgrade to save unlimited readings';
         break;
       case PaywallTrigger.pdfLimit:
-        title = '📄 PDF Limit Reached';
+        title = 'PDF Limit Reached';
         subtitle = 'Upgrade for unlimited PDF exports';
         break;
       case PaywallTrigger.truncatedText:
-        title = '📖 Full Interpretation Locked';
+        title = 'Full Interpretation Locked';
         subtitle = 'Upgrade to read complete interpretations';
         break;
     }

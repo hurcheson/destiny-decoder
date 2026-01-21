@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/firebase/firebase_service.dart';
 import '../../../core/onboarding/onboarding_service.dart';
-import '../../onboarding/view/onboarding_page.dart';
+import '../../onboarding/presentation/onboarding_page.dart';
 import '../../../core/notifications/notification_service.dart';
 import '../../debug/deep_link_test_page.dart';
 import 'widgets/notification_preferences_widget.dart';
@@ -359,7 +359,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                     ),
                     const SizedBox(height: 12),
                     Text(
-                      'Destiny Decoder 🔮',
+                      'Destiny Decoder',
                       style: Theme.of(context).textTheme.titleSmall,
                     ),
                     const SizedBox(height: 8),

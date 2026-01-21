@@ -131,7 +131,7 @@ class LifeSealCardGenerator {
     // Footer
     final footerPainter = TextPainter(
       text: const TextSpan(
-        text: 'Discover your destiny with\nDestiny Decoder 🔮',
+        text: 'Discover your destiny with\nDestiny Decoder',
         style: TextStyle(
           color: Colors.white60,
           fontSize: 24,

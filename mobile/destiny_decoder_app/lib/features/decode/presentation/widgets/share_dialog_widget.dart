@@ -12,6 +12,7 @@ class ShareDialogWidget extends ConsumerStatefulWidget {
   final String keyTakeaway;
   final String shareText;
   final VoidCallback? onShareComplete;
+  final VoidCallback? onShareFullPageImage;
 
   const ShareDialogWidget({
     super.key,
@@ -19,6 +20,7 @@ class ShareDialogWidget extends ConsumerStatefulWidget {
     required this.keyTakeaway,
     required this.shareText,
     this.onShareComplete,
+    this.onShareFullPageImage,
   });
 
   @override
@@ -32,14 +34,14 @@ class _ShareDialogWidgetState extends ConsumerState<ShareDialogWidget> {
   /// Generate the share text that will be shared to social platforms.
   String _generateShareText() {
     return '''
-✨ Check out my Life Seal #${widget.lifeSealNumber} reading from Destiny Decoder!
+Check out my Life Seal #${widget.lifeSealNumber} reading from Destiny Decoder!
 
-💫 Key Insight:
+KEY INSIGHT:
 ${widget.keyTakeaway}
 
-${widget.shareText.isNotEmpty ? '\n📖 Full Reading:\n${widget.shareText}' : ''}
+${widget.shareText.isNotEmpty ? '\nFULL READING:\n${widget.shareText}' : ''}
 
-🔮 Discover your destiny: https://destiny-decoder.app
+Discover your destiny: https://destiny-decoder.app
 '''.trim();
   }
 
@@ -265,6 +267,14 @@ ${widget.shareText.isNotEmpty ? '\n📖 Full Reading:\n${widget.shareText}' : ''
               color: Colors.deepPurple,
               onPressed: _isSharing ? null : _copyToClipboard,
             ),
+            const SizedBox(height: 12),
+            if (widget.onShareFullPageImage != null)
+              _buildShareButton(
+                icon: Icons.image,
+                label: 'Share Full Page Image',
+                color: Colors.purple,
+                onPressed: _isSharing ? null : widget.onShareFullPageImage,
+              ),
 
             const SizedBox(height: 20),
 

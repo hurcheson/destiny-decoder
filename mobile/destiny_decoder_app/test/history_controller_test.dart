@@ -1,7 +1,9 @@
 import 'package:destiny_decoder_app/features/decode/domain/decode_result.dart';
 import 'package:destiny_decoder_app/features/history/data/history_local_source.dart';
 import 'package:destiny_decoder_app/features/history/data/history_repository.dart';
+import 'package:destiny_decoder_app/features/history/data/history_providers.dart';
 import 'package:destiny_decoder_app/features/history/presentation/history_controller.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -38,23 +40,30 @@ DecodeResult _sampleResult(String name) {
 }
 
 void main() {
+  late ProviderContainer container;
   late HistoryLocalSource localSource;
-  late HistoryRepository repository;
-  late HistoryController controller;
 
-  setUp(() {
+  setUp(() async {
     SharedPreferences.setMockInitialValues({});
     localSource = HistoryLocalSource();
-    repository = HistoryRepository(localSource);
-    controller = HistoryController(repository);
+    
+    container = ProviderContainer(
+      overrides: [
+        historyRepositoryProvider.overrideWithValue(
+          HistoryRepository(localSource),
+        ),
+      ],
+    );
   });
 
   test('addFromResult stores entry and updates state', () async {
+    final controller = container.read(historyControllerProvider.notifier);
+    
     await controller.refresh();
 
     await controller.addFromResult(_sampleResult('Test User'));
 
-    final state = controller.state.value!;
+    final state = container.read(historyControllerProvider).value!;
     expect(state.length, 1);
     expect(state.first.result.input.fullName, 'Test User');
 
@@ -64,25 +73,29 @@ void main() {
   });
 
   test('delete removes entry by id', () async {
+    final controller = container.read(historyControllerProvider.notifier);
+    
     await controller.refresh();
     await controller.addFromResult(_sampleResult('Delete Me'));
-    final id = controller.state.value!.first.id;
+    final id = container.read(historyControllerProvider).value!.first.id;
 
     await controller.delete(id);
 
-    expect(controller.state.value, isEmpty);
+    expect(container.read(historyControllerProvider).value, isEmpty);
     final stored = await localSource.loadEntries();
     expect(stored, isEmpty);
   });
 
   test('clear removes all entries', () async {
+    final controller = container.read(historyControllerProvider.notifier);
+    
     await controller.refresh();
     await controller.addFromResult(_sampleResult('First'));
     await controller.addFromResult(_sampleResult('Second'));
 
     await controller.clear();
 
-    expect(controller.state.value, isEmpty);
+    expect(container.read(historyControllerProvider).value, isEmpty);
     final stored = await localSource.loadEntries();
     expect(stored, isEmpty);
   });

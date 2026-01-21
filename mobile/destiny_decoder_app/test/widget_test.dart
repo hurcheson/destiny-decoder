@@ -20,5 +20,8 @@ void main() {
     );
 
     expect(find.byType(MaterialApp), findsOneWidget);
+    
+    // Advance the splash screen timer (3 seconds)
+    await tester.pumpAndSettle(const Duration(seconds: 3));
   });
 }

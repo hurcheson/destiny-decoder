@@ -4,8 +4,8 @@ import 'package:destiny_decoder_app/core/notifications/notification_preferences_
 
 /// Provider for notification preferences
 final notificationPreferencesProvider =
-    StateNotifierProvider<NotificationPreferencesNotifier, NotificationPreferences>(
-  (ref) => NotificationPreferencesNotifier(),
+    NotifierProvider<NotificationPreferencesNotifier, NotificationPreferences>(
+  NotificationPreferencesNotifier.new,
 );
 
 class NotificationPreferences {
@@ -56,8 +56,9 @@ class NotificationPreferences {
   }
 }
 
-class NotificationPreferencesNotifier extends StateNotifier<NotificationPreferences> {
-  NotificationPreferencesNotifier() : super(NotificationPreferences());
+class NotificationPreferencesNotifier extends Notifier<NotificationPreferences> {
+  @override
+  NotificationPreferences build() => NotificationPreferences();
 
   Future<void> loadPreferences() async {
     state = state.copyWith(isLoading: true, error: null);
@@ -183,7 +184,7 @@ class _NotificationPreferencesWidgetState
             _buildNotificationToggle(
               context: context,
               isDark: isDark,
-              icon: '🌟',
+              icon: Icons.star.toString(),
               title: 'Blessed Days',
               subtitle: 'Get notified on your blessed dates',
               value: prefs.blessedDayAlerts,
@@ -195,7 +196,7 @@ class _NotificationPreferencesWidgetState
             _buildNotificationToggle(
               context: context,
               isDark: isDark,
-              icon: '📚',
+              icon: Icons.menu_book.toString(),
               title: 'Daily Insights',
               subtitle: 'Receive your daily numerology reading',
               value: prefs.dailyInsights,
@@ -207,7 +208,7 @@ class _NotificationPreferencesWidgetState
             _buildNotificationToggle(
               context: context,
               isDark: isDark,
-              icon: '🌙',
+              icon: Icons.nights_stay.toString(),
               title: 'Lunar Phase Updates',
               subtitle: 'Stay informed about lunar cycles',
               value: prefs.lunarPhaseAlerts,
@@ -219,7 +220,7 @@ class _NotificationPreferencesWidgetState
             _buildNotificationToggle(
               context: context,
               isDark: isDark,
-              icon: '💫',
+              icon: Icons.auto_awesome.toString(),
               title: 'Motivational Quotes',
               subtitle: 'Daily inspiration and encouragement',
               value: prefs.motivationalQuotes,
