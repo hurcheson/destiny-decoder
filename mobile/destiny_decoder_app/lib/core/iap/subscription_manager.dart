@@ -2,6 +2,8 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../utils/logger.dart';
+import '../config/app_config.dart';
+import '../device/device_id_provider.dart';
 
 /// Subscription tier enumeration
 enum SubscriptionTier {
@@ -197,16 +199,13 @@ class SubscriptionManager {
 
 /// Riverpod provider for SubscriptionManager
 final subscriptionManagerProvider = Provider<SubscriptionManager>((ref) {
-  // TODO: Get base URL from config
-  return SubscriptionManager(baseUrl: 'http://localhost:8000');
+  return SubscriptionManager(baseUrl: AppConfig.apiBaseUrl);
 });
 
 /// Provider for current subscription status
 final subscriptionStatusProvider = FutureProvider<SubscriptionStatus?>((ref) async {
   final manager = ref.watch(subscriptionManagerProvider);
+  final deviceId = await ref.watch(deviceIdProvider.future);
   
-  // TODO: Get actual user ID from auth provider
-  const userId = 'anonymous'; // Placeholder
-  
-  return await manager.getSubscriptionStatus(userId);
+  return await manager.getSubscriptionStatus(deviceId);
 });

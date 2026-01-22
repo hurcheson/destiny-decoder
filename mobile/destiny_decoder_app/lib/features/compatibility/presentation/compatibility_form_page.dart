@@ -203,20 +203,19 @@ class _CompatibilityFormPageState extends ConsumerState<CompatibilityFormPage> {
                           const SizedBox(height: AppSpacing.sm),
                           TextFormField(
                             controller: _dobAController,
-                            decoration: const InputDecoration(
+                            readOnly: true,
+                            decoration: InputDecoration(
                               hintText: 'YYYY-MM-DD',
-                              prefixIcon: Icon(Icons.calendar_today),
+                              prefixIcon: const Icon(Icons.calendar_today),
                               prefixIconColor: AppColors.primary,
+                              suffixIcon: IconButton(
+                                icon: const Icon(Icons.date_range),
+                                onPressed: () => _selectDateA(context),
+                              ),
                             ),
-                            keyboardType: TextInputType.datetime,
-                            textInputAction: TextInputAction.next,
                             validator: (value) {
                               if (value == null || value.isEmpty) {
-                                return 'Please enter date of birth';
-                              }
-                              if (!RegExp(r'^\d{4}-\d{2}-\d{2}$')
-                                  .hasMatch(value)) {
-                                return 'Use format YYYY-MM-DD';
+                                return 'Please select date of birth';
                               }
                               return null;
                             },
@@ -297,19 +296,19 @@ class _CompatibilityFormPageState extends ConsumerState<CompatibilityFormPage> {
                           const SizedBox(height: AppSpacing.sm),
                           TextFormField(
                             controller: _dobBController,
-                            decoration: const InputDecoration(
+                            readOnly: true,
+                            decoration: InputDecoration(
                               hintText: 'YYYY-MM-DD',
-                              prefixIcon: Icon(Icons.calendar_today),
+                              prefixIcon: const Icon(Icons.calendar_today),
                               prefixIconColor: AppColors.accent,
+                              suffixIcon: IconButton(
+                                icon: const Icon(Icons.date_range),
+                                onPressed: () => _selectDateB(context),
+                              ),
                             ),
-                            keyboardType: TextInputType.datetime,
                             validator: (value) {
                               if (value == null || value.isEmpty) {
-                                return 'Please enter date of birth';
-                              }
-                              if (!RegExp(r'^\d{4}-\d{2}-\d{2}$')
-                                  .hasMatch(value)) {
-                                return 'Use format YYYY-MM-DD';
+                                return 'Please select date of birth';
                               }
                               return null;
                             },
@@ -380,5 +379,37 @@ class _CompatibilityFormPageState extends ConsumerState<CompatibilityFormPage> {
         ),
       ),
     );
+  }
+
+  /// Open Material date picker for Person A
+  Future<void> _selectDateA(BuildContext context) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now().subtract(const Duration(days: 365 * 18)),
+      firstDate: DateTime(1900),
+      lastDate: DateTime.now(),
+    );
+
+    if (picked != null) {
+      final String formattedDate =
+          '${picked.year}-${picked.month.toString().padLeft(2, '0')}-${picked.day.toString().padLeft(2, '0')}';
+      _dobAController.text = formattedDate;
+    }
+  }
+
+  /// Open Material date picker for Person B
+  Future<void> _selectDateB(BuildContext context) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now().subtract(const Duration(days: 365 * 18)),
+      firstDate: DateTime(1900),
+      lastDate: DateTime.now(),
+    );
+
+    if (picked != null) {
+      final String formattedDate =
+          '${picked.year}-${picked.month.toString().padLeft(2, '0')}-${picked.day.toString().padLeft(2, '0')}';
+      _dobBController.text = formattedDate;
+    }
   }
 }

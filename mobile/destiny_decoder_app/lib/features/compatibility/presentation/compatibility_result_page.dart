@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:screenshot/screenshot.dart';
 import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:path_provider/path_provider.dart';
@@ -8,9 +7,7 @@ import 'package:open_filex/open_filex.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../core/network/api_client_provider.dart';
-import '../../../core/utils/share_service.dart';
 import '../../decode/presentation/widgets/cards.dart';
-import '../../history/presentation/history_controller.dart';
 import '../domain/compatibility_result.dart';
 import '../data/compatibility_repository.dart';
 import 'compatibility_controller.dart';
@@ -25,159 +22,12 @@ class CompatibilityResultPage extends ConsumerStatefulWidget {
 
 class _CompatibilityResultPageState
     extends ConsumerState<CompatibilityResultPage> {
-  final _screenshotController = ScreenshotController();
   bool _isExporting = false;
 
   /// Refresh the compatibility reading - provides visual refresh feedback
   Future<void> _refreshReading() async {
     // Small delay for visual feedback
     await Future.delayed(const Duration(milliseconds: 300));
-  }
-
-  /// Build the full compatibility content column for export/preview
-  Widget _buildCompatibilityContent(
-    BuildContext context,
-    bool isDarkMode,
-    CompatibilityResult result,
-  ) {
-    final compat = result.compatibility;
-    final personA = result.personA;
-    final personB = result.personB;
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        // Overall compatibility score
-        Card(
-          elevation: AppElevation.lg,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(AppRadius.xl),
-          ),
-          child: Container(
-            padding: const EdgeInsets.all(AppSpacing.xl),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(AppRadius.xl),
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  _getCompatibilityColor(compat.overall, isDarkMode)
-                      .withValues(alpha: 0.2),
-                  _getCompatibilityColor(compat.overall, isDarkMode)
-                      .withValues(alpha: 0.05),
-                ],
-              ),
-            ),
-            child: Column(
-              children: [
-                Icon(
-                  _getCompatibilityIcon(compat.overall),
-                  size: 64,
-                  color: _getCompatibilityColor(compat.overall, isDarkMode),
-                ),
-                const SizedBox(height: AppSpacing.md),
-                Text(
-                  compat.overall,
-                  style: AppTypography.headingLarge.copyWith(
-                    color:
-                        _getCompatibilityColor(compat.overall, isDarkMode),
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: AppSpacing.sm),
-                Text(
-                  '${compat.score} / ${compat.maxScore} points',
-                  style: AppTypography.bodyLarge.copyWith(
-                    color: isDarkMode
-                        ? AppColors.darkText
-                        : AppColors.textDark,
-                  ),
-                ),
-                const SizedBox(height: AppSpacing.md),
-                LinearProgressIndicator(
-                  value: compat.percentage / 100,
-                  minHeight: 8,
-                  borderRadius: BorderRadius.circular(4),
-                  backgroundColor: Colors.grey.withValues(alpha: 0.2),
-                  valueColor: AlwaysStoppedAnimation(
-                    _getCompatibilityColor(compat.overall, isDarkMode),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-
-        const SizedBox(height: AppSpacing.xl),
-
-        // Detailed scores
-        Text(
-          'Compatibility Breakdown',
-          style: AppTypography.headingMedium.copyWith(
-            color: isDarkMode ? AppColors.darkText : AppColors.textDark,
-          ),
-        ),
-        const SizedBox(height: AppSpacing.md),
-
-        _CompatibilityMetric(
-          label: 'Life Path Compatibility',
-          value: compat.lifeSeal,
-          isDarkMode: isDarkMode,
-          icon: Icons.auto_awesome,
-        ),
-        const SizedBox(height: AppSpacing.md),
-
-        _CompatibilityMetric(
-          label: 'Soul Connection',
-          value: compat.soulNumber,
-          isDarkMode: isDarkMode,
-          icon: Icons.favorite,
-        ),
-        const SizedBox(height: AppSpacing.md),
-
-        _CompatibilityMetric(
-          label: 'Personality Match',
-          value: compat.personalityNumber,
-          isDarkMode: isDarkMode,
-          icon: Icons.people,
-        ),
-
-        const SizedBox(height: AppSpacing.xl),
-
-        // Side-by-side comparison
-        Text(
-          'Individual Profiles',
-          style: AppTypography.headingMedium.copyWith(
-            color: isDarkMode ? AppColors.darkText : AppColors.textDark,
-          ),
-        ),
-        const SizedBox(height: AppSpacing.md),
-
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(
-              child: _PersonCard(
-                person: personA,
-                label: 'Person A',
-                color: AppColors.primary,
-                isDarkMode: isDarkMode,
-              ),
-            ),
-            const SizedBox(width: AppSpacing.md),
-            Expanded(
-              child: _PersonCard(
-                person: personB,
-                label: 'Person B',
-                color: AppColors.accent,
-                isDarkMode: isDarkMode,
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: AppSpacing.xl * 2),
-      ],
-    );
   }
 
   Future<void> _exportPdf(WidgetRef ref, CompatibilityResult result) async {
@@ -362,42 +212,40 @@ class _CompatibilityResultPageState
           appBar: AppBar(
             title: const Text('Compatibility Analysis'),
           ),
-          body: Screenshot(
-            controller: _screenshotController,
-            child: Container(
-              color: Colors.white,
-              child: GradientContainer(
-                child: RefreshIndicator(
-                  onRefresh: _refreshReading,
-                  child: SingleChildScrollView(
-                    padding: const EdgeInsets.all(AppSpacing.lg),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        // Overall compatibility score
-                        Card(
-                          elevation: AppElevation.lg,
-                          shape: RoundedRectangleBorder(
+          body: Container(
+            color: Colors.white,
+            child: GradientContainer(
+              child: RefreshIndicator(
+                onRefresh: _refreshReading,
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.all(AppSpacing.lg),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      // Overall compatibility score
+                      Card(
+                        elevation: AppElevation.lg,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(AppRadius.xl),
+                        ),
+                        child: Container(
+                          padding: const EdgeInsets.all(AppSpacing.xl),
+                          decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(AppRadius.xl),
-                          ),
-                          child: Container(
-                            padding: const EdgeInsets.all(AppSpacing.xl),
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(AppRadius.xl),
-                              gradient: LinearGradient(
-                                begin: Alignment.topLeft,
-                                end: Alignment.bottomRight,
-                                colors: [
-                                  _getCompatibilityColor(
-                                          compat.overall, isDarkMode)
-                                      .withValues(alpha: 0.2),
-                                  _getCompatibilityColor(
-                                          compat.overall, isDarkMode)
-                                      .withValues(alpha: 0.05),
-                                ],
-                              ),
+                            gradient: LinearGradient(
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                              colors: [
+                                _getCompatibilityColor(
+                                        compat.overall, isDarkMode)
+                                    .withValues(alpha: 0.2),
+                                _getCompatibilityColor(
+                                        compat.overall, isDarkMode)
+                                    .withValues(alpha: 0.05),
+                              ],
                             ),
-                            child: Column(
+                          ),
+                          child: Column(
                               children: [
                                 Icon(
                                   _getCompatibilityIcon(compat.overall),
@@ -511,9 +359,8 @@ class _CompatibilityResultPageState
                             ),
                           ],
                         ),
-                        const SizedBox(height: AppSpacing.xl * 2),
-                      ],
-                    ),
+                      const SizedBox(height: AppSpacing.xl * 2),
+                    ],
                   ),
                 ),
               ),

@@ -7,6 +7,7 @@ import '../../onboarding/presentation/onboarding_page.dart';
 import '../../../core/notifications/notification_service.dart';
 import '../../debug/deep_link_test_page.dart';
 import 'widgets/notification_preferences_widget.dart';
+import '../../subscription/presentation/subscription_page.dart';
 
 class SettingsPage extends ConsumerStatefulWidget {
   const SettingsPage({super.key});
@@ -307,6 +308,27 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
             const SizedBox(height: 24),
             // Notification Preferences Section
             const NotificationPreferencesWidget(),
+            
+            const SizedBox(height: 24),
+            // Subscription section
+            Text(
+              'Subscription',
+              style: Theme.of(context).textTheme.titleLarge,
+            ),
+            const SizedBox(height: 16),
+            Card(
+              child: ListTile(
+                leading: const Icon(Icons.card_membership),
+                title: const Text('Manage Subscription'),
+                subtitle: const Text('View plans and manage your subscription'),
+                trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+                onTap: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(builder: (_) => const SubscriptionPage()),
+                  );
+                },
+              ),
+            ),
             
             // Debug tools (only in debug mode)
             if (kDebugMode) ...[

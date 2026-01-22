@@ -1,23 +1,19 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:screenshot/screenshot.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:open_filex/open_filex.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../core/analytics/analytics_service.dart';
-import '../../../core/utils/share_service.dart';
 import 'decode_controller.dart';
 import 'timeline.dart';
 import 'widgets/cards.dart';
 import 'widgets/animated_number.dart';
 import 'widgets/recommended_articles_widget.dart';
-import 'widgets/share_dialog_widget.dart';
 import '../../sharing/widgets/share_widget.dart';
 import '../../sharing/models/share_models.dart';
-import '../../history/presentation/history_controller.dart';
 import '../../daily_insights/view/daily_insights_page.dart';
 
 class DecodeResultPage extends ConsumerStatefulWidget {
@@ -284,36 +280,7 @@ class _DecodeResultPageState extends ConsumerState<DecodeResultPage>
     }
   }
 
-  /// Show the share dialog with platform-specific sharing options.
-  void _showShareDialog(
-      BuildContext context, dynamic lifeSeal, dynamic result) {
-    final keyTakeaway = _extractKeySentence(
-        result.interpretation?.elementAt(0)['summary'] ??
-            'Check your life reading!');
-    final interpretation =
-        (result.interpretation?.elementAt(0)?['summary'] ?? '')
-            .toString()
-            .split('.')
-            .first;
 
-    showDialog(
-      context: context,
-      builder: (context) => ShareDialogWidget(
-        lifeSealNumber: lifeSeal.number,
-        keyTakeaway: keyTakeaway,
-        shareText: interpretation,
-        onShareComplete: () {
-          // Optional: Show confirmation or close dialog
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Share recorded! Thanks for sharing your reading.'),
-              duration: Duration(seconds: 2),
-            ),
-          );
-        },
-      ),
-    );
-  }
 
   Widget _buildInterpretationAccordion(
     BuildContext context,
@@ -487,15 +454,7 @@ class _DecodeResultPageState extends ConsumerState<DecodeResultPage>
                   elevation: 0,
                   backgroundColor: Theme.of(context).colorScheme.surface,
                   scrolledUnderElevation: 0,
-                  actions: [
-                    IconButton(
-                      icon: Icon(Icons.share,
-                          color: AppColors.getAccentColorForTheme(isDarkMode)),
-                      tooltip: 'Share your reading',
-                      onPressed: () =>
-                          _showShareDialog(context, lifeSeal, result),
-                    ),
-                  ],
+                  actions: [],
                   bottom: TabBar(
                     indicatorColor:
                         AppColors.getAccentColorForTheme(isDarkMode),
@@ -632,8 +591,7 @@ class _DecodeResultPageState extends ConsumerState<DecodeResultPage>
                       ),
                     ),
                   ),
-                ),
-              );
+                );
             },
           ),
         );

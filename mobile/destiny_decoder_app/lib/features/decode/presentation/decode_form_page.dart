@@ -439,20 +439,21 @@ class _DecodeFormPageState extends ConsumerState<DecodeFormPage>
               const SizedBox(height: AppSpacing.sm),
               TextFormField(
                 controller: _dobController,
+                readOnly: true,
                 decoration: InputDecoration(
                   hintText: 'YYYY-MM-DD',
                   prefixIcon: const Icon(Icons.calendar_today_outlined),
                   prefixIconColor: AppColors.primary,
                   filled: true,
                   fillColor: AppColors.background,
+                  suffixIcon: IconButton(
+                    icon: const Icon(Icons.date_range),
+                    onPressed: () => _selectDate(context, _dobController),
+                  ),
                 ),
-                keyboardType: TextInputType.datetime,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Please enter your date of birth';
-                  }
-                  if (!RegExp(r'^\d{4}-\d{2}-\d{2}$').hasMatch(value)) {
-                    return 'Use format YYYY-MM-DD';
+                    return 'Please select your date of birth';
                   }
                   return null;
                 },
@@ -505,6 +506,24 @@ class _DecodeFormPageState extends ConsumerState<DecodeFormPage>
     );
   }
 
+  /// Open Material date picker and populate DOB field
+  Future<void> _selectDate(
+      BuildContext context, TextEditingController controller) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now().subtract(const Duration(days: 365 * 18)),
+      firstDate: DateTime(1900),
+      lastDate: DateTime.now(),
+    );
+
+    if (picked != null) {
+      // Format as YYYY-MM-DD
+      final String formattedDate =
+          '${picked.year}-${picked.month.toString().padLeft(2, '0')}-${picked.day.toString().padLeft(2, '0')}';
+      controller.text = formattedDate;
+    }
+  }
 }
+
 
 

@@ -63,6 +63,7 @@ class _LifeTimelineState extends State<LifeTimeline> with TickerProviderStateMix
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
+      mainAxisSize: MainAxisSize.min,
       children: [
         // Current phase indicator (enhanced)
         if (currentPhase.isNotEmpty)
@@ -102,23 +103,27 @@ class _LifeTimelineState extends State<LifeTimeline> with TickerProviderStateMix
         
         const SizedBox(height: AppSpacing.xl),
         
-        // Detail panel with smooth animations
-        AnimatedSwitcher(
+        // Detail panel with smooth animations and constraints
+        AnimatedSize(
           duration: const Duration(milliseconds: 350),
-          switchInCurve: Curves.easeOutCubic,
-          transitionBuilder: (child, animation) {
-            return FadeTransition(
-              opacity: animation,
-              child: SlideTransition(
-                position: Tween<Offset>(
-                  begin: const Offset(0, 0.1),
-                  end: Offset.zero,
-                ).animate(animation),
-                child: child,
-              ),
-            );
-          },
-          child: _buildDetailPanel(context, isDarkMode),
+          curve: Curves.easeOutCubic,
+          child: AnimatedSwitcher(
+            duration: const Duration(milliseconds: 350),
+            switchInCurve: Curves.easeOutCubic,
+            transitionBuilder: (child, animation) {
+              return FadeTransition(
+                opacity: animation,
+                child: SlideTransition(
+                  position: Tween<Offset>(
+                    begin: const Offset(0, 0.1),
+                    end: Offset.zero,
+                  ).animate(animation),
+                  child: child,
+                ),
+              );
+            },
+            child: _buildDetailPanel(context, isDarkMode),
+          ),
         ),
       ],
     );
@@ -706,12 +711,7 @@ class _EnhancedDetailCard extends StatelessWidget {
           
           // Content
           Padding(
-            padding: const EdgeInsets.only(
-              left: AppSpacing.md,
-              right: AppSpacing.md,
-              top: AppSpacing.md,
-              bottom: 120, // Extra padding to avoid FAB overlap
-            ),
+            padding: const EdgeInsets.all(AppSpacing.md),
             child: Text(
               content,
               style: AppTypography.bodyMedium.copyWith(
