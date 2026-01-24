@@ -92,6 +92,7 @@ class DailyInsightTile extends StatelessWidget {
             Text(
               data.briefInsight,
               style: Theme.of(context).textTheme.bodyMedium,
+              softWrap: true,
             ),
             const SizedBox(height: 12),
             Wrap(

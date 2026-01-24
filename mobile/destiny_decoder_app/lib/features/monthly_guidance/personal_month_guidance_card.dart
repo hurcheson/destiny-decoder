@@ -200,8 +200,7 @@ class PersonalMonthGuidanceCard extends ConsumerWidget {
             Text(
               data.theme,
               style: theme.textTheme.bodyMedium,
-              maxLines: 3,
-              overflow: TextOverflow.ellipsis,
+              softWrap: true,
             ),
 
             const SizedBox(height: 12),
@@ -250,6 +249,7 @@ class PersonalMonthGuidanceCard extends ConsumerWidget {
         style: theme.textTheme.bodySmall?.copyWith(
           height: 1.5,
         ),
+        softWrap: true,
       ),
     );
   }
