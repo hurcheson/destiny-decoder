@@ -213,6 +213,55 @@ class EnhancedInterpretationCard extends StatelessWidget {
             ),
           ),
         ],
+        
+        // Compatibility Hint (if present)
+        if (enhanced!['compatibility_hint'] != null) ...[
+          const SizedBox(height: 16),
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.pink.withValues(alpha: 0.05),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: Colors.pink.withValues(alpha: 0.2),
+                width: 1,
+              ),
+            ),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Icon(
+                  Icons.favorite_outline,
+                  color: Colors.pink.shade400,
+                  size: 20,
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Romantic Compatibility',
+                        style: theme.textTheme.titleSmall?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: Colors.pink.shade400,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        enhanced!['compatibility_hint'],
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          height: 1.5,
+                        ),
+                        softWrap: true,
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ],
     );
   }

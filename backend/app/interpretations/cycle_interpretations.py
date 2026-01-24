@@ -202,7 +202,7 @@ ENHANCED_CYCLE_INTERPRETATIONS = {
             "Lead large projects or organizations",
             "Grow wealth through strategic investments",
             "Make things easier and better for others",
-            "Partner with numbers 3 and 7 for maximum success"
+            "Partner with numbers 3 and 7 for maximum compatibility"
         ],
         "challenges": [
             "Extremely busy—risk of burnout despite high energy",
@@ -210,7 +210,8 @@ ENHANCED_CYCLE_INTERPRETATIONS = {
             "May become too conservative with resources"
         ],
         "guidance": "This is your power phase! You have the rare ability to handle two major streams of activity (the '2 conduits'). Use your exceptional energy wisely—you're built to accomplish big things while helping others succeed.",
-        "special_note": "The '2 conduits' means you're naturally equipped to manage dual channels—whether that's two businesses, two major projects, or multiple income streams. This isn't about being scattered; it's about having the capacity for parallel success."
+        "special_note": "The '2 conduits' means you're naturally equipped to manage dual channels—whether that's two businesses, two major projects, or multiple income streams. This isn't about being scattered; it's about having the capacity for parallel success.",
+        "compatibility_hint": "For intimate relationships: People with first names that reduce to 3 or 7 create the most harmonious partnerships with you (based on physical name number compatibility)."
     },
     9: {
         "title": "The Completer",
@@ -273,12 +274,33 @@ NUMEROLOGY_GLOSSARY = {
         "definition": "The numerological theme for your current year, influencing the types of experiences and opportunities you'll encounter.",
         "example": "Your Personal Year changes annually and guides your focus for that 12-month period."
     },
+    "physical_name_number": {
+        "term": "Physical Name Number (Sex/Intimacy Number)",
+        "definition": "Calculated from ALL letters in your first name only, used to determine romantic and intimate compatibility.",
+        "example": "JOHN: J(1) + O(6) + H(8) + N(5) = 20 → reduces to 2. People with names reducing to 3 or 7 are compatible with 2s."
+    },
+    "soul_number": {
+        "term": "Soul Number",
+        "definition": "Calculated from only the VOWELS in your full name, representing your inner desires and spiritual nature.",
+        "example": "In JOHN: O = 6, so Soul Number is 6. This reveals what you truly desire at a soul level."
+    },
+    "personality_number": {
+        "term": "Personality Number",
+        "definition": "Calculated from only the CONSONANTS in your full name, representing how others perceive you.",
+        "example": "In JOHN: J(1) + H(8) + N(5) = 14 → reduces to 5. This is the energy you project to the world."
+    },
+    "compatibility": {
+        "term": "Compatibility",
+        "definition": "A measure of numerological harmony between two people, calculated from their Physical Name Numbers (first name only).",
+        "example": "If person A's first name reduces to 8 and person B's to 3, they have 'Compatible' energy (difference of 5... wait, that's actually Challenging). Differences of 0 = Very Strong, 1-2 = Compatible, 3+ = Challenging."
+    },
     "excel_reduce": {
         "term": "Reduction",
         "definition": "The process of reducing multi-digit numbers to single digits (1-9) to reveal their numerological meaning.",
         "example": "The number 25 reduces to 7 (2+5=7), revealing the energy of wisdom and analysis."
     }
 }
+
 
 def get_cycle_interpretation(number: int) -> str | None:
     """Retrieve legacy interpretation text for a cycle number (backward compatibility).
