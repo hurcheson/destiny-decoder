@@ -34,6 +34,9 @@ class DailyInsightTile extends StatelessWidget {
       }
     }();
 
+    // Limit chip width so long action text can wrap instead of overflowing
+    final chipMaxWidth = MediaQuery.of(context).size.width - 64; // card horizontal padding + spacing
+
     return Card(
       elevation: 2,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -99,7 +102,18 @@ class DailyInsightTile extends StatelessWidget {
               spacing: 8,
               runSpacing: 8,
               children: data.insight.actionFocus
-                  .map((a) => Chip(label: Text(a)))
+                  .map(
+                    (a) => ConstrainedBox(
+                      constraints: BoxConstraints(maxWidth: chipMaxWidth),
+                      child: Chip(
+                        labelPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                        label: Text(
+                          a,
+                          softWrap: true,
+                        ),
+                      ),
+                    ),
+                  )
                   .toList(),
             ),
           ],
