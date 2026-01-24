@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../core/theme/app_theme.dart';
+import '../widgets/enhanced_interpretation_card.dart';
 
 /// TIER 3: Enhanced Timeline Visualization with Interactive Storytelling
 /// Features:
@@ -326,6 +327,7 @@ class _LifeTimelineState extends State<LifeTimeline> with TickerProviderStateMix
       final cycle = widget.lifeCycles[selectedLifeCycleIndex!];
       final number = cycle['number'] as int?;
       final interpretation = cycle['interpretation'] as String?;
+      final enhanced = cycle['enhanced'] as Map<String, dynamic>?;
       final ageRange = cycle['age_range'] as String?;
       final planetColor = AppColors.getPlanetColorForTheme(number ?? 1, isDarkMode);
       
@@ -339,6 +341,7 @@ class _LifeTimelineState extends State<LifeTimeline> with TickerProviderStateMix
         title: phaseName,
         subtitle: 'Ages $ageRange • Number $number',
         content: interpretation ?? '',
+        enhanced: enhanced,
         accentColor: planetColor,
         textColor: textColor,
         isDarkMode: isDarkMode,
@@ -349,6 +352,7 @@ class _LifeTimelineState extends State<LifeTimeline> with TickerProviderStateMix
       final tp = widget.turningPoints[selectedTurningPointIndex!];
       final number = tp['number'] as int?;
       final interpretation = tp['interpretation'] as String?;
+      final enhanced = tp['enhanced'] as Map<String, dynamic>?;
       final age = tp['age'] as int?;
       final planetColor = AppColors.getPlanetColorForTheme(number ?? 1, isDarkMode);
 
@@ -357,6 +361,7 @@ class _LifeTimelineState extends State<LifeTimeline> with TickerProviderStateMix
         title: 'Turning Point at Age $age',
         subtitle: 'Number $number • Key Transition',
         content: interpretation ?? '',
+        enhanced: enhanced,
         accentColor: planetColor,
         textColor: textColor,
         isDarkMode: isDarkMode,
@@ -619,6 +624,7 @@ class _EnhancedDetailCard extends StatelessWidget {
   final String title;
   final String subtitle;
   final String content;
+  final Map<String, dynamic>? enhanced;
   final Color accentColor;
   final Color textColor;
   final bool isDarkMode;
@@ -629,6 +635,7 @@ class _EnhancedDetailCard extends StatelessWidget {
     required this.title,
     required this.subtitle,
     required this.content,
+    this.enhanced,
     required this.accentColor,
     required this.textColor,
     required this.isDarkMode,
@@ -709,15 +716,14 @@ class _EnhancedDetailCard extends StatelessWidget {
             ),
           ),
           
-          // Content
+          // Content - use enhanced interpretation if available
           Padding(
             padding: const EdgeInsets.all(AppSpacing.md),
-            child: Text(
-              content,
-              style: AppTypography.bodyMedium.copyWith(
-                color: textColor,
-                height: 1.6,
-              ),
+            child: EnhancedInterpretationCard(
+              enhanced: enhanced,
+              fallbackText: content,
+              accentColor: accentColor,
+              isDarkMode: isDarkMode,
             ),
           ),
         ],

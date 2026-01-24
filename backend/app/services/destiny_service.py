@@ -17,7 +17,10 @@ from ..core.cycles import (
 )
 from ..core.pinnacles import calculate_pinnacles
 from ..core.compatibility import evaluate_compatibility
-from ..interpretations.cycle_interpretations import get_cycle_interpretation
+from ..interpretations.cycle_interpretations import (
+    get_cycle_interpretation,
+    get_enhanced_cycle_interpretation
+)
 from .narrative_service import build_narrative
 from .report_service import build_report
 
@@ -76,11 +79,12 @@ def calculate_destiny(payload: dict) -> dict:
     # Excel-faithful age ranges for Life Cycles
     life_cycle_age_ranges = ["0–30", "30–55", "55+"]
     
-    # Build Life Cycles with interpretations and age ranges
+    # Build Life Cycles with both legacy and enhanced interpretations
     life_cycles_with_interpretations = [
         {
             "number": num,
             "interpretation": get_cycle_interpretation(num),
+            "enhanced": get_enhanced_cycle_interpretation(num),
             "age_range": life_cycle_age_ranges[idx]
         }
         for idx, num in enumerate(life_cycles)
@@ -89,11 +93,12 @@ def calculate_destiny(payload: dict) -> dict:
     # Excel-faithful ages for Turning Points
     turning_point_ages = [36, 45, 54, 63]
     
-    # Build Turning Points with interpretations and ages
+    # Build Turning Points with both legacy and enhanced interpretations
     turning_points_with_interpretations = [
         {
             "number": num,
             "interpretation": get_cycle_interpretation(num),
+            "enhanced": get_enhanced_cycle_interpretation(num),
             "age": turning_point_ages[idx]
         }
         for idx, num in enumerate(turning_points)
