@@ -50,7 +50,7 @@ class DailyInsightsPage extends ConsumerWidget {
               WeeklyPreviewCarousel(
                 lifeSeal: lifeSeal,
                 onSelect: (preview) {
-                  Navigator.of(context).push(
+                  Navigator.of(context).pushReplacement(
                     MaterialPageRoute(
                       builder: (_) => DailyInsightsPage(
                         lifeSeal: lifeSeal,
@@ -73,7 +73,7 @@ class DailyInsightsPage extends ConsumerWidget {
                     : DateTime.now(),
                 onSelectDate: (selected) {
                   final iso = "${selected.year.toString().padLeft(4, '0')}-${selected.month.toString().padLeft(2, '0')}-${selected.day.toString().padLeft(2, '0')}";
-                  Navigator.of(context).push(
+                  Navigator.of(context).pushReplacement(
                     MaterialPageRoute(
                       builder: (_) => DailyInsightsPage(
                         lifeSeal: lifeSeal,
