@@ -178,6 +178,14 @@ class _CompatibilityFormPageState extends ConsumerState<CompatibilityFormPage> {
                               color: AppColors.textDark,
                             ),
                           ),
+                          const SizedBox(height: AppSpacing.xs),
+                          Text(
+                            'First name is used for compatibility',
+                            style: AppTypography.labelSmall.copyWith(
+                              color: AppColors.textMuted,
+                              fontStyle: FontStyle.italic,
+                            ),
+                          ),
                           const SizedBox(height: AppSpacing.sm),
                           TextFormField(
                             controller: _nameAController,
@@ -269,6 +277,14 @@ class _CompatibilityFormPageState extends ConsumerState<CompatibilityFormPage> {
                             'Full Name',
                             style: AppTypography.labelMedium.copyWith(
                               color: AppColors.textDark,
+                            ),
+                          ),
+                          const SizedBox(height: AppSpacing.xs),
+                          Text(
+                            'First name is used for compatibility',
+                            style: AppTypography.labelSmall.copyWith(
+                              color: AppColors.textMuted,
+                              fontStyle: FontStyle.italic,
                             ),
                           ),
                           const SizedBox(height: AppSpacing.sm),

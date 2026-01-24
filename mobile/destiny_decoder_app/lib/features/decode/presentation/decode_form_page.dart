@@ -22,7 +22,8 @@ class DecodeFormPage extends ConsumerStatefulWidget {
 class _DecodeFormPageState extends ConsumerState<DecodeFormPage>
     with TickerProviderStateMixin {
   final _formKey = GlobalKey<FormState>();
-  final _fullNameController = TextEditingController();
+  final _firstNameController = TextEditingController();
+  final _otherNamesController = TextEditingController();
   final _dobController = TextEditingController();
   bool _showForm = false;
   late AnimationController _animationController;
@@ -57,7 +58,8 @@ class _DecodeFormPageState extends ConsumerState<DecodeFormPage>
 
   @override
   void dispose() {
-    _fullNameController.dispose();
+    _firstNameController.dispose();
+    _otherNamesController.dispose();
     _dobController.dispose();
     _animationController.dispose();
     super.dispose();
@@ -67,8 +69,12 @@ class _DecodeFormPageState extends ConsumerState<DecodeFormPage>
     final isValid = _formKey.currentState?.validate() ?? false;
     if (!isValid) return;
 
+    final firstName = _firstNameController.text.trim();
+    final otherNames = _otherNamesController.text.trim();
+    final fullName = otherNames.isNotEmpty ? '$firstName $otherNames' : firstName;
+
     await ref.read(decodeControllerProvider.notifier).decode(
-          fullName: _fullNameController.text.trim(),
+          fullName: fullName,
           dateOfBirth: _dobController.text.trim(),
         );
 
@@ -403,19 +409,27 @@ class _DecodeFormPageState extends ConsumerState<DecodeFormPage>
               ),
               const SizedBox(height: AppSpacing.lg),
 
-              // Name field
+              // First Name field
               Text(
-                'Full Name',
+                'First Name *',
                 style: AppTypography.labelMedium.copyWith(
                   color: AppColors.textDark,
                   fontWeight: FontWeight.w600,
                 ),
               ),
+              const SizedBox(height: AppSpacing.xs),
+              Text(
+                'Used for compatibility calculations',
+                style: AppTypography.labelSmall.copyWith(
+                  color: AppColors.textMuted,
+                  fontStyle: FontStyle.italic,
+                ),
+              ),
               const SizedBox(height: AppSpacing.sm),
               TextFormField(
-                controller: _fullNameController,
+                controller: _firstNameController,
                 decoration: InputDecoration(
-                  hintText: 'e.g., John Smith',
+                  hintText: 'e.g., John',
                   prefixIcon: const Icon(Icons.person_outline),
                   prefixIconColor: AppColors.primary,
                   filled: true,
@@ -423,8 +437,38 @@ class _DecodeFormPageState extends ConsumerState<DecodeFormPage>
                 ),
                 textInputAction: TextInputAction.next,
                 validator: (value) => value == null || value.isEmpty
-                    ? 'Please enter your full name'
+                    ? 'Please enter your first name'
                     : null,
+              ),
+              const SizedBox(height: AppSpacing.lg),
+
+              // Other Names field
+              Text(
+                'Other Names (Optional)',
+                style: AppTypography.labelMedium.copyWith(
+                  color: AppColors.textDark,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const SizedBox(height: AppSpacing.xs),
+              Text(
+                'Middle or last name',
+                style: AppTypography.labelSmall.copyWith(
+                  color: AppColors.textMuted,
+                  fontStyle: FontStyle.italic,
+                ),
+              ),
+              const SizedBox(height: AppSpacing.sm),
+              TextFormField(
+                controller: _otherNamesController,
+                decoration: InputDecoration(
+                  hintText: 'e.g., Smith',
+                  prefixIcon: const Icon(Icons.person_outline),
+                  prefixIconColor: AppColors.primary,
+                  filled: true,
+                  fillColor: AppColors.background,
+                ),
+                textInputAction: TextInputAction.next,
               ),
               const SizedBox(height: AppSpacing.lg),
 
