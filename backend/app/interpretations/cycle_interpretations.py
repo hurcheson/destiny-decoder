@@ -10,7 +10,7 @@ CYCLE_INTERPRETATIONS = {
     5: "Religious, Spiritual, Change, Freedom, Careless in Action, Good (Sales Person, Researcher, Communicator), Traveller (Financial Break Through), Media Person, Risk Taker, Quick Tempered, Don't Listen. Helpers are outside your Family, Knowledgeable, Superficial.",
     6: "Material Supply, Education, Family, Marriage Life, Keeper, Harmonizer, Rhythmic, Domineering, Intellectual, Emotional, Community, Large Institution, Admirer, Dedicated with work/Family/People.",
     7: "Wisdom, Knowledge, Perfection, Details, Researcher, Life Full of Challenges, A Planner, Full of Ideas, Has Good Health.",
-    8: "Blessed with Money, 2 Conduits, Extremely Busy, Good Health, Energetic, Endurance, Powerful, Discipline, Systemic, Makes things Easy and Better for people, Conservative, Grow with Money, Listener of Advice, Good Implementer. (Always choose 3&7).",
+        8: "Blessed with Money, Dual Income Streams (2 Conduits), Extremely Busy, Good Health, Energetic, Endurance, Powerful, Discipline, Systemic, Makes things Easy and Better for people, Conservative, Grow with Money, Listener of Advice, Good Implementer.",
     9: "Finisher, Transitions, Challenging and Busier Life, Spiritual, Preparing Students for Exams, Fighter, Lover of Breaking Research, Hot Tempered, Sensitive to the Spirit, Lover of Sex (Sexual Energy)",
     0: None,
 }
