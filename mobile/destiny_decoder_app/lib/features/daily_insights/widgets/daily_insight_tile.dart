@@ -107,17 +107,17 @@ class DailyInsightTile extends StatelessWidget {
                       constraints: BoxConstraints(maxWidth: chipMaxWidth),
                       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                       decoration: BoxDecoration(
-                        color: accent.withOpacity(0.1),
+                        color: Theme.of(context).colorScheme.primaryContainer,
                         borderRadius: BorderRadius.circular(8),
                         border: Border.all(
-                          color: accent.withOpacity(0.3),
+                          color: Theme.of(context).colorScheme.outline.withOpacity(0.3),
                           width: 1,
                         ),
                       ),
                       child: Text(
                         a,
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: accent.withOpacity(0.9),
+                          color: Theme.of(context).colorScheme.onPrimaryContainer,
                           fontWeight: FontWeight.w500,
                         ),
                         softWrap: true,
