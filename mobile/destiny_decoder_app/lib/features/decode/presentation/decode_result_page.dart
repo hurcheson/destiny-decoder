@@ -456,37 +456,50 @@ class _DecodeResultPageState extends ConsumerState<DecodeResultPage>
                   scrolledUnderElevation: 0,
                   actions: [
                     // Daily Insights - Primary action
-                    IconButton(
-                      icon: const Icon(Icons.today),
-                      tooltip: 'Daily Insights',
-                      onPressed: () {
-                        final lifeSealNumber = lifeSeal.number;
-                        final dob = DateTime.parse(result.input.dateOfBirth);
-                        final dayOfBirth = dob.day;
-                        final monthOfBirth = dob.month;
-                        final yearOfBirth = dob.year;
-                        Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (_) => DailyInsightsPage(
-                              lifeSeal: lifeSealNumber,
-                              dayOfBirth: dayOfBirth,
-                              monthOfBirth: monthOfBirth,
-                              yearOfBirth: yearOfBirth,
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 4),
+                      child: IconButton(
+                        icon: Icon(
+                          Icons.today,
+                          color: AppColors.accent,
+                          size: 28,
+                        ),
+                        tooltip: 'Daily Insights',
+                        onPressed: () {
+                          final lifeSealNumber = lifeSeal.number;
+                          final dob = DateTime.parse(result.input.dateOfBirth);
+                          final dayOfBirth = dob.day;
+                          final monthOfBirth = dob.month;
+                          final yearOfBirth = dob.year;
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (_) => DailyInsightsPage(
+                                lifeSeal: lifeSealNumber,
+                                dayOfBirth: dayOfBirth,
+                                monthOfBirth: monthOfBirth,
+                                yearOfBirth: yearOfBirth,
+                              ),
                             ),
-                          ),
-                        );
-                      },
+                          );
+                        },
+                      ),
                     ),
                     // Export Report - Secondary action
-                    PopupMenuButton<String>(
-                      icon: const Icon(Icons.more_vert),
-                      tooltip: 'More options',
-                      onSelected: (value) {
-                        if (value == 'export' && !isExporting) {
-                          _exportPdf(ref, result);
-                        }
-                      },
-                      itemBuilder: (context) => [
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 4),
+                      child: PopupMenuButton<String>(
+                        icon: Icon(
+                          Icons.more_vert,
+                          color: AppColors.primary,
+                          size: 28,
+                        ),
+                        tooltip: 'More options',
+                        onSelected: (value) {
+                          if (value == 'export' && !isExporting) {
+                            _exportPdf(ref, result);
+                          }
+                        },
+                        itemBuilder: (context) => [
                         PopupMenuItem(
                           value: 'export',
                           enabled: !isExporting,
@@ -502,6 +515,7 @@ class _DecodeResultPageState extends ConsumerState<DecodeResultPage>
                           ),
                         ),
                       ],
+                      ),
                     ),
                   ],
                   bottom: TabBar(
