@@ -84,7 +84,7 @@ class _DecodeResultPageState extends ConsumerState<DecodeResultPage>
         left: AppSpacing.lg,
         right: AppSpacing.lg,
         top: AppSpacing.lg,
-        bottom: 180, // Extra padding for stacked FABs (Daily Insights + Share + Back to Top)
+        bottom: 80, // Padding for mini Back to Top FAB
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -152,7 +152,7 @@ class _DecodeResultPageState extends ConsumerState<DecodeResultPage>
         left: AppSpacing.lg,
         right: AppSpacing.lg,
         top: AppSpacing.lg,
-        bottom: 180, // Extra padding for stacked FABs (Daily Insights + Share + Back to Top)
+        bottom: 80, // Padding for mini Back to Top FAB
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -236,7 +236,7 @@ class _DecodeResultPageState extends ConsumerState<DecodeResultPage>
         left: AppSpacing.lg,
         right: AppSpacing.lg,
         top: AppSpacing.lg,
-        bottom: 180, // Extra padding for stacked FABs (Daily Insights + Share + Back to Top)
+        bottom: 80, // Padding for mini Back to Top FAB
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -454,7 +454,56 @@ class _DecodeResultPageState extends ConsumerState<DecodeResultPage>
                   elevation: 0,
                   backgroundColor: Theme.of(context).colorScheme.surface,
                   scrolledUnderElevation: 0,
-                  actions: [],
+                  actions: [
+                    // Daily Insights - Primary action
+                    IconButton(
+                      icon: const Icon(Icons.today),
+                      tooltip: 'Daily Insights',
+                      onPressed: () {
+                        final lifeSealNumber = lifeSeal.number;
+                        final dob = DateTime.parse(result.input.dateOfBirth);
+                        final dayOfBirth = dob.day;
+                        final monthOfBirth = dob.month;
+                        final yearOfBirth = dob.year;
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) => DailyInsightsPage(
+                              lifeSeal: lifeSealNumber,
+                              dayOfBirth: dayOfBirth,
+                              monthOfBirth: monthOfBirth,
+                              yearOfBirth: yearOfBirth,
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                    // Export Report - Secondary action
+                    PopupMenuButton<String>(
+                      icon: const Icon(Icons.more_vert),
+                      tooltip: 'More options',
+                      onSelected: (value) {
+                        if (value == 'export' && !isExporting) {
+                          _exportPdf(ref, result);
+                        }
+                      },
+                      itemBuilder: (context) => [
+                        PopupMenuItem(
+                          value: 'export',
+                          enabled: !isExporting,
+                          child: Row(
+                            children: [
+                              Icon(
+                                isExporting ? Icons.hourglass_empty : Icons.picture_as_pdf,
+                                size: 20,
+                              ),
+                              const SizedBox(width: 12),
+                              Text(isExporting ? 'Exporting...' : 'Export Report'),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                   bottom: TabBar(
                     indicatorColor:
                         AppColors.getAccentColorForTheme(isDarkMode),
@@ -478,69 +527,13 @@ class _DecodeResultPageState extends ConsumerState<DecodeResultPage>
                     ],
                   ),
                 ),
-                floatingActionButton: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    FloatingActionButton.extended(
-                      heroTag: 'daily_insights',
-                      onPressed: () {
-                        final lifeSealNumber = lifeSeal.number;
-                        final dob = DateTime.parse(result.input.dateOfBirth);
-                        final dayOfBirth = dob.day;
-                        final monthOfBirth = dob.month;
-                        final yearOfBirth = dob.year;
-                        Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (_) => DailyInsightsPage(
-                              lifeSeal: lifeSealNumber,
-                              dayOfBirth: dayOfBirth,
-                              monthOfBirth: monthOfBirth,
-                              yearOfBirth: yearOfBirth,
-                              // If you want a specific date, pass ISO yyyy-MM-dd; else omit for today
-                              // targetDate: DateTime.now().toIso8601String().split('T').first,
-                            ),
-                          ),
-                        );
-                      },
-                      backgroundColor:
-                          AppColors.getAccentColorForTheme(isDarkMode),
-                      foregroundColor:
-                          isDarkMode ? AppColors.darkBackground : Colors.black,
-                      icon: const Icon(Icons.today),
-                      label: const Text('Daily Insights'),
-                    ),
-                    const SizedBox(height: 12),
-                    FloatingActionButton.extended(
-                      heroTag: 'export_pdf',
-                      onPressed: isExporting ? null : () => _exportPdf(ref, result),
-                      backgroundColor:
-                          AppColors.getAccentColorForTheme(isDarkMode),
-                      foregroundColor:
-                          isDarkMode ? AppColors.darkBackground : Colors.black,
-                      icon: isExporting 
-                          ? const SizedBox(
-                              width: 20,
-                              height: 20,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                                valueColor: AlwaysStoppedAnimation(Colors.black),
-                              ),
-                            )
-                          : const Icon(Icons.picture_as_pdf),
-                      label: Text(isExporting ? 'Exporting...' : 'Export Report'),
-                    ),
-                    const SizedBox(height: 12),
-                    FloatingActionButton(
-                      heroTag: 'back_to_top',
-                      mini: true,
-                      onPressed: _scrollToTop,
-                      backgroundColor:
-                          AppColors.getPrimaryColorForTheme(isDarkMode),
-                      foregroundColor: Colors.white,
-                      child: const Icon(Icons.arrow_upward),
-                    ),
-                  ],
+                floatingActionButton: FloatingActionButton(
+                  heroTag: 'back_to_top',
+                  mini: true,
+                  onPressed: _scrollToTop,
+                  backgroundColor: AppColors.getPrimaryColorForTheme(isDarkMode),
+                  foregroundColor: Colors.white,
+                  child: const Icon(Icons.arrow_upward),
                 ),
                 floatingActionButtonLocation:
                     FloatingActionButtonLocation.endFloat,
