@@ -103,14 +103,25 @@ class DailyInsightTile extends StatelessWidget {
               runSpacing: 8,
               children: data.insight.actionFocus
                   .map(
-                    (a) => ConstrainedBox(
+                    (a) => Container(
                       constraints: BoxConstraints(maxWidth: chipMaxWidth),
-                      child: Chip(
-                        labelPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                        label: Text(
-                          a,
-                          softWrap: true,
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      decoration: BoxDecoration(
+                        color: accent.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(
+                          color: accent.withOpacity(0.3),
+                          width: 1,
                         ),
+                      ),
+                      child: Text(
+                        a,
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: accent.withOpacity(0.9),
+                          fontWeight: FontWeight.w500,
+                        ),
+                        softWrap: true,
+                        maxLines: null,
                       ),
                     ),
                   )
