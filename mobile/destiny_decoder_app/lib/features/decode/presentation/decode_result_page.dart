@@ -454,91 +454,105 @@ class _DecodeResultPageState extends ConsumerState<DecodeResultPage>
                   elevation: 0,
                   backgroundColor: Theme.of(context).colorScheme.surface,
                   scrolledUnderElevation: 0,
-                  actions: [
-                    // Daily Insights - Primary action
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 4),
-                      child: IconButton(
-                        icon: Icon(
-                          Icons.today,
-                          color: AppColors.accent,
-                          size: 28,
+                  actions: const [],
+                  bottom: PreferredSize(
+                    preferredSize: const Size.fromHeight(96),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        TabBar(
+                          indicatorColor:
+                              AppColors.getAccentColorForTheme(isDarkMode),
+                          labelColor: Theme.of(context).colorScheme.onSurface,
+                          unselectedLabelColor: Theme.of(context)
+                              .colorScheme
+                              .onSurface
+                              .withValues(alpha: 0.65),
+                          labelStyle: const TextStyle(
+                            fontWeight: FontWeight.w700,
+                            fontSize: 14,
+                          ),
+                          unselectedLabelStyle: const TextStyle(
+                            fontWeight: FontWeight.w500,
+                            fontSize: 14,
+                          ),
+                          tabs: const [
+                            Tab(text: 'Overview'),
+                            Tab(text: 'Numbers'),
+                            Tab(text: 'Timeline'),
+                          ],
                         ),
-                        tooltip: 'Daily Insights',
-                        onPressed: () {
-                          final lifeSealNumber = lifeSeal.number;
-                          final dob = DateTime.parse(result.input.dateOfBirth);
-                          final dayOfBirth = dob.day;
-                          final monthOfBirth = dob.month;
-                          final yearOfBirth = dob.year;
-                          Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (_) => DailyInsightsPage(
-                                lifeSeal: lifeSealNumber,
-                                dayOfBirth: dayOfBirth,
-                                monthOfBirth: monthOfBirth,
-                                yearOfBirth: yearOfBirth,
-                              ),
-                            ),
-                          );
-                        },
-                      ),
-                    ),
-                    // Export Report - Secondary action
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 4),
-                      child: PopupMenuButton<String>(
-                        icon: Icon(
-                          Icons.more_vert,
-                          color: AppColors.primary,
-                          size: 28,
-                        ),
-                        tooltip: 'More options',
-                        onSelected: (value) {
-                          if (value == 'export' && !isExporting) {
-                            _exportPdf(ref, result);
-                          }
-                        },
-                        itemBuilder: (context) => [
-                        PopupMenuItem(
-                          value: 'export',
-                          enabled: !isExporting,
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(
+                            AppSpacing.md,
+                            AppSpacing.sm,
+                            AppSpacing.md,
+                            AppSpacing.sm,
+                          ),
                           child: Row(
                             children: [
-                              Icon(
-                                isExporting ? Icons.hourglass_empty : Icons.picture_as_pdf,
-                                size: 20,
+                              Expanded(
+                                child: OutlinedButton.icon(
+                                  icon: const Icon(Icons.today),
+                                  label: const Text('Daily Insights'),
+                                  style: OutlinedButton.styleFrom(
+                                    foregroundColor: AppColors.accent,
+                                    side: BorderSide(
+                                      color: AppColors.accent.withValues(alpha: 0.7),
+                                    ),
+                                  ),
+                                  onPressed: () {
+                                    final lifeSealNumber = lifeSeal.number;
+                                    final dob = DateTime.parse(result.input.dateOfBirth);
+                                    final dayOfBirth = dob.day;
+                                    final monthOfBirth = dob.month;
+                                    final yearOfBirth = dob.year;
+                                    Navigator.of(context).push(
+                                      MaterialPageRoute(
+                                        builder: (_) => DailyInsightsPage(
+                                          lifeSeal: lifeSealNumber,
+                                          dayOfBirth: dayOfBirth,
+                                          monthOfBirth: monthOfBirth,
+                                          yearOfBirth: yearOfBirth,
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                ),
                               ),
-                              const SizedBox(width: 12),
-                              Text(isExporting ? 'Exporting...' : 'Export Report'),
+                              const SizedBox(width: AppSpacing.sm),
+                              Expanded(
+                                child: OutlinedButton.icon(
+                                  icon: isExporting
+                                      ? const SizedBox(
+                                          width: 18,
+                                          height: 18,
+                                          child: CircularProgressIndicator(
+                                            strokeWidth: 2,
+                                            valueColor:
+                                                AlwaysStoppedAnimation<Color>(AppColors.primary),
+                                          ),
+                                        )
+                                      : const Icon(Icons.picture_as_pdf),
+                                  label: Text(isExporting ? 'Exporting...' : 'Export PDF'),
+                                  style: OutlinedButton.styleFrom(
+                                    foregroundColor: AppColors.primary,
+                                    side: BorderSide(
+                                      color: AppColors.primary.withValues(alpha: 0.7),
+                                    ),
+                                  ),
+                                  onPressed: isExporting
+                                      ? null
+                                      : () {
+                                          _exportPdf(ref, result);
+                                        },
+                                ),
+                              ),
                             ],
                           ),
                         ),
                       ],
-                      ),
                     ),
-                  ],
-                  bottom: TabBar(
-                    indicatorColor:
-                        AppColors.getAccentColorForTheme(isDarkMode),
-                    labelColor: Theme.of(context).colorScheme.onSurface,
-                    unselectedLabelColor: Theme.of(context)
-                        .colorScheme
-                        .onSurface
-                        .withValues(alpha: 0.65),
-                    labelStyle: const TextStyle(
-                      fontWeight: FontWeight.w700,
-                      fontSize: 14,
-                    ),
-                    unselectedLabelStyle: const TextStyle(
-                      fontWeight: FontWeight.w500,
-                      fontSize: 14,
-                    ),
-                    tabs: const [
-                      Tab(text: 'Overview'),
-                      Tab(text: 'Numbers'),
-                      Tab(text: 'Timeline'),
-                    ],
                   ),
                 ),
                 floatingActionButton: FloatingActionButton(
