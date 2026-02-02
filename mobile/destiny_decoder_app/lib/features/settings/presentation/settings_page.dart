@@ -8,6 +8,8 @@ import '../../../core/notifications/notification_service.dart';
 import '../../debug/deep_link_test_page.dart';
 import 'widgets/notification_preferences_widget.dart';
 import '../../subscription/presentation/subscription_page.dart';
+import '../../profile/presentation/pages/profile_page.dart';
+import '../../profile/presentation/pages/edit_profile_page.dart';
 
 class SettingsPage extends ConsumerStatefulWidget {
   const SettingsPage({super.key});
@@ -93,6 +95,47 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // Profile section
+            Text(
+              'Profile',
+              style: Theme.of(context).textTheme.titleLarge,
+            ),
+            const SizedBox(height: 16),
+            Card(
+              child: Column(
+                children: [
+                  ListTile(
+                    leading: const Icon(Icons.person),
+                    title: const Text('View Profile'),
+                    subtitle: const Text('See your profile and preferences'),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) => const ProfilePage(),
+                        ),
+                      );
+                    },
+                  ),
+                  const Divider(height: 1),
+                  ListTile(
+                    leading: const Icon(Icons.edit),
+                    title: const Text('Edit Profile'),
+                    subtitle: const Text('Update your preferences and settings'),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) => const EditProfilePage(),
+                        ),
+                      );
+                    },
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 24),
+            
             // Notifications section
             Text(
               'Notifications',

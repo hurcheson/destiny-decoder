@@ -5,6 +5,7 @@ import '../../../core/theme/app_theme.dart';
 import '../../../core/analytics/analytics_service.dart';
 import '../../compatibility/presentation/compatibility_form_page.dart';
 import '../../settings/presentation/settings_page.dart';
+import '../../profile/presentation/providers/profile_providers.dart';
 import 'decode_controller.dart';
 import 'decode_result_page.dart';
 import 'widgets/cards.dart';
@@ -54,6 +55,22 @@ class _DecodeFormPageState extends ConsumerState<DecodeFormPage>
     );
 
     _animationController.forward();
+    
+    // Prefill from profile if available
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadProfileData();
+    });
+  }
+  
+  void _loadProfileData() {
+    final profileAsync = ref.read(userProfileProvider);
+    if (profileAsync.hasValue && profileAsync.value != null) {
+      final profile = profileAsync.value!;
+      setState(() {
+        _firstNameController.text = profile.firstName;
+        _dobController.text = profile.dateOfBirth;
+      });
+    }
   }
 
   @override
@@ -92,6 +109,14 @@ class _DecodeFormPageState extends ConsumerState<DecodeFormPage>
       final result = state.value!;
       final lifeSealNumber = result.lifeSeal.number;
       await AnalyticsService.logCalculationCompleted(lifeSealNumber);
+      
+      // Increment readings count in profile
+      try {
+        await ref.read(profileNotifierProvider.notifier).incrementReadings();
+      } catch (e) {
+        // Silent failure - don't block user flow for counter increment
+        debugPrint('Failed to increment reading count: $e');
+      }
 
       if (mounted) {
         Navigator.of(context).push(

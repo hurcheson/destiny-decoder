@@ -12,6 +12,8 @@ import 'core/deep_linking/deep_link_service.dart';
 import 'core/screens/splash_screen.dart';
 import 'features/onboarding/presentation/onboarding_page.dart';
 import 'features/content/presentation/article_reader_page.dart';
+import 'features/profile/presentation/providers/profile_providers.dart';
+import 'features/profile/presentation/pages/personal_dashboard_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -69,7 +71,7 @@ void main() async {
   );
 }
 
-class DestinyDecoderApp extends StatefulWidget {
+class DestinyDecoderApp extends ConsumerStatefulWidget {
   final bool hasSeenOnboarding;
 
   const DestinyDecoderApp({
@@ -78,10 +80,10 @@ class DestinyDecoderApp extends StatefulWidget {
   });
 
   @override
-  State<DestinyDecoderApp> createState() => _DestinyDecoderAppState();
+  ConsumerState<DestinyDecoderApp> createState() => _DestinyDecoderAppState();
 }
 
-class _DestinyDecoderAppState extends State<DestinyDecoderApp> {
+class _DestinyDecoderAppState extends ConsumerState<DestinyDecoderApp> {
   final GlobalKey<NavigatorState> _navigatorKey = GlobalKey<NavigatorState>();
   final _deepLinkService = DeepLinkService();
   bool _splashComplete = false;
@@ -122,23 +124,39 @@ class _DestinyDecoderAppState extends State<DestinyDecoderApp> {
 
   @override
   Widget build(BuildContext context) {
+    // Check if profile exists and onboarding is complete
+    final hasCompletedOnboarding = ref.watch(userHasCompletedOnboardingProvider);
+    
+    Widget home;
+    if (!_splashComplete) {
+      home = SplashScreen(
+        onSplashComplete: () {
+          setState(() {
+            _splashComplete = true;
+          });
+        },
+      );
+    } else {
+      // Determine home based on profile completion
+      if (hasCompletedOnboarding) {
+        // Profile exists and onboarding complete → Dashboard
+        home = const PersonalDashboardPage();
+      } else if (widget.hasSeenOnboarding) {
+        // Onboarding seen but no profile → Main navigation (old flow)
+        home = const MainNavigationPage();
+      } else {
+        // Never seen onboarding → Onboarding page
+        home = const OnboardingPage();
+      }
+    }
+
     return MaterialApp(
       navigatorKey: _navigatorKey,
       title: 'Destiny Decoder',
       theme: getLightTheme(),
       darkTheme: getDarkTheme(),
       themeMode: ThemeMode.system,
-      home: _splashComplete
-          ? (widget.hasSeenOnboarding
-              ? const MainNavigationPage()
-              : const OnboardingPage())
-          : SplashScreen(
-              onSplashComplete: () {
-                setState(() {
-                  _splashComplete = true;
-                });
-              },
-            ),
+      home: home,
     );
   }
 }

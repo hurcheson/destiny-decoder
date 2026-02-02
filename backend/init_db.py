@@ -10,6 +10,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from app.config.database import init_db, check_db_connection, engine, DATABASE_URL
 from app.models import Device, NotificationPreference
+from app.models.user_profile import UserProfile
 import logging
 
 logging.basicConfig(level=logging.INFO)
@@ -45,6 +46,7 @@ def main():
         print("Tables created:")
         print("  - devices")
         print("  - notification_preferences")
+        print("  - user_profiles")
         print()
         print("You can now start the server with: uvicorn backend.main:app --reload")
         return 0

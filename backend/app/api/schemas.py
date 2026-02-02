@@ -123,3 +123,56 @@ class NotificationPreferencesResponse(BaseModel):
     quiet_hours_start: Optional[str]
     quiet_hours_end: Optional[str]
     updated_at: str  # ISO timestamp
+
+
+# User Profile Schemas
+class CreateUserProfileRequest(BaseModel):
+    """Create new user profile during onboarding"""
+    device_id: str
+    first_name: str = Field(..., min_length=1, max_length=100)
+    date_of_birth: str = Field(..., description="YYYY-MM-DD format")
+    life_stage: Optional[str] = None  # twenties, thirties, forties, fifties+
+    spiritual_preference: Optional[str] = None  # christian, universal, practical, custom
+    communication_style: Optional[str] = None  # spiritual, practical, balanced
+    interests: Optional[List[str]] = None  # ["career", "relationships", "spirituality", "personal_growth"]
+    notification_style: Optional[str] = "motivational"  # motivational, informational, minimal
+
+
+class UpdateUserProfileRequest(BaseModel):
+    """Update existing user profile"""
+    first_name: Optional[str] = None
+    life_stage: Optional[str] = None
+    spiritual_preference: Optional[str] = None
+    communication_style: Optional[str] = None
+    interests: Optional[List[str]] = None
+    notification_style: Optional[str] = None
+
+
+class UserProfileResponse(BaseModel):
+    """User profile response"""
+    id: str
+    device_id: str
+    first_name: str
+    date_of_birth: str
+    life_seal: Optional[int]
+    life_stage: str
+    spiritual_preference: str
+    communication_style: str
+    interests: List[str]
+    notification_style: str
+    readings_count: int
+    last_reading_date: Optional[str]
+    has_completed_onboarding: bool
+    has_seen_dashboard_intro: bool
+    created_at: str
+    updated_at: str
+
+
+class UserProfileWithCalculationsResponse(UserProfileResponse):
+    """Extended profile response with calculated numbers"""
+    soul_number: Optional[int] = None
+    personality_number: Optional[int] = None
+    personal_year: Optional[int] = None
+    daily_power_number: Optional[int] = None
+    today_power_number: Optional[int] = None
+    is_blessed_day_today: Optional[bool] = None

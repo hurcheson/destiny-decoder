@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../../../core/theme/app_theme.dart';
 
 /// Widget to display enhanced, structured numerology interpretations
 /// Replaces comma-separated text with organized categories and helpful explanations

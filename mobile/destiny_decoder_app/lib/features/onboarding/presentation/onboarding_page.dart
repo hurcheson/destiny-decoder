@@ -4,6 +4,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/app_logo.dart';
 import '../../decode/presentation/decode_form_page.dart';
+import '../../profile/domain/user_profile.dart';
+import '../../profile/presentation/providers/profile_providers.dart';
+import '../../profile/presentation/pages/personal_dashboard_page.dart';
 import '../widgets/progress_tracker.dart';
 import '../widgets/example_preview_cards.dart';
 import '../widgets/skip_button.dart';
@@ -21,6 +24,27 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage>
   late PageController _pageController;
   late AnimationController _animationController;
   int _currentPage = 0;
+  
+  // Profile preference state
+  final _nameController = TextEditingController();
+  final _dobController = TextEditingController();
+  LifeStage? _selectedLifeStage;
+  SpiritualPreference? _selectedSpiritualPreference;
+  CommunicationStyle? _selectedCommunicationStyle;
+  final List<String> _selectedInterests = [];
+  
+  final List<String> _availableInterests = [
+    'Numerology',
+    'Astrology',
+    'Spirituality',
+    'Self-improvement',
+    'Meditation',
+    'Tarot',
+    'Dream interpretation',
+    'Energy healing',
+    'Manifestation',
+    'Personal growth',
+  ];
 
   final List<OnboardingStep> _steps = [
     OnboardingStep(
@@ -79,6 +103,14 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage>
         'Improve communication',
       ],
     ),
+    OnboardingStep(
+      title: 'Personalize Your Experience',
+      description:
+          'Tell us a bit about yourself so we can tailor your destiny insights to your unique journey.',
+      icon: Icons.person_outline,
+      color: AppColors.accent,
+      showProfileForm: true, // Special flag for profile step
+    ),
   ];
 
   @override
@@ -96,24 +128,74 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage>
   void dispose() {
     _pageController.dispose();
     _animationController.dispose();
+    _nameController.dispose();
+    _dobController.dispose();
     super.dispose();
   }
 
   Future<void> _completeOnboarding() async {
-    // Show completion celebration
-    await OnboardingCompleteDialog.show(
+    // Validate profile data
+    if (_nameController.text.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please enter your name')),
+      );
+      return;
+    }
+    if (_dobController.text.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please enter your date of birth')),
+      );
+      return;
+    }
+    
+    // Show loading
+    showDialog(
       context: context,
-      onGetStarted: () async {
-        await ref.read(onboardingControllerProvider.notifier).completeOnboarding();
-        if (!mounted) return;
-        Navigator.of(context).pushAndRemoveUntil(
-          MaterialPageRoute(builder: (_) => const DecodeFormPage()),
-          (route) => false,
-        );
-      },
-      stepsCompleted: _currentPage + 1,
-      totalSteps: _steps.length,
+      barrierDismissible: false,
+      builder: (context) => const Center(child: CircularProgressIndicator()),
     );
+    
+    try {
+      // Create profile
+      await ref.read(profileNotifierProvider.notifier).createProfile(
+        firstName: _nameController.text.trim(),
+        dateOfBirth: _dobController.text.trim(),
+        lifeStage: _selectedLifeStage ?? LifeStage.unknown,
+        spiritualPreference: _selectedSpiritualPreference ?? SpiritualPreference.notSpecified,
+        communicationStyle: _selectedCommunicationStyle ?? CommunicationStyle.notSpecified,
+        interests: _selectedInterests,
+      );
+      
+      // Mark onboarding complete
+      await ref.read(onboardingControllerProvider.notifier).completeOnboarding();
+      
+      if (!mounted) return;
+      
+      // Dismiss loading
+      Navigator.of(context).pop();
+      
+      // Show completion celebration
+      await OnboardingCompleteDialog.show(
+        context: context,
+        onGetStarted: () {
+          Navigator.of(context).pushAndRemoveUntil(
+            MaterialPageRoute(builder: (_) => const PersonalDashboardPage()),
+            (route) => false,
+          );
+        },
+        stepsCompleted: _currentPage + 1,
+        totalSteps: _steps.length,
+      );
+    } catch (e) {
+      if (!mounted) return;
+      Navigator.of(context).pop(); // Dismiss loading
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error creating profile: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
   }
 
   Future<void> _skipOnboarding() async {
@@ -303,6 +385,11 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage>
   }
 
   Widget _buildOnboardingStep(OnboardingStep step, bool isDarkMode) {
+    // Special rendering for profile form step
+    if (step.showProfileForm == true) {
+      return _buildProfileFormStep(step, isDarkMode);
+    }
+    
     return FadeTransition(
       opacity: Tween<double>(begin: 0, end: 1).animate(
         CurvedAnimation(parent: _animationController, curve: Curves.easeOut),
@@ -429,6 +516,248 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage>
       ),
     );
   }
+  
+  Widget _buildProfileFormStep(OnboardingStep step, bool isDarkMode) {
+    return FadeTransition(
+      opacity: Tween<double>(begin: 0, end: 1).animate(
+        CurvedAnimation(parent: _animationController, curve: Curves.easeOut),
+      ),
+      child: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              step.color.withValues(alpha: 0.1),
+              step.color.withValues(alpha: 0.05),
+            ],
+          ),
+        ),
+        child: SafeArea(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.fromLTRB(
+              AppSpacing.lg,
+              AppSpacing.xxl * 2,
+              AppSpacing.lg,
+              AppSpacing.xxl * 3,
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Header
+                Center(
+                  child: Icon(
+                    step.icon,
+                    size: 60,
+                    color: step.color,
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.lg),
+                Center(
+                  child: Text(
+                    step.title,
+                    style: AppTypography.headingLarge.copyWith(
+                      color: isDarkMode ? AppColors.darkText : AppColors.textDark,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.md),
+                Center(
+                  child: Text(
+                    step.description,
+                    style: AppTypography.bodyMedium.copyWith(
+                      color: (isDarkMode ? AppColors.darkText : AppColors.textDark)
+                          .withValues(alpha: 0.7),
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.xl),
+
+                // Name field
+                Text(
+                  'Your Name',
+                  style: AppTypography.labelMedium.copyWith(
+                    color: isDarkMode ? AppColors.darkText : AppColors.textDark,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.sm),
+                TextField(
+                  controller: _nameController,
+                  decoration: InputDecoration(
+                    hintText: 'Enter your first name',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(AppRadius.md),
+                    ),
+                    prefixIcon: const Icon(Icons.person),
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.lg),
+
+                // Date of birth field
+                Text(
+                  'Date of Birth',
+                  style: AppTypography.labelMedium.copyWith(
+                    color: isDarkMode ? AppColors.darkText : AppColors.textDark,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.sm),
+                TextField(
+                  controller: _dobController,
+                  decoration: InputDecoration(
+                    hintText: 'YYYY-MM-DD (e.g., 1990-05-15)',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(AppRadius.md),
+                    ),
+                    prefixIcon: const Icon(Icons.cake),
+                  ),
+                  keyboardType: TextInputType.datetime,
+                ),
+                const SizedBox(height: AppSpacing.lg),
+
+                // Life Stage
+                Text(
+                  'Life Stage (Optional)',
+                  style: AppTypography.labelMedium.copyWith(
+                    color: isDarkMode ? AppColors.darkText : AppColors.textDark,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.sm),
+                Wrap(
+                  spacing: AppSpacing.sm,
+                  runSpacing: AppSpacing.sm,
+                  children: LifeStage.values
+                      .where((stage) => stage != LifeStage.unknown)
+                      .map((stage) {
+                    final isSelected = _selectedLifeStage == stage;
+                    return FilterChip(
+                      label: Text(stage.displayName),
+                      selected: isSelected,
+                      onSelected: (selected) {
+                        setState(() {
+                          _selectedLifeStage = selected ? stage : null;
+                        });
+                      },
+                      selectedColor: step.color.withValues(alpha: 0.3),
+                      checkmarkColor: step.color,
+                    );
+                  }).toList(),
+                ),
+                const SizedBox(height: AppSpacing.lg),
+
+                // Spiritual Preference
+                Text(
+                  'Spiritual Preference (Optional)',
+                  style: AppTypography.labelMedium.copyWith(
+                    color: isDarkMode ? AppColors.darkText : AppColors.textDark,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.sm),
+                Wrap(
+                  spacing: AppSpacing.sm,
+                  runSpacing: AppSpacing.sm,
+                  children: SpiritualPreference.values
+                      .where((pref) => pref != SpiritualPreference.notSpecified)
+                      .map((pref) {
+                    final isSelected = _selectedSpiritualPreference == pref;
+                    return FilterChip(
+                      label: Text(pref.displayName),
+                      selected: isSelected,
+                      onSelected: (selected) {
+                        setState(() {
+                          _selectedSpiritualPreference = selected ? pref : null;
+                        });
+                      },
+                      selectedColor: step.color.withValues(alpha: 0.3),
+                      checkmarkColor: step.color,
+                    );
+                  }).toList(),
+                ),
+                const SizedBox(height: AppSpacing.lg),
+
+                // Communication Style
+                Text(
+                  'Communication Style (Optional)',
+                  style: AppTypography.labelMedium.copyWith(
+                    color: isDarkMode ? AppColors.darkText : AppColors.textDark,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.sm),
+                Wrap(
+                  spacing: AppSpacing.sm,
+                  runSpacing: AppSpacing.sm,
+                  children: CommunicationStyle.values
+                      .where((style) => style != CommunicationStyle.notSpecified)
+                      .map((style) {
+                    final isSelected = _selectedCommunicationStyle == style;
+                    return FilterChip(
+                      label: Text(style.displayName),
+                      selected: isSelected,
+                      onSelected: (selected) {
+                        setState(() {
+                          _selectedCommunicationStyle = selected ? style : null;
+                        });
+                      },
+                      selectedColor: step.color.withValues(alpha: 0.3),
+                      checkmarkColor: step.color,
+                    );
+                  }).toList(),
+                ),
+                const SizedBox(height: AppSpacing.lg),
+
+                // Interests
+                Text(
+                  'Interests (Optional)',
+                  style: AppTypography.labelMedium.copyWith(
+                    color: isDarkMode ? AppColors.darkText : AppColors.textDark,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.sm),
+                Text(
+                  'Select topics you\'re interested in:',
+                  style: AppTypography.bodySmall.copyWith(
+                    color: (isDarkMode ? AppColors.darkText : AppColors.textDark)
+                        .withValues(alpha: 0.7),
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.sm),
+                Wrap(
+                  spacing: AppSpacing.sm,
+                  runSpacing: AppSpacing.sm,
+                  children: _availableInterests.map((interest) {
+                    final isSelected = _selectedInterests.contains(interest);
+                    return FilterChip(
+                      label: Text(interest),
+                      selected: isSelected,
+                      onSelected: (selected) {
+                        setState(() {
+                          if (selected) {
+                            _selectedInterests.add(interest);
+                          } else {
+                            _selectedInterests.remove(interest);
+                          }
+                        });
+                      },
+                      selectedColor: step.color.withValues(alpha: 0.3),
+                      checkmarkColor: step.color,
+                    );
+                  }).toList(),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 }
 
 class OnboardingStep {
@@ -438,6 +767,7 @@ class OnboardingStep {
   final Color color;
   final bool? showExamples; // Show example preview cards
   final List<String>? features; // Feature bullet points
+  final bool? showProfileForm; // Show profile collection form
 
   OnboardingStep({
     required this.title,
@@ -446,5 +776,6 @@ class OnboardingStep {
     required this.color,
     this.showExamples,
     this.features,
+    this.showProfileForm,
   });
 }

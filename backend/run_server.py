@@ -13,6 +13,7 @@ from app.api.routes.notifications import router as notifications_router
 from app.api.routes.export import router as export_router
 from app.api.routes.content import router as content_router
 from app.api.routes.analytics import router as analytics_router
+from app.api.routes.profile import router as profile_router
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -38,6 +39,7 @@ app.include_router(notifications_router)
 app.include_router(export_router)
 app.include_router(content_router)
 app.include_router(analytics_router)
+app.include_router(profile_router)
 
 # Health check endpoint
 @app.get("/health")
@@ -49,6 +51,6 @@ if __name__ == "__main__":
     uvicorn.run(
         app,
         host="0.0.0.0",
-        port=8001,
+        port=8000,
         log_level="info",
     )
