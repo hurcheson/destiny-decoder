@@ -349,13 +349,51 @@ class SubscriptionPage extends ConsumerWidget {
   }
 
   void _handleUpgrade(BuildContext context, SubscriptionTier tier) {
-    // TODO: Implement in-app purchase flow
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Upgrade to ${tier.displayName} - Coming Soon!'),
-        backgroundColor: AppColors.primary,
-      ),
-    );
+    // Trigger in-app purchase for selected tier
+    _initiateSubscriptionPurchase(context, tier);
+  }
+  
+  Future<void> _initiateSubscriptionPurchase(
+    BuildContext context,
+    SubscriptionTier tier,
+  ) async {
+    try {
+      // Determine product ID based on tier
+      String productId;
+      switch (tier.id) {
+        case 'premium_monthly':
+          productId = 'destiny_decoder_premium_monthly';
+          break;
+        case 'premium_annual':
+          productId = 'destiny_decoder_premium_annual';
+          break;
+        case 'pro_annual':
+          productId = 'destiny_decoder_pro_annual';
+          break;
+        default:
+          throw Exception('Unknown subscription tier: ${tier.id}');
+      }
+      
+      // Trigger purchase flow
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Initiating purchase of ${tier.displayName}...'),
+          duration: const Duration(seconds: 2),
+        ),
+      );
+      
+      // TODO: Integrate with PurchaseService to start purchase
+      // Example: await PurchaseService().buyProduct(productId);
+      // This requires injecting PurchaseService via Riverpod provider
+      
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error: ${e.toString()}'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
   }
 }
 

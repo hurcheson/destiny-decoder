@@ -124,8 +124,8 @@ class _DestinyDecoderAppState extends ConsumerState<DestinyDecoderApp> {
 
   @override
   Widget build(BuildContext context) {
-    // Check if profile exists and onboarding is complete
-    final hasCompletedOnboarding = ref.watch(userHasCompletedOnboardingProvider);
+    // Watch profile provider for loading/error states
+    final profileAsync = ref.watch(userProfileProvider);
     
     Widget home;
     if (!_splashComplete) {
@@ -138,16 +138,29 @@ class _DestinyDecoderAppState extends ConsumerState<DestinyDecoderApp> {
       );
     } else {
       // Determine home based on profile completion
-      if (hasCompletedOnboarding) {
-        // Profile exists and onboarding complete → Dashboard
-        home = const PersonalDashboardPage();
-      } else if (widget.hasSeenOnboarding) {
-        // Onboarding seen but no profile → Main navigation (old flow)
-        home = const MainNavigationPage();
-      } else {
-        // Never seen onboarding → Onboarding page
-        home = const OnboardingPage();
-      }
+      home = profileAsync.when(
+        data: (profile) {
+          if (profile != null && profile.hasCompletedOnboarding) {
+            // Profile exists and onboarding complete → Dashboard
+            return const PersonalDashboardPage();
+          } else if (widget.hasSeenOnboarding) {
+            // Onboarding seen but no profile → Main navigation (old flow)
+            return const MainNavigationPage();
+          } else {
+            // Never seen onboarding → Onboarding page
+            return const OnboardingPage();
+          }
+        },
+        loading: () => Scaffold(
+          body: Center(
+            child: CircularProgressIndicator(),
+          ),
+        ),
+        error: (error, stack) {
+          // Profile doesn't exist or error loading → Show onboarding
+          return const OnboardingPage();
+        },
+      );
     }
 
     return MaterialApp(

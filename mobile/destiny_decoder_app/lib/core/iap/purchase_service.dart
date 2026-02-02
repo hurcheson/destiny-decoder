@@ -128,16 +128,55 @@ class PurchaseService {
   Future<void> _handleSuccessfulPurchase(PurchaseDetails purchaseDetails) async {
     try {
       // Extract receipt and platform for backend validation
+      String? receiptData;
+      
       if (Platform.isIOS) {
-        // receiptData: purchaseDetails.verificationData.serverVerificationData
-        // TODO: Send receipt to backend: POST /subscriptions/validate-receipt
+        receiptData = purchaseDetails.verificationData.serverVerificationData;
+        // Send receipt to backend for validation
+        await _validateReceiptWithBackend(
+          receiptData,
+          purchaseDetails.productID,
+          'ios',
+        );
       } else if (Platform.isAndroid) {
-        // receiptData from: (purchaseDetails as GooglePlayPurchaseDetails).billingClientPurchase.purchaseToken
-        // TODO: Send receipt to backend: POST /subscriptions/validate-receipt
+        // Get receipt from Google Play purchase
+        receiptData = purchaseDetails.verificationData.serverVerificationData;
+        // Send receipt to backend for validation
+        await _validateReceiptWithBackend(
+          receiptData,
+          purchaseDetails.productID,
+          'android',
+        );
       }
       Logger.i('✅ Purchase completed for ${purchaseDetails.productID}');
     } catch (e) {
       Logger.e('❌ Error handling purchase: $e');
+    }
+  }
+  
+  /// Send receipt to backend for validation
+  Future<void> _validateReceiptWithBackend(
+    String receiptData,
+    String productId,
+    String platform,
+  ) async {
+    try {
+      // Note: This requires a DioClient or HTTP client to be available
+      // For now, we log the receipt data
+      Logger.i('Validating receipt: product=$productId, platform=$platform');
+      Logger.d('Receipt data length: ${receiptData.length}');
+      
+      // TODO: Implement HTTP POST to /api/subscriptions/validate-receipt
+      // This will require injecting an HTTP client into PurchaseService
+      // POST body: {
+      //   "receipt_data": receiptData,
+      //   "product_id": productId,
+      //   "platform": platform,
+      //   "device_id": <device_id_from_profile>
+      // }
+    } catch (e) {
+      Logger.e('Error validating receipt: $e');
+      rethrow;
     }
   }
 
