@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../features/profile/presentation/providers/profile_providers.dart';
 import '../providers.dart';
 import '../widgets/daily_insight_tile.dart';
 import '../widgets/weekly_preview_carousel.dart';
@@ -31,6 +32,7 @@ class DailyInsightsPage extends ConsumerWidget {
     );
 
     final insightAsync = ref.watch(dailyInsightProvider(params));
+    final firstName = ref.watch(userFirstNameProvider);
 
     return Scaffold(
       appBar: AppBar(title: const Text('Daily Insights')),
@@ -43,12 +45,13 @@ class DailyInsightsPage extends ConsumerWidget {
           child: ListView(
             padding: const EdgeInsets.all(16),
             children: [
-              DailyInsightTile(data: data),
+              DailyInsightTile(data: data, firstName: firstName),
               const SizedBox(height: 16),
               Text('Weekly Preview', style: Theme.of(context).textTheme.titleMedium),
               const SizedBox(height: 8),
               WeeklyPreviewCarousel(
                 lifeSeal: lifeSeal,
+                firstName: firstName,
                 onSelect: (preview) {
                   Navigator.of(context).pushReplacement(
                     MaterialPageRoute(
@@ -68,6 +71,7 @@ class DailyInsightsPage extends ConsumerWidget {
               const SizedBox(height: 8),
               BlessedDaysCalendar(
                 dayOfBirth: dayOfBirth,
+                firstName: firstName,
                 initialMonth: targetDate != null
                     ? DateTime.parse(targetDate!)
                     : DateTime.now(),
@@ -93,6 +97,7 @@ class DailyInsightsPage extends ConsumerWidget {
                 dayOfBirth: dayOfBirth,
                 monthOfBirth: monthOfBirth,
                 yearOfBirth: yearOfBirth,
+                firstName: firstName,
               ),
             ],
           ),

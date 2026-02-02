@@ -4,8 +4,13 @@ import '../models.dart';
 
 class DailyInsightTile extends StatelessWidget {
   final DailyInsightResponse data;
+  final String firstName;
 
-  const DailyInsightTile({super.key, required this.data});
+  const DailyInsightTile({
+    super.key,
+    required this.data,
+    required this.firstName,
+  });
 
 
   @override
@@ -67,7 +72,9 @@ class DailyInsightTile extends StatelessWidget {
                         style: Theme.of(context).textTheme.bodySmall,
                       ),
                       Text(
-                        data.insight.title,
+                        firstName.isNotEmpty
+                            ? '$firstName, ${data.insight.title.toLowerCase()}'
+                            : data.insight.title,
                         style: Theme.of(context)
                             .textTheme
                             .titleMedium
@@ -93,7 +100,9 @@ class DailyInsightTile extends StatelessWidget {
             ),
             const SizedBox(height: 12),
             Text(
-              data.briefInsight,
+              firstName.isNotEmpty
+                  ? '$firstName, ${data.briefInsight[0].toLowerCase()}${data.briefInsight.substring(1)}'
+                  : data.briefInsight,
               style: Theme.of(context).textTheme.bodyMedium,
               softWrap: true,
             ),

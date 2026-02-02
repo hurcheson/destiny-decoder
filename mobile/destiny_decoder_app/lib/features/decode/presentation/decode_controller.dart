@@ -29,10 +29,12 @@ class DecodeController extends Notifier<AsyncValue<DecodeResult?>> {
   Future<List<int>> exportPdf({
     required String fullName,
     required String dateOfBirth,
+    String firstName = '',
   }) async {
     return _repository.exportPdf(
       fullName: fullName,
       dateOfBirth: dateOfBirth,
+      firstName: firstName,
     );
   }
 

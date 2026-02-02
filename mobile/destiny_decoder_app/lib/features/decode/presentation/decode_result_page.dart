@@ -7,6 +7,7 @@ import 'package:open_filex/open_filex.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../core/analytics/analytics_service.dart';
+import '../../../features/profile/presentation/providers/profile_providers.dart';
 import 'decode_controller.dart';
 import 'timeline.dart';
 import 'widgets/cards.dart';
@@ -74,6 +75,7 @@ class _DecodeResultPageState extends ConsumerState<DecodeResultPage>
     AsyncValue<bool> exportState,
     dynamic result,
     ScrollController controller,
+    String firstName,
   ) {
     final accent = AppColors.getAccentColorForTheme(isDarkMode);
     final textColor = isDarkMode ? AppColors.darkText : AppColors.textDark;
@@ -100,7 +102,7 @@ class _DecodeResultPageState extends ConsumerState<DecodeResultPage>
           ),
           const SizedBox(height: AppSpacing.xl),
           Text(
-            'Tap Export PDF anytime. Swipe tabs for Numbers and Timeline.',
+            '${firstName.isNotEmpty ? "$firstName, tap" : "Tap"} Export PDF anytime. Swipe tabs for Numbers and Timeline.',
             style: AppTypography.bodyMedium.copyWith(color: textColor),
           ),
           const SizedBox(height: AppSpacing.md),
@@ -112,7 +114,7 @@ class _DecodeResultPageState extends ConsumerState<DecodeResultPage>
               borderRadius: BorderRadius.circular(AppRadius.lg),
             ),
             child: Text(
-              'Summary: Your Life Seal is ${lifeSeal.number} (${lifeSeal.planet}). Explore detailed interpretations under the Numbers tab.',
+              '${firstName.isNotEmpty ? "$firstName, your" : "Your"} Life Seal is ${lifeSeal.number} (${lifeSeal.planet}). Explore detailed interpretations under the Numbers tab.',
               style: AppTypography.bodySmall.copyWith(color: textColor),
             ),
           ),
@@ -143,6 +145,7 @@ class _DecodeResultPageState extends ConsumerState<DecodeResultPage>
     dynamic personalYear,
     dynamic result,
     ScrollController controller,
+    String firstName,
   ) {
     final textColor = isDarkMode ? AppColors.darkText : AppColors.textDark;
 
@@ -158,7 +161,7 @@ class _DecodeResultPageState extends ConsumerState<DecodeResultPage>
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Core Numbers',
+            '${firstName.isNotEmpty ? "$firstName\'s" : "Your"} Core Numbers',
             style: AppTypography.headingMedium.copyWith(color: textColor),
           ),
           const SizedBox(height: AppSpacing.md),
@@ -193,6 +196,7 @@ class _DecodeResultPageState extends ConsumerState<DecodeResultPage>
             'Life Seal',
             lifeSeal.content,
             initiallyExpanded: true,
+            firstName: firstName,
           ),
           _buildInterpretationAccordion(
             context,
@@ -200,6 +204,7 @@ class _DecodeResultPageState extends ConsumerState<DecodeResultPage>
             soulNumber.number,
             'Soul Number',
             soulNumber.content,
+            firstName: firstName,
           ),
           _buildInterpretationAccordion(
             context,
@@ -207,6 +212,7 @@ class _DecodeResultPageState extends ConsumerState<DecodeResultPage>
             personalityNumber.number,
             'Personality Number',
             personalityNumber.content,
+            firstName: firstName,
           ),
           _buildInterpretationAccordion(
             context,
@@ -214,6 +220,7 @@ class _DecodeResultPageState extends ConsumerState<DecodeResultPage>
             personalYear.number,
             'Personal Year',
             personalYear.content,
+            firstName: firstName,
           ),
         ],
       ),
@@ -227,6 +234,7 @@ class _DecodeResultPageState extends ConsumerState<DecodeResultPage>
     List<Map<String, dynamic>> turningPoints,
     String dateOfBirth,
     ScrollController controller,
+    String firstName,
   ) {
     final textColor = isDarkMode ? AppColors.darkText : AppColors.textDark;
 
@@ -242,7 +250,7 @@ class _DecodeResultPageState extends ConsumerState<DecodeResultPage>
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Your Life Journey',
+            '${firstName.isNotEmpty ? "$firstName\'s" : "Your"} Life Journey',
             style: AppTypography.headingMedium.copyWith(color: textColor),
           ),
           const SizedBox(height: AppSpacing.lg),
@@ -289,6 +297,7 @@ class _DecodeResultPageState extends ConsumerState<DecodeResultPage>
     String title,
     Map<String, dynamic> interpretation, {
     bool initiallyExpanded = false,
+    String firstName = '',
   }) {
     final color = AppColors.getPlanetColorForTheme(number, isDarkMode);
     final textColor = isDarkMode ? AppColors.darkText : AppColors.textDark;
@@ -296,6 +305,17 @@ class _DecodeResultPageState extends ConsumerState<DecodeResultPage>
     final border = color.withValues(alpha: isDarkMode ? 0.35 : 0.25);
     final keySentence = _extractKeySentence(interpretation['summary']);
     final actionPlan = _extractActionPlan(interpretation);
+    
+    // Inject firstName into interpretation text
+    final titleText = interpretation['title'] ?? '';
+    final personalizedTitle = firstName.isNotEmpty && titleText.isNotEmpty
+        ? titleText.replaceFirst(RegExp(r'^(?:Your|The)\s+'), '$firstName\'s ')
+        : titleText;
+    
+    final summaryText = interpretation['summary'] ?? '';
+    final personalizedSummary = firstName.isNotEmpty && summaryText.isNotEmpty
+        ? summaryText.replaceFirst(RegExp(r'^(?:You|Your)\s+'), '$firstName ')
+        : summaryText;
 
     return Container(
       margin: const EdgeInsets.only(bottom: AppSpacing.md),
@@ -328,12 +348,12 @@ class _DecodeResultPageState extends ConsumerState<DecodeResultPage>
           children: [
             if (interpretation.isNotEmpty) ...[
               Text(
-                interpretation['title'] ?? '',
+                personalizedTitle,
                 style: AppTypography.headingSmall.copyWith(color: textColor),
               ),
               const SizedBox(height: AppSpacing.md),
               Text(
-                interpretation['summary'] ?? '',
+                personalizedSummary,
                 style: AppTypography.bodyMedium.copyWith(color: textColor),
               ),
               if (keySentence.isNotEmpty) ...[
@@ -409,6 +429,7 @@ class _DecodeResultPageState extends ConsumerState<DecodeResultPage>
   Widget build(BuildContext context) {
     final state = ref.watch(decodeControllerProvider);
     final exportState = ref.watch(pdfExportStateProvider);
+    final firstName = ref.watch(userFirstNameProvider);
     final dispatcher = WidgetsBinding.instance.platformDispatcher;
     final reduceMotion =
         MediaQuery.maybeOf(context)?.disableAnimations == true ||
@@ -580,6 +601,7 @@ class _DecodeResultPageState extends ConsumerState<DecodeResultPage>
                                 exportState,
                                 result,
                                 _overviewController,
+                                firstName,
                               ),
                               reduceMotion,
                             ),
@@ -593,6 +615,7 @@ class _DecodeResultPageState extends ConsumerState<DecodeResultPage>
                                 personalYear,
                                 result,
                                 _numbersController,
+                                firstName,
                               ),
                               reduceMotion,
                             ),
@@ -604,6 +627,7 @@ class _DecodeResultPageState extends ConsumerState<DecodeResultPage>
                                 turningPoints,
                                 result.input.dateOfBirth,
                                 _timelineController,
+                                firstName,
                               ),
                               reduceMotion,
                             ),
@@ -828,6 +852,7 @@ class _DecodeResultPageState extends ConsumerState<DecodeResultPage>
     dynamic result,
   ) async {
     final exportStateNotifier = ref.read(pdfExportStateProvider.notifier);
+    final firstName = ref.read(userFirstNameProvider);
     if (!mounted) return;
     final messenger = ScaffoldMessenger.of(context);
 
@@ -840,6 +865,7 @@ class _DecodeResultPageState extends ConsumerState<DecodeResultPage>
       final pdfBytes = await controller.exportPdf(
         fullName: result.input.fullName,
         dateOfBirth: result.input.dateOfBirth,
+        firstName: firstName,
       );
 
       // Save file with user-chosen location

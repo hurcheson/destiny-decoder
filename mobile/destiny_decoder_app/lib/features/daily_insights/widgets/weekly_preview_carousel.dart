@@ -8,12 +8,14 @@ class WeeklyPreviewCarousel extends ConsumerWidget {
   final int lifeSeal;
   final String? startDate; // ISO YYYY-MM-DD
   final void Function(DailyPowerPreview)? onSelect;
+  final String firstName;
 
   const WeeklyPreviewCarousel({
     super.key,
     required this.lifeSeal,
     this.startDate,
     this.onSelect,
+    this.firstName = '',
   });
 
   @override
@@ -35,6 +37,7 @@ class WeeklyPreviewCarousel extends ConsumerWidget {
               final d = items[index];
               return _PreviewCard(
                 data: d,
+                firstName: firstName,
                 onTap: onSelect == null ? null : () => onSelect!(d),
               );
             },
@@ -60,7 +63,8 @@ class WeeklyPreviewCarousel extends ConsumerWidget {
 class _PreviewCard extends StatelessWidget {
   final DailyPowerPreview data;
   final VoidCallback? onTap;
-  const _PreviewCard({required this.data, this.onTap});
+  final String firstName;
+  const _PreviewCard({required this.data, this.onTap, this.firstName = ''});
 
   Color _accent(int n) {
     switch (n) {
@@ -89,6 +93,10 @@ class _PreviewCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final accent = _accent(data.powerNumber);
+    final briefText = firstName.isNotEmpty && data.briefInsight.isNotEmpty
+        ? data.briefInsight.replaceFirst(RegExp(r'^(?:You|Your)\s+'), '$firstName ')
+        : data.briefInsight;
+    
     return InkWell(
       onTap: onTap,
       child: Container(
@@ -126,7 +134,7 @@ class _PreviewCard extends StatelessWidget {
             const SizedBox(height: 8),
             Expanded(
               child: Text(
-                data.briefInsight,
+                briefText,
                 maxLines: 3,
                 overflow: TextOverflow.ellipsis,
                 style: Theme.of(context).textTheme.bodySmall,

@@ -7,12 +7,14 @@ class BlessedDaysCalendar extends ConsumerStatefulWidget {
   final int dayOfBirth;
   final DateTime initialMonth;
   final void Function(DateTime selectedDate)? onSelectDate;
+  final String firstName;
 
   const BlessedDaysCalendar({
     super.key,
     required this.dayOfBirth,
     required this.initialMonth,
     this.onSelectDate,
+    this.firstName = '',
   });
 
   @override

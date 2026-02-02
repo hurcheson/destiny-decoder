@@ -38,6 +38,7 @@ class DecodeRemoteSource {
   Future<List<int>> exportPdf({
     required String fullName,
     required String dateOfBirth,
+    String firstName = '',
   }) async {
     // First get the full decode data
     final decodeData = await decodeFull(
@@ -51,6 +52,7 @@ class DecodeRemoteSource {
       data: {
         'full_name': fullName,
         'date_of_birth': dateOfBirth,
+        'first_name': firstName,
         'decode_data': decodeData,
       },
     );

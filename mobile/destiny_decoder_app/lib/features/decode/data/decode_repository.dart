@@ -21,10 +21,12 @@ class DecodeRepository {
   Future<List<int>> exportPdf({
     required String fullName,
     required String dateOfBirth,
+    String firstName = '',
   }) async {
     return _remoteSource.exportPdf(
       fullName: fullName,
       dateOfBirth: dateOfBirth,
+      firstName: firstName,
     );
   }
 }

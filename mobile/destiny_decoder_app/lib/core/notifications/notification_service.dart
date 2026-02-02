@@ -83,18 +83,24 @@ class NotificationService {
   }
 
   /// Test: Show a blessed day notification (via print for now).
-  Future<void> showTestBlessedDayNotification() async {
+  Future<void> showTestBlessedDayNotification({String firstName = ''}) async {
     if (kDebugMode) {
-      print('Test Blessed Day Notification: Today is Your Blessed Day!');
+      final greeting = firstName.isNotEmpty 
+          ? '$firstName, today is your blessed day!'
+          : 'Today is your blessed day!';
+      print('Test Blessed Day Notification: $greeting');
       print(
           'Harness the divine energy. This is an auspicious day for important decisions.');
     }
   }
 
   /// Test: Show a personal year notification (via print for now).
-  Future<void> showTestPersonalYearNotification() async {
+  Future<void> showTestPersonalYearNotification({String firstName = '', int personalYear = 0}) async {
     if (kDebugMode) {
-      print('Test Personal Year Notification: Personal Year 7 Begins!');
+      final greeting = firstName.isNotEmpty
+          ? '$firstName, personal year $personalYear begins!'
+          : 'Personal Year $personalYear Begins!';
+      print('Test Personal Year Notification: $greeting');
       print(
           'Happy numerological birthday! You\'re entering a year of wisdom and introspection.');
     }
