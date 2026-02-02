@@ -7,12 +7,14 @@ class PersonalMonthGuidanceCard extends ConsumerWidget {
   final int dayOfBirth;
   final int monthOfBirth;
   final int yearOfBirth;
+  final String firstName;
 
   const PersonalMonthGuidanceCard({
     super.key,
     required this.dayOfBirth,
     required this.monthOfBirth,
     required this.yearOfBirth,
+    this.firstName = '',
   });
 
   @override
@@ -206,7 +208,7 @@ class PersonalMonthGuidanceCard extends ConsumerWidget {
             const SizedBox(height: 12),
 
             // Actionable guidance based on month
-            _buildMonthGuidance(context, data.personalMonth, theme),
+            _buildMonthGuidance(context, data.personalMonth, theme, firstName),
           ],
         ),
       ),
@@ -217,6 +219,7 @@ class PersonalMonthGuidanceCard extends ConsumerWidget {
     BuildContext context,
     int monthNumber,
     ThemeData theme,
+    String firstName,
   ) {
     final guidanceMap = {
       1: 'Focus on starting new projects and taking initiative. Leadership opportunities abound.',
@@ -231,6 +234,9 @@ class PersonalMonthGuidanceCard extends ConsumerWidget {
     };
 
     final guidance = guidanceMap[monthNumber] ?? 'Trust your journey this month.';
+    final personalizedGuidance = firstName.isNotEmpty
+        ? guidance.replaceFirst(RegExp(r'^(?:Focus|This|Creative|Build|Embrace|Service|A time|Manifest|Release)'), '$firstName, ${guidance[0].toLowerCase()}${guidance.substring(1)}')
+        : guidance;
 
     return Container(
       padding: const EdgeInsets.only(left: 12, top: 12, right: 12, bottom: 12),
@@ -245,7 +251,7 @@ class PersonalMonthGuidanceCard extends ConsumerWidget {
         borderRadius: BorderRadius.circular(8),
       ),
       child: Text(
-        guidance,
+        personalizedGuidance,
         style: theme.textTheme.bodySmall?.copyWith(
           height: 1.5,
         ),

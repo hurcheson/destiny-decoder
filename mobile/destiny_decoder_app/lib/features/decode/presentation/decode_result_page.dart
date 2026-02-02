@@ -161,7 +161,7 @@ class _DecodeResultPageState extends ConsumerState<DecodeResultPage>
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            '${firstName.isNotEmpty ? "$firstName\'s" : "Your"} Core Numbers',
+            '${firstName.isNotEmpty ? "${firstName}'s" : "Your"} Core Numbers',
             style: AppTypography.headingMedium.copyWith(color: textColor),
           ),
           const SizedBox(height: AppSpacing.md),
@@ -250,7 +250,7 @@ class _DecodeResultPageState extends ConsumerState<DecodeResultPage>
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            '${firstName.isNotEmpty ? "$firstName\'s" : "Your"} Life Journey',
+            '${firstName.isNotEmpty ? "${firstName}'s" : "Your"} Life Journey',
             style: AppTypography.headingMedium.copyWith(color: textColor),
           ),
           const SizedBox(height: AppSpacing.lg),
