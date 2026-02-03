@@ -4,6 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
+from app.api.routes.auth import router as auth_router
 from app.api.routes.destiny import router as destiny_router
 from app.api.routes.interpretations import router as interpretations_router
 from app.api.routes.compatibility import router as compatibility_router
@@ -94,6 +95,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
+app.include_router(auth_router)
 app.include_router(destiny_router)
 app.include_router(interpretations_router)
 app.include_router(compatibility_router)
