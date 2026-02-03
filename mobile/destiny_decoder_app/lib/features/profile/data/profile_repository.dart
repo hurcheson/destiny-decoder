@@ -92,6 +92,11 @@ class ProfileRepository {
         return null;
       }
     } on DioException catch (e) {
+      // If 404, profile doesn't exist yet (first-time user)
+      if (e.response?.statusCode == 404) {
+        return null;
+      }
+      
       // If network error, try to return cached version
       if (e.type == DioExceptionType.connectionTimeout ||
           e.type == DioExceptionType.unknown) {
