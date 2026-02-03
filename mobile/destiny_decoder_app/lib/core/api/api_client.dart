@@ -1,7 +1,5 @@
-"""
-HTTP client with automatic error handling and feature gate management.
-Catches 403 Forbidden errors and routes to paywall screen.
-"""
+// HTTP client with automatic error handling and feature gate management.
+// Catches 403 Forbidden errors and routes to paywall screen.
 
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
@@ -35,15 +33,18 @@ class ApiException implements Exception {
 class ApiClient {
   final String baseUrl;
   final Future<String?> Function() getToken;
-  final VoidCallback onForbidden; // Navigate to paywall
-  final VoidCallback onUnauthorized; // Navigate to login
+  late VoidCallback onForbidden; // Navigate to paywall
+  late VoidCallback onUnauthorized; // Navigate to login
 
   ApiClient({
     required this.baseUrl,
     required this.getToken,
-    required this.onForbidden,
-    required this.onUnauthorized,
-  });
+    VoidCallback? onForbidden,
+    VoidCallback? onUnauthorized,
+  }) {
+    this.onForbidden = onForbidden ?? () {};
+    this.onUnauthorized = onUnauthorized ?? () {};
+  }
 
   // Helper to get headers with auth token
   Future<Map<String, String>> _getHeaders({

@@ -1,6 +1,5 @@
-"""
-Riverpod providers for subscription status and reading limits.
-"""
+// Riverpod providers for subscription status and reading limits.
+// ignore_for_file: unused_result
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'api_providers.dart';
@@ -55,12 +54,10 @@ final refreshLimitProvider = FutureProvider<void>((ref) async {
   // When invalidated, reading limit will be refetched
 });
 
-
 // Helper function to refresh limits
 void refreshReadingLimit(WidgetRef ref) {
   ref.refresh(readingLimitProvider);
 }
-
 
 // Check if user can create a reading without payment
 final canCreateReadingProvider = FutureProvider<bool>((ref) async {

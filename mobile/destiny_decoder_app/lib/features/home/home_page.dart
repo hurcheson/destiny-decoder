@@ -8,7 +8,7 @@ import '../../core/widgets/base_layout.dart';
 /// Beautiful Material 3 dashboard for authenticated users.
 /// Displays Life Seal reading, daily insights, blessed days, and premium upsell.
 class HomePage extends ConsumerWidget {
-  const HomePage({Key? key}) : super(key: key);
+  const HomePage({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -145,14 +145,14 @@ class HomePage extends ConsumerWidget {
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: [
-              AppColors.primary.withOpacity(0.8),
-              AppColors.primary.withOpacity(0.4),
+              AppColors.primary.withValues(alpha: 0.8),
+              AppColors.primary.withValues(alpha: 0.4),
             ],
           ),
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
-              color: AppColors.primary.withOpacity(0.3),
+              color: AppColors.primary.withValues(alpha: 0.3),
               blurRadius: 12,
               offset: const Offset(0, 6),
             ),
@@ -202,7 +202,7 @@ class HomePage extends ConsumerWidget {
                     height: 80,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      color: Colors.white.withOpacity(0.2),
+                      color: Colors.white.withValues(alpha: 0.2),
                     ),
                     child: Center(
                       child: Text(
@@ -264,7 +264,7 @@ class HomePage extends ConsumerWidget {
               height: 60,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: AppColors.primary.withOpacity(0.1),
+                color: AppColors.primary.withValues(alpha: 0.1),
               ),
               child: Center(
                 child: Text(
@@ -347,10 +347,10 @@ class HomePage extends ConsumerWidget {
                     vertical: 6,
                   ),
                   decoration: BoxDecoration(
-                    color: AppColors.primary.withOpacity(0.1),
+                    color: AppColors.primary.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(16),
                     border: Border.all(
-                      color: AppColors.primary.withOpacity(0.3),
+                      color: AppColors.primary.withValues(alpha: 0.3),
                     ),
                   ),
                   child: Text(
@@ -377,14 +377,14 @@ class HomePage extends ConsumerWidget {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            Colors.amber.withOpacity(0.8),
-            Colors.orange.withOpacity(0.6),
+            Colors.amber.withValues(alpha: 0.8),
+            Colors.orange.withValues(alpha: 0.6),
           ],
         ),
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.orange.withOpacity(0.2),
+            color: Colors.orange.withValues(alpha: 0.2),
             blurRadius: 8,
             offset: const Offset(0, 4),
           ),
@@ -512,13 +512,13 @@ class HomePage extends ConsumerWidget {
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: [
-              Colors.grey.withOpacity(0.2),
-              Colors.grey.withOpacity(0.1),
+              Colors.grey.withValues(alpha: 0.2),
+              Colors.grey.withValues(alpha: 0.1),
             ],
           ),
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: Colors.grey.withOpacity(0.3),
+            color: Colors.grey.withValues(alpha: 0.3),
             width: 2,
           ),
         ),
@@ -562,7 +562,7 @@ class HomePage extends ConsumerWidget {
               height: 24,
               width: 150,
               decoration: BoxDecoration(
-                color: Colors.grey.withOpacity(0.2),
+                color: Colors.grey.withValues(alpha: 0.2),
                 borderRadius: BorderRadius.circular(4),
               ),
             ),
@@ -571,7 +571,7 @@ class HomePage extends ConsumerWidget {
               height: 32,
               width: 200,
               decoration: BoxDecoration(
-                color: Colors.grey.withOpacity(0.2),
+                color: Colors.grey.withValues(alpha: 0.2),
                 borderRadius: BorderRadius.circular(4),
               ),
             ),
@@ -595,3 +595,5 @@ class HomePage extends ConsumerWidget {
     );
   }
 }
+
+

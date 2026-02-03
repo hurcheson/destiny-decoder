@@ -1,17 +1,14 @@
-"""
-Riverpod providers for authentication state management.
-"""
+// Riverpod providers for authentication state management.
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'auth_service.dart';
 import '../config/app_config.dart';
 
-
 // Auth service provider
 final authServiceProvider = Provider<AuthService>((ref) {
   return AuthService(
-    baseUrl: ApiConfig.baseUrl,
+    baseUrl: AppConfig.apiBaseUrl,
     secureStorage: const FlutterSecureStorage(),
   );
 });
@@ -73,7 +70,7 @@ class AuthStateNotifier extends AsyncNotifier<bool> {
     
     try {
       final authService = ref.read(authServiceProvider);
-      final response = await authService.signup(
+      await authService.signup(
         email: email,
         password: password,
         firstName: firstName,
@@ -100,7 +97,7 @@ class AuthStateNotifier extends AsyncNotifier<bool> {
     
     try {
       final authService = ref.read(authServiceProvider);
-      final response = await authService.login(
+      await authService.login(
         email: email,
         password: password,
       );

@@ -1,7 +1,5 @@
-"""
-Auth service for JWT-based authentication with the backend.
-Handles signup, login, token storage, and auto-login.
-"""
+// Auth service for JWT-based authentication with the backend.
+// Handles signup, login, token storage, and auto-login.
 
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
@@ -53,7 +51,7 @@ class AuthService {
   final FlutterSecureStorage _secureStorage;
   final String _baseUrl;
   
-  StreamController<bool> _authStateController = StreamController<bool>.broadcast();
+  final StreamController<bool> _authStateController = StreamController<bool>.broadcast();
   Stream<bool> get authStateStream => _authStateController.stream;
 
   AuthService({

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/theme/app_colors.dart';
-import '../../core/api/auth_providers.dart';
 import '../../core/widgets/base_layout.dart';
 
 /// Beautiful paywall screen showing subscription tiers.
@@ -10,9 +9,9 @@ class PaywallScreen extends ConsumerWidget {
   final String? fromFeature; // Which feature triggered the paywall
 
   const PaywallScreen({
-    Key? key,
+    super.key,
     this.fromFeature,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -61,8 +60,8 @@ class PaywallScreen extends ConsumerWidget {
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
               colors: [
-                AppColors.primary.withOpacity(0.8),
-                AppColors.primary.withOpacity(0.4),
+                AppColors.primary.withValues(alpha: 0.8),
+                AppColors.primary.withValues(alpha: 0.4),
               ],
             ),
             shape: BoxShape.circle,
@@ -140,7 +139,7 @@ class PaywallScreen extends ConsumerWidget {
               ],
             ),
           );
-        }).toList(),
+        }),
       ],
     );
   }
@@ -201,11 +200,11 @@ class PaywallScreen extends ConsumerWidget {
       child: Container(
         decoration: BoxDecoration(
           border: Border.all(
-            color: isPopular ? AppColors.primary : Colors.grey.withOpacity(0.3),
+            color: isPopular ? AppColors.primary : Colors.grey.withValues(alpha: 0.3),
             width: isPopular ? 2 : 1,
           ),
           borderRadius: BorderRadius.circular(16),
-          color: isPopular ? AppColors.primary.withOpacity(0.05) : Colors.white,
+          color: isPopular ? AppColors.primary.withValues(alpha: 0.05) : Colors.white,
         ),
         child: Stack(
           children: [
@@ -291,7 +290,7 @@ class PaywallScreen extends ConsumerWidget {
                         ],
                       ),
                     );
-                  }).toList(),
+                  }),
                   const SizedBox(height: 16),
                   SizedBox(
                     width: double.infinity,
@@ -300,7 +299,7 @@ class PaywallScreen extends ConsumerWidget {
                       style: ElevatedButton.styleFrom(
                         backgroundColor: isPopular
                             ? AppColors.primary
-                            : Colors.grey.withOpacity(0.2),
+                            : Colors.grey.withValues(alpha: 0.2),
                         foregroundColor: isPopular ? Colors.white : Colors.black87,
                         padding: const EdgeInsets.symmetric(vertical: 12),
                         shape: RoundedRectangleBorder(
@@ -401,7 +400,7 @@ class PaywallScreen extends ConsumerWidget {
             Container(
               width: 1,
               height: 12,
-              color: Colors.grey.withOpacity(0.3),
+              color: Colors.grey.withValues(alpha: 0.3),
             ),
             Expanded(
               child: GestureDetector(
@@ -489,3 +488,5 @@ extension StringExtension on String {
     return "${this[0].toUpperCase()}${substring(1)}";
   }
 }
+
+
