@@ -377,7 +377,7 @@ class SubscriptionPage extends ConsumerWidget {
       // TODO: Integrate with PurchaseService to start purchase
       // Example: await ref.read(purchaseServiceProvider).buyProduct(productId);
       // This requires injecting PurchaseService via Riverpod provider
-      Logger.info('Would initiate purchase for: $productId');
+      Logger.i('Would initiate purchase for: $productId');
       
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
