@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/iap/subscription_manager.dart';
+import '../../../core/utils/logger.dart';
 
 /// Subscription management page
 class SubscriptionPage extends ConsumerWidget {
@@ -359,20 +360,11 @@ class SubscriptionPage extends ConsumerWidget {
   ) async {
     try {
       // Determine product ID based on tier
-      String productId;
-      switch (tier.id) {
-        case 'premium_monthly':
-          productId = 'destiny_decoder_premium_monthly';
-          break;
-        case 'premium_annual':
-          productId = 'destiny_decoder_premium_annual';
-          break;
-        case 'pro_annual':
-          productId = 'destiny_decoder_pro_annual';
-          break;
-        default:
-          throw Exception('Unknown subscription tier: ${tier.id}');
-      }
+      final productId = switch (tier) {
+        SubscriptionTier.premium => 'destiny_decoder_premium_monthly',
+        SubscriptionTier.pro => 'destiny_decoder_pro_annual',
+        SubscriptionTier.free => throw Exception('Cannot purchase free tier'),
+      };
       
       // Trigger purchase flow
       ScaffoldMessenger.of(context).showSnackBar(
@@ -383,8 +375,9 @@ class SubscriptionPage extends ConsumerWidget {
       );
       
       // TODO: Integrate with PurchaseService to start purchase
-      // Example: await PurchaseService().buyProduct(productId);
+      // Example: await ref.read(purchaseServiceProvider).buyProduct(productId);
       // This requires injecting PurchaseService via Riverpod provider
+      Logger.info('Would initiate purchase for: $productId');
       
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
