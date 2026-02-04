@@ -1,6 +1,7 @@
 """
 API routes for subscription management.
 """
+import logging
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from pydantic import BaseModel, Field
@@ -13,7 +14,8 @@ from app.models.subscription_history import SubscriptionStatus
 from app.models.user import SubscriptionTier
 from app.services.receipt_validation_service import ReceiptValidationService
 from app.core.feature_gates import get_user_from_request
-from app.utils.logger import logger
+
+logger = logging.getLogger(__name__)
 
 
 router = APIRouter(prefix="/api/subscriptions", tags=["subscriptions"])
