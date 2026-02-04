@@ -4,9 +4,11 @@ Receipt validation service for Apple App Store and Google Play Store.
 import base64
 import json
 import requests
+import logging
 from typing import Dict, Optional
 from datetime import datetime, timedelta
-from app.utils.logger import logger
+
+logger = logging.getLogger(__name__)
 
 
 class ReceiptValidationService:
