@@ -8,7 +8,8 @@ from sqlalchemy.orm import Session
 from datetime import datetime, timedelta
 
 from app.config.database import get_db
-from app.models.user import User, SubscriptionTier, Reading
+from app.models.user import User, SubscriptionTier
+from app.models.reading import Reading
 from app.core.feature_gates import check_reading_limit, get_user_from_request
 
 router = APIRouter(
