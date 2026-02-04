@@ -10,6 +10,8 @@ import 'core/analytics/analytics_service.dart';
 import 'core/navigation/main_navigation_page.dart';
 import 'core/deep_linking/deep_link_service.dart';
 import 'core/screens/splash_screen.dart';
+import 'features/auth/presentation/pages/login_signup_page.dart';
+import 'features/auth/providers/auth_notifier.dart';
 import 'features/onboarding/presentation/onboarding_page.dart';
 import 'features/content/presentation/article_reader_page.dart';
 import 'features/profile/presentation/providers/profile_providers.dart';
@@ -124,6 +126,8 @@ class _DestinyDecoderAppState extends ConsumerState<DestinyDecoderApp> {
 
   @override
   Widget build(BuildContext context) {
+    // Watch auth state first
+    final authAsync = ref.watch(authStateNotifierProvider);
     // Watch profile provider for loading/error states
     final profileAsync = ref.watch(userProfileProvider);
     
@@ -137,19 +141,38 @@ class _DestinyDecoderAppState extends ConsumerState<DestinyDecoderApp> {
         },
       );
     } else {
-      // Determine home based on profile completion
-      home = profileAsync.when(
-        data: (profile) {
-          if (profile != null && profile.hasCompletedOnboarding) {
-            // Profile exists and onboarding complete → Dashboard
-            return const PersonalDashboardPage();
-          } else if (widget.hasSeenOnboarding) {
-            // Onboarding seen but no profile → Main navigation (old flow)
-            return const MainNavigationPage();
-          } else {
-            // Never seen onboarding → Onboarding page
-            return const OnboardingPage();
+      // Check authentication first
+      home = authAsync.when(
+        data: (isAuthenticated) {
+          if (!isAuthenticated) {
+            // Not authenticated → Show login/signup
+            return const LoginSignupPage();
           }
+          
+          // Authenticated → Check onboarding status
+          return profileAsync.when(
+            data: (profile) {
+              if (profile != null && profile.hasCompletedOnboarding) {
+                // Profile exists and onboarding complete → Dashboard
+                return const PersonalDashboardPage();
+              } else if (widget.hasSeenOnboarding) {
+                // Onboarding seen but no profile → Main navigation (old flow)
+                return const MainNavigationPage();
+              } else {
+                // Never seen onboarding → Onboarding page
+                return const OnboardingPage();
+              }
+            },
+            loading: () => Scaffold(
+              body: Center(
+                child: CircularProgressIndicator(),
+              ),
+            ),
+            error: (error, stack) {
+              // Profile doesn't exist or error loading → Show onboarding
+              return const OnboardingPage();
+            },
+          );
         },
         loading: () => Scaffold(
           body: Center(
@@ -157,8 +180,8 @@ class _DestinyDecoderAppState extends ConsumerState<DestinyDecoderApp> {
           ),
         ),
         error: (error, stack) {
-          // Profile doesn't exist or error loading → Show onboarding
-          return const OnboardingPage();
+          // Auth error → Show login/signup
+          return const LoginSignupPage();
         },
       );
     }

@@ -1,11 +1,8 @@
-/// Personal Dashboard Page
-/// Shows user's personalized greeting, today's power number, life seal summary,
-/// and quick action buttons.
-library;
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../../../features/auth/presentation/pages/login_signup_page.dart';
+import '../../../../features/auth/providers/auth_notifier.dart';
 import '../../../../features/daily_insights/view/daily_insights_page.dart';
 import '../../../../features/decode/presentation/decode_form_page.dart';
 import '../../../../features/history/presentation/history_page.dart';
@@ -52,6 +49,54 @@ class PersonalDashboardPage extends ConsumerWidget {
         title: const Text('Your Destiny'),
         elevation: 0,
         centerTitle: false,
+        actions: [
+          PopupMenuButton(
+            itemBuilder: (context) => [
+              PopupMenuItem(
+                child: const Text('Logout'),
+                onTap: () async {
+                  // Show confirmation dialog
+                  final confirmed = await showDialog<bool>(
+                    context: context,
+                    builder: (context) => AlertDialog(
+                      title: const Text('Logout'),
+                      content: const Text('Are you sure you want to logout?'),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.pop(context, false),
+                          child: const Text('Cancel'),
+                        ),
+                        TextButton(
+                          onPressed: () => Navigator.pop(context, true),
+                          child: const Text('Logout'),
+                        ),
+                      ],
+                    ),
+                  );
+
+                  if (confirmed == true && context.mounted) {
+                    try {
+                      // Logout
+                      await ref.read(authStateNotifierProvider.notifier).logout();
+                      
+                      if (context.mounted) {
+                        // Navigate to login screen
+                        Navigator.of(context).pushAndRemoveUntil(
+                          MaterialPageRoute(builder: (_) => const LoginSignupPage()),
+                          (route) => false,
+                        );
+                      }
+                    } catch (e) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('Error logging out: $e')),
+                      );
+                    }
+                  }
+                },
+              ),
+            ],
+          ),
+        ],
       ),
       body: profileAsync.when(
         data: (profile) {
