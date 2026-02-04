@@ -3,6 +3,8 @@ import 'dart:io';
 import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../utils/logger.dart';
+import '../api/api_client.dart';
+import '../api/api_providers.dart';
 
 /// Product IDs for subscriptions
 class ProductIds {
@@ -16,6 +18,7 @@ class ProductIds {
 /// Purchase service for managing in-app purchases and subscriptions.
 class PurchaseService {
   final InAppPurchase _iap = InAppPurchase.instance;
+  final ApiClient _apiClient;
   
   StreamSubscription<List<PurchaseDetails>>? _subscription;
   List<ProductDetails> _products = [];
@@ -23,6 +26,8 @@ class PurchaseService {
 
   List<ProductDetails> get products => _products;
   bool get isAvailable => _isAvailable;
+
+  PurchaseService({required ApiClient apiClient}) : _apiClient = apiClient;
 
   /// Initialize the purchase service and set up listeners
   Future<void> initialize() async {
@@ -161,21 +166,27 @@ class PurchaseService {
     String platform,
   ) async {
     try {
-      // Note: This requires a DioClient or HTTP client to be available
-      // For now, we log the receipt data
-      Logger.i('Validating receipt: product=$productId, platform=$platform');
-      Logger.d('Receipt data length: ${receiptData.length}');
+      Logger.i('📤 Validating receipt: product=$productId, platform=$platform');
       
-      // TODO: Implement HTTP POST to /api/subscriptions/validate-receipt
-      // This will require injecting an HTTP client into PurchaseService
-      // POST body: {
-      //   "receipt_data": receiptData,
-      //   "product_id": productId,
-      //   "platform": platform,
-      //   "device_id": <device_id_from_profile>
-      // }
+      // Send receipt to backend
+      final response = await _apiClient.post(
+        '/api/subscriptions/validate-receipt',
+        body: {
+          "receipt_data": receiptData,
+          "product_id": productId,
+          "platform": platform,
+        },
+      );
+      
+      if (response['success'] == true) {
+        Logger.i('✅ Receipt validated successfully');
+        Logger.i('   Subscription: ${response['subscription']['tier']}');
+        Logger.i('   Expires: ${response['subscription']['expires_at']}');
+      } else {
+        Logger.e('❌ Receipt validation failed: ${response['message']}');
+      }
     } catch (e) {
-      Logger.e('Error validating receipt: $e');
+      Logger.e('❌ Error validating receipt: $e');
       rethrow;
     }
   }
@@ -197,7 +208,10 @@ class PurchaseService {
 
 /// Riverpod provider for PurchaseService
 final purchaseServiceProvider = Provider<PurchaseService>((ref) {
-  final service = PurchaseService();
+  final apiClient = ref.watch(apiClientProvider);
+  final service = PurchaseService(apiClient: apiClient);
+  
+  // Initialize on first access
   service.initialize();
   
   ref.onDispose(() {

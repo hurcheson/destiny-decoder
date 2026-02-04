@@ -5,33 +5,48 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from pydantic import BaseModel, Field
 from typing import Optional, List
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from app.config.database import get_db
 from app.models import User, SubscriptionHistory
-from app.services.subscription_service import SubscriptionService
+from app.models.subscription_history import SubscriptionStatus
+from app.models.user import SubscriptionTier
+from app.services.receipt_validation_service import ReceiptValidationService
+from app.core.feature_gates import get_user_from_request
+from app.utils.logger import logger
 
 
-router = APIRouter(prefix="/api/subscription", tags=["subscription"])
+router = APIRouter(prefix="/api/subscriptions", tags=["subscriptions"])
+
+
+# Dependency to get current user from JWT
+async def get_current_user(db: Session = Depends(get_db)) -> User:
+    """Get current authenticated user from JWT token."""
+    user = get_user_from_request(db)
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Authentication required"
+        )
+    return user
 
 
 # ===== Request/Response Models =====
 
-class SubscriptionValidateRequest(BaseModel):
+class ValidateReceiptRequest(BaseModel):
     """Request model for receipt validation."""
-    user_id: str = Field(..., description="User ID")
-    platform: str = Field(..., description="Platform: ios, android, web")
     receipt_data: str = Field(..., description="Base64 encoded receipt from platform")
-    product_id: str = Field(..., description="Product ID (e.g., premium_monthly)")
+    product_id: str = Field(..., description="Product ID (e.g., destiny_decoder_premium_monthly)")
+    platform: str = Field(..., description="Platform: ios or android")
 
 
 class SubscriptionStatusResponse(BaseModel):
     """Response model for subscription status."""
-    user_id: str
     tier: str  # 'free', 'premium', 'pro'
     is_active: bool
     expires_at: Optional[datetime]
-    features: dict
+    auto_renew: bool
+    platform: Optional[str]
 
 
 class SubscriptionHistoryResponse(BaseModel):
@@ -53,171 +68,176 @@ class CancelSubscriptionRequest(BaseModel):
 
 # ===== Endpoints =====
 
-@router.post("/validate", status_code=status.HTTP_201_CREATED)
-async def validate_subscription(
-    request: SubscriptionValidateRequest,
-    db: Session = Depends(get_db)
+@router.post("/validate-receipt", status_code=status.HTTP_200_OK)
+async def validate_receipt(
+    request: ValidateReceiptRequest,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
 ):
     """
-    Validate purchase receipt with Apple/Google and create subscription.
+    Validate purchase receipt with Apple/Google and activate subscription.
     
     Workflow:
     1. Validate receipt with platform API
     2. Extract transaction details
-    3. Create/update subscription in database
-    4. Return subscription status
+    3. Update user subscription tier
+    4. Create subscription history record
+    5. Return updated subscription status
     """
     try:
+        logger.info(f"Validating receipt for user {current_user.id}, product {request.product_id}")
+        
         # Validate receipt with platform
-        validation_result = SubscriptionService.validate_receipt(
-            request.platform,
-            request.receipt_data
+        validation_result = ReceiptValidationService.validate_receipt(
+            platform=request.platform,
+            receipt_data=request.receipt_data,
+            product_id=request.product_id
         )
         
         if not validation_result.get("valid"):
+            logger.warning(f"Invalid receipt: {validation_result.get('error')}")
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Invalid receipt"
+                detail=validation_result.get("error", "Invalid receipt")
             )
         
         # Extract subscription details
         transaction_id = validation_result.get("transaction_id")
+        original_transaction_id = validation_result.get("original_transaction_id")
         expires_date = validation_result.get("expires_date")
+        purchase_date = validation_result.get("purchase_date")
+        is_active = validation_result.get("is_active", True)
         
         # Determine tier from product_id
-        tier = "premium" if "premium" in request.product_id else "pro"
+        if "premium" in request.product_id.lower():
+            tier = SubscriptionTier.PREMIUM
+            tier_str = "premium"
+        elif "pro" in request.product_id.lower():
+            tier = SubscriptionTier.PRO
+            tier_str = "pro"
+        else:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Unknown product: {request.product_id}"
+            )
         
-        # Calculate duration
-        duration_months = 1 if "monthly" in request.product_id else 12
-        
-        # Get price
+        # Get price mapping
         price_map = {
-            "premium_monthly": "2.99",
-            "premium_annual": "24.99",
-            "pro_annual": "49.99"
+            "destiny_decoder_premium_monthly": "4.99",
+            "destiny_decoder_premium_annual": "49.99",
+            "destiny_decoder_pro_annual": "99.99",
         }
-        price_usd = price_map.get(request.product_id)
+        price_usd = price_map.get(request.product_id, "0.00")
         
-        # Create subscription
-        subscription = SubscriptionService.create_subscription(
-            db=db,
-            user_id=request.user_id,
-            tier=tier,
+        # Update user subscription
+        current_user.subscription_tier = tier
+        current_user.subscription_expires = expires_date
+        db.add(current_user)
+        
+        # Create subscription history record
+        subscription_history = SubscriptionHistory(
+            user_id=current_user.id,
+            tier=tier_str,
+            status=SubscriptionStatus.ACTIVE if is_active else SubscriptionStatus.EXPIRED,
+            started_at=purchase_date or datetime.utcnow(),
+            expires_at=expires_date or (datetime.utcnow() + timedelta(days=30)),
             platform=request.platform,
             transaction_id=transaction_id,
-            duration_months=duration_months,
-            price_usd=price_usd
+            original_transaction_id=original_transaction_id,
+            price_usd=price_usd,
+            currency="USD"
         )
+        db.add(subscription_history)
+        db.commit()
+        db.refresh(current_user)
+        
+        logger.info(f"✅ Subscription activated: {current_user.id} → {tier_str}")
         
         return {
             "success": True,
-            "message": "Subscription activated",
+            "message": f"{tier_str.capitalize()} subscription activated",
             "subscription": {
-                "id": subscription.id,
-                "tier": subscription.tier,
-                "expires_at": subscription.expires_at.isoformat(),
-                "status": subscription.status.value
+                "tier": tier_str,
+                "expires_at": expires_date.isoformat() if expires_date else None,
+                "is_active": is_active,
+                "transaction_id": transaction_id
             }
         }
         
+    except HTTPException:
+        raise
     except Exception as e:
+        logger.error(f"❌ Error processing subscription: {str(e)}")
+        db.rollback()
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to process subscription: {str(e)}"
         )
 
 
-@router.get("/status/{user_id}", response_model=SubscriptionStatusResponse)
+@router.get("/status", response_model=SubscriptionStatusResponse)
 async def get_subscription_status(
-    user_id: str,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
 ):
     """
-    Get current subscription status for a user.
+    Get current subscription status for authenticated user.
     
-    Returns subscription tier, expiry date, and available features.
+    Returns subscription tier, expiry date, and platform info.
     """
-    user = db.query(User).filter(User.id == user_id).first()
+    # Get latest subscription history for platform info
+    latest_subscription = (
+        db.query(SubscriptionHistory)
+        .filter(SubscriptionHistory.user_id == current_user.id)
+        .order_by(SubscriptionHistory.created_at.desc())
+        .first()
+    )
     
-    if not user:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="User not found"
-        )
-    
-    # Determine available features
-    features = {
-        "unlimited_readings": SubscriptionService.check_feature_access(user, "unlimited_readings"),
-        "full_interpretations": SubscriptionService.check_feature_access(user, "full_interpretations"),
-        "unlimited_pdf": SubscriptionService.check_feature_access(user, "unlimited_pdf"),
-        "detailed_compatibility": SubscriptionService.check_feature_access(user, "detailed_compatibility"),
-        "advanced_analytics": SubscriptionService.check_feature_access(user, "advanced_analytics"),
-        "ad_free": SubscriptionService.check_feature_access(user, "ad_free"),
-        "reading_limit": SubscriptionService.get_reading_limit(user),
-        "pdf_monthly_limit": SubscriptionService.get_pdf_monthly_limit(user)
-    }
+    # Check if subscription is still active
+    is_active = False
+    if current_user.subscription_tier != SubscriptionTier.FREE:
+        if current_user.subscription_expires:
+            is_active = current_user.subscription_expires > datetime.utcnow()
+        else:
+            is_active = True  # Lifetime or no expiration
     
     return SubscriptionStatusResponse(
-        user_id=user.id,
-        tier=user.subscription_tier.value,
-        is_active=user.is_premium or user.is_pro,
-        expires_at=user.subscription_expires,
-        features=features
+        tier=current_user.subscription_tier.value,
+        is_active=is_active,
+        expires_at=current_user.subscription_expires,
+        auto_renew=is_active and latest_subscription is not None,
+        platform=latest_subscription.platform if latest_subscription else None
     )
 
 
-@router.post("/cancel")
-async def cancel_subscription(
-    request: CancelSubscriptionRequest,
-    db: Session = Depends(get_db)
-):
-    """
-    Cancel an active subscription.
-    
-    Note: User retains access until expiry date.
-    """
-    success = SubscriptionService.cancel_subscription(db, request.user_id)
-    
-    if not success:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="No active subscription found"
-        )
-    
-    return {
-        "success": True,
-        "message": "Subscription cancelled. Access remains until expiry date."
-    }
-
-
-@router.get("/history/{user_id}", response_model=List[SubscriptionHistoryResponse])
+@router.get("/history")
 async def get_subscription_history(
-    user_id: str,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
 ):
     """
-    Get subscription history for a user.
+    Get subscription history for authenticated user.
     
     Returns list of all past and current subscriptions.
     """
     subscriptions = (
         db.query(SubscriptionHistory)
-        .filter(SubscriptionHistory.user_id == user_id)
+        .filter(SubscriptionHistory.user_id == current_user.id)
         .order_by(SubscriptionHistory.created_at.desc())
         .all()
     )
     
     return [
-        SubscriptionHistoryResponse(
-            id=sub.id,
-            tier=sub.tier,
-            status=sub.status.value,
-            started_at=sub.started_at,
-            expires_at=sub.expires_at,
-            cancelled_at=sub.cancelled_at,
-            platform=sub.platform,
-            price_usd=sub.price_usd
-        )
+        {
+            "id": sub.id,
+            "tier": sub.tier,
+            "status": sub.status.value,
+            "started_at": sub.started_at.isoformat(),
+            "expires_at": sub.expires_at.isoformat(),
+            "cancelled_at": sub.cancelled_at.isoformat() if sub.cancelled_at else None,
+            "platform": sub.platform,
+            "price_usd": sub.price_usd
+        }
         for sub in subscriptions
     ]
 

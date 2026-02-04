@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/widgets/base_layout.dart';
+import '../../core/iap/purchase_service.dart';
+import '../../core/api/auth_providers.dart';
 
 /// Beautiful paywall screen showing subscription tiers.
 /// Displayed when user tries to access premium features without a subscription.
@@ -35,7 +37,7 @@ class PaywallScreen extends ConsumerWidget {
               const SizedBox(height: 32),
 
               // Pricing cards
-              _buildPricingCards(context),
+              _buildPricingCards(context, ref),
               const SizedBox(height: 24),
 
               // Terms
@@ -144,7 +146,7 @@ class PaywallScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildPricingCards(BuildContext context) {
+  Widget _buildPricingCards(BuildContext context, WidgetRef ref) {
     return Column(
       children: [
         // Premium card
@@ -161,7 +163,7 @@ class PaywallScreen extends ConsumerWidget {
             'PDF export readings',
           ],
           isPopular: true,
-          onTap: () => _showPurchaseDialog(context, 'premium'),
+          onTap: () => _showPurchaseDialog(context, ref, 'premium'),
         ),
         const SizedBox(height: 12),
 
@@ -179,7 +181,7 @@ class PaywallScreen extends ConsumerWidget {
             'Monthly guidance updates',
           ],
           isPopular: false,
-          onTap: () => _showPurchaseDialog(context, 'pro'),
+          onTap: () => _showPurchaseDialog(context, ref, 'pro'),
         ),
       ],
     );
@@ -424,7 +426,7 @@ class PaywallScreen extends ConsumerWidget {
     );
   }
 
-  void _showPurchaseDialog(BuildContext context, String tier) {
+  void _showPurchaseDialog(BuildContext context, WidgetRef ref, String tier) {
     showModalBottomSheet(
       context: context,
       builder: (context) {
@@ -455,14 +457,14 @@ class PaywallScreen extends ConsumerWidget {
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: () {
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                  ),
+                  onPressed: () async {
                     Navigator.pop(context);
-                    // TODO: Initiate purchase flow
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Purchase flow coming soon'),
-                      ),
-                    );
+                    await _initiatePurchase(context, ref, tier);
                   },
                   child: const Text('Continue to Payment'),
                 ),
@@ -480,6 +482,99 @@ class PaywallScreen extends ConsumerWidget {
         );
       },
     );
+  }
+
+  Future<void> _initiatePurchase(BuildContext context, WidgetRef ref, String tier) async {
+    try {
+      // Show loading
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Opening payment...'),
+            duration: Duration(seconds: 2),
+          ),
+        );
+      }
+
+      // Get purchase service
+      final purchaseService = ref.read(purchaseServiceProvider);
+
+      // Check if IAP is available
+      if (!purchaseService.isAvailable) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('In-app purchases not available on this device'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+        return;
+      }
+
+      // Determine product ID from tier
+      String productId;
+      if (tier == 'premium') {
+        productId = ProductIds.premiumMonthly;
+      } else if (tier == 'pro') {
+        productId = ProductIds.proAnnual;
+      } else {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Invalid subscription tier'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+        return;
+      }
+
+      // Get product details
+      final product = purchaseService.getProduct(productId);
+      if (product == null) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Product not found. Please try again.'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+        return;
+      }
+
+      // Initiate purchase
+      final success = await purchaseService.purchaseProduct(product);
+      
+      if (success && context.mounted) {
+        // Purchase initiated successfully
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Processing purchase...'),
+            duration: Duration(seconds: 3),
+          ),
+        );
+        
+        // Wait a bit for the purchase to complete and navigate back
+        await Future.delayed(const Duration(seconds: 3));
+        if (context.mounted) {
+          Navigator.pop(context);
+          
+          // Refresh auth providers to get updated subscription
+          ref.invalidate(subscriptionTierProvider);
+        }
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Purchase failed: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
 }
 
