@@ -25,11 +25,12 @@ def create_dev_account():
         email = "admin@dd.com"
         password = "admin@dd.com"
         
-        # Check if account already exists
+        # Delete existing account if it exists (for recreation)
         existing = db.query(User).filter(User.email == email).first()
         if existing:
-            print(f"✅ Dev account already exists: {email}")
-            return
+            print(f"🔄 Deleting existing dev account to recreate with proper hash...")
+            db.delete(existing)
+            db.commit()
         
         # Hash password using simple sha256 (or use bcrypt if available)
         try:
