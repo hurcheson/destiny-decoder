@@ -25,6 +25,17 @@ from app.core.cycles import calculate_blessed_days
 router = APIRouter(prefix="/api/profile", tags=["profile"])
 
 
+def _current_month() -> str:
+    return datetime.utcnow().strftime("%Y-%m")
+
+
+def _ensure_pdf_month(profile: UserProfile) -> None:
+    current_month = _current_month()
+    if profile.pdf_exports_month != current_month:
+        profile.pdf_exports_month = current_month
+        profile.pdf_exports_count = 0
+
+
 @router.post("/create", response_model=UserProfileResponse, status_code=status.HTTP_201_CREATED)
 async def create_profile(
     request: CreateUserProfileRequest,
@@ -80,6 +91,8 @@ async def create_profile(
             communication_style=request.communication_style or CommunicationStyle.NOT_SPECIFIED,
             interests=request.interests or [],
             notification_style=request.notification_style or "motivational",
+            pdf_exports_count=0,
+            pdf_exports_month=_current_month(),
             has_completed_onboarding=True,
         )
         
@@ -129,7 +142,11 @@ async def get_profile(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Profile not found for this device"
         )
-    
+
+    _ensure_pdf_month(profile)
+    db.commit()
+    db.refresh(profile)
+
     return UserProfileResponse(**profile.to_dict())
 
 
@@ -160,7 +177,11 @@ async def get_profile_with_calculations(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Profile not found for this device"
         )
-    
+
+    _ensure_pdf_month(profile)
+    db.commit()
+    db.refresh(profile)
+
     # Calculate additional numbers for today
     date_parts = profile.date_of_birth.split("-")
     year = int(date_parts[0])
@@ -270,6 +291,36 @@ async def increment_readings(
     return {
         "readings_count": profile.readings_count,
         "last_reading_date": profile.last_reading_date.isoformat(),
+    }
+
+
+@router.post("/me/increment-pdf-exports")
+async def increment_pdf_exports(
+    device_id: str,
+    db: Session = Depends(get_db)
+) -> dict:
+    """
+    Increment monthly PDF export count.
+    Resets the count when a new month starts.
+    """
+    profile = db.query(UserProfile).filter(
+        UserProfile.device_id == device_id
+    ).first()
+
+    if not profile:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Profile not found for this device"
+        )
+
+    _ensure_pdf_month(profile)
+    profile.pdf_exports_count += 1
+    db.commit()
+    db.refresh(profile)
+
+    return {
+        "pdf_exports_count": profile.pdf_exports_count,
+        "pdf_exports_month": profile.pdf_exports_month,
     }
 
 

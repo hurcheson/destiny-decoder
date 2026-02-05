@@ -182,6 +182,40 @@ class ProfileRepository {
     }
   }
 
+  /// Increment monthly PDF export count
+  Future<int> incrementPdfExportsCount({
+    required String deviceId,
+  }) async {
+    try {
+      final response = await _dio.post(
+        '/profile/me/increment-pdf-exports',
+        queryParameters: {'device_id': deviceId},
+      );
+
+      if (response.statusCode == 200) {
+        final pdfExportsCount = response.data['pdf_exports_count'] ?? 0;
+        final pdfExportsMonth = response.data['pdf_exports_month'];
+
+        final cached = await _getCachedProfile();
+        if (cached != null) {
+          final updated = cached.copyWith(
+            pdfExportsCount: pdfExportsCount,
+            pdfExportsMonth: pdfExportsMonth,
+          );
+          await _cacheProfile(updated);
+        }
+
+        return pdfExportsCount;
+      } else {
+        throw Exception('Failed to increment PDF exports: ${response.statusCode}');
+      }
+    } on DioException catch (e) {
+      throw Exception('Network error: ${e.message}');
+    } catch (e) {
+      throw Exception('Error incrementing PDF exports: $e');
+    }
+  }
+
   /// Mark dashboard intro as seen
   Future<void> markDashboardSeen({
     required String deviceId,

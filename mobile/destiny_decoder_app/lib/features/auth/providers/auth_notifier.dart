@@ -14,19 +14,21 @@ class AuthStateNotifier extends AsyncNotifier<bool> {
   Future<void> signup({
     required String email,
     required String password,
+    required String firstName,
   }) async {
     final authService = ref.watch(authServiceProvider);
     
-    final response = await authService.signup(
-      email: email,
-      password: password,
-    );
-    
-    if (response.success) {
-      // Update state to authenticated
+    try {
+      await authService.signup(
+        email: email,
+        password: password,
+        firstName: firstName,
+      );
+      
+      // Update state to authenticated on success
       state = const AsyncValue.data(true);
-    } else {
-      throw Exception(response.message);
+    } on AuthException catch (e) {
+      throw Exception(e.message);
     }
   }
 
@@ -37,16 +39,16 @@ class AuthStateNotifier extends AsyncNotifier<bool> {
   }) async {
     final authService = ref.watch(authServiceProvider);
     
-    final response = await authService.login(
-      email: email,
-      password: password,
-    );
-    
-    if (response.success) {
-      // Update state to authenticated
+    try {
+      await authService.login(
+        email: email,
+        password: password,
+      );
+      
+      // Update state to authenticated on success
       state = const AsyncValue.data(true);
-    } else {
-      throw Exception(response.message);
+    } on AuthException catch (e) {
+      throw Exception(e.message);
     }
   }
 

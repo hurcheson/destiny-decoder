@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/iap/purchase_service.dart';
 import '../../../core/iap/subscription_manager.dart';
-import '../../../core/utils/logger.dart';
 
 /// Subscription management page
 class SubscriptionPage extends ConsumerWidget {
@@ -20,7 +20,7 @@ class SubscriptionPage extends ConsumerWidget {
         elevation: 0,
       ),
       body: subscriptionAsync.when(
-        data: (status) => _buildContent(context, status, textColor, isDarkMode),
+        data: (status) => _buildContent(context, ref, status, textColor, isDarkMode),
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, stack) => Center(
           child: Column(
@@ -49,6 +49,7 @@ class SubscriptionPage extends ConsumerWidget {
 
   Widget _buildContent(
     BuildContext context,
+    WidgetRef ref,
     SubscriptionStatus? status,
     Color textColor,
     bool isDarkMode,
@@ -82,7 +83,7 @@ class SubscriptionPage extends ConsumerWidget {
                 isCurrent: isCurrent,
                 textColor: textColor,
                 isDarkMode: isDarkMode,
-                onTap: isCurrent ? null : () => _handleUpgrade(context, tier),
+                onTap: isCurrent ? null : () => _handleUpgrade(context, ref, tier),
               ),
             );
           }),
@@ -349,13 +350,18 @@ class SubscriptionPage extends ConsumerWidget {
     );
   }
 
-  void _handleUpgrade(BuildContext context, SubscriptionTier tier) {
+  void _handleUpgrade(
+    BuildContext context,
+    WidgetRef ref,
+    SubscriptionTier tier,
+  ) {
     // Trigger in-app purchase for selected tier
-    _initiateSubscriptionPurchase(context, tier);
+    _initiateSubscriptionPurchase(context, ref, tier);
   }
   
   Future<void> _initiateSubscriptionPurchase(
     BuildContext context,
+    WidgetRef ref,
     SubscriptionTier tier,
   ) async {
     try {
@@ -374,10 +380,26 @@ class SubscriptionPage extends ConsumerWidget {
         ),
       );
       
-      // TODO: Integrate with PurchaseService to start purchase
-      // Example: await ref.read(purchaseServiceProvider).buyProduct(productId);
-      // This requires injecting PurchaseService via Riverpod provider
-      Logger.i('Would initiate purchase for: $productId');
+      final purchaseService = ref.read(purchaseServiceProvider);
+      var product = purchaseService.getProduct(productId);
+      if (product == null) {
+        await purchaseService.loadProducts();
+        product = purchaseService.getProduct(productId);
+      }
+
+      if (product == null) {
+        throw Exception('Product not available in store');
+      }
+
+      final success = await purchaseService.purchaseProduct(product);
+      if (!success) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Purchase could not be started'),
+            backgroundColor: Colors.orange,
+          ),
+        );
+      }
       
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(

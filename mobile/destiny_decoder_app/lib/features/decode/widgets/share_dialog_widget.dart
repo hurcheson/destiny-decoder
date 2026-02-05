@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
+import '../../core/api/analytics_api_client.dart';
 
 /// Dialog widget for sharing decoded readings across social platforms.
 /// Supports WhatsApp, Instagram, Twitter, and clipboard copy with
@@ -50,7 +51,7 @@ Discover your destiny: https://destiny-decoder.app
 
       if (await canLaunchUrl(whatsappUrl)) {
         await launchUrl(whatsappUrl);
-        _recordShare('whatsapp');
+        await _recordShare('whatsapp');
       } else {
         _showError('WhatsApp not installed');
       }
@@ -111,7 +112,7 @@ Discover your destiny: https://destiny-decoder.app
 
       if (await canLaunchUrl(twitterUrl)) {
         await launchUrl(twitterUrl, mode: LaunchMode.externalApplication);
-        _recordShare('twitter');
+        await _recordShare('twitter');
       } else {
         _showError('Could not open Twitter');
       }
@@ -138,7 +139,7 @@ Discover your destiny: https://destiny-decoder.app
         );
       }
       
-      _recordShare('copy_clipboard');
+      await _recordShare('copy_clipboard');
     } catch (e) {
       _showError('Failed to copy: $e');
     } finally {
@@ -147,9 +148,13 @@ Discover your destiny: https://destiny-decoder.app
   }
 
   /// Record the share event with backend tracking.
-  void _recordShare(String platform) {
-    // TODO: Call backend API to track share with platform
-    // POST /api/shares/track with device_id, life_seal_number, platform, share_text
+  Future<void> _recordShare(String platform) async {
+    final client = AnalyticsApiClient();
+    await client.recordShareEvent(
+      eventType: 'share',
+      lifeSealNumber: widget.lifeSealNumber,
+      platform: platform,
+    );
     widget.onShareComplete?.call();
   }
 

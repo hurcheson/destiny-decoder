@@ -879,8 +879,8 @@ class _DecodeResultPageState extends ConsumerState<DecodeResultPage>
 
       // Log PDF export
       await AnalyticsService.logPdfExport();
-
-      // Show success with file location and open button
+       await ref.read(profileNotifierProvider.notifier).incrementPdfExports();
+       ref.invalidate(userPdfExportsCountProvider);
       messenger.showSnackBar(
         SnackBar(
           content: Text('PDF saved to:\n$filePath'),

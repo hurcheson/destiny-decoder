@@ -1,8 +1,14 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:url_launcher/url_launcher.dart';
+import '../../core/api/auth_providers.dart';
 import '../../core/iap/subscription_manager.dart';
 import '../../core/iap/purchase_service.dart';
+import '../../features/paywall/paywall_page.dart';
+import '../../features/profile/presentation/providers/profile_providers.dart';
 
 /// Subscription settings and management page
 class SubscriptionSettingsPage extends ConsumerWidget {
@@ -40,7 +46,7 @@ class SubscriptionSettingsPage extends ConsumerWidget {
           const SizedBox(height: 24),
 
           // Usage statistics
-          _buildUsageSection(status),
+          _buildUsageSection(status, ref),
           const SizedBox(height: 24),
 
           // Action buttons
@@ -248,7 +254,10 @@ class SubscriptionSettingsPage extends ConsumerWidget {
     );
   }
 
-  Widget _buildUsageSection(SubscriptionStatus? status) {
+  Widget _buildUsageSection(SubscriptionStatus? status, WidgetRef ref) {
+    final readingsCount = ref.watch(userReadingsCountProvider);
+    final pdfExports = ref.watch(userPdfExportsCountProvider);
+
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -266,14 +275,14 @@ class SubscriptionSettingsPage extends ConsumerWidget {
             _buildUsageItem(
               icon: Icons.book,
               title: 'Readings Saved',
-              current: 0, // TODO: Get from backend
+              current: readingsCount,
               limit: status?.readingLimit ?? 3,
             ),
             const SizedBox(height: 12),
             _buildUsageItem(
               icon: Icons.picture_as_pdf,
               title: 'PDFs Exported',
-              current: 0, // TODO: Get from backend
+              current: pdfExports,
               limit: status?.pdfMonthlyLimit ?? 1,
             ),
           ],
@@ -400,24 +409,29 @@ class SubscriptionSettingsPage extends ConsumerWidget {
   }
 
   void _upgradeToPremium(BuildContext context) {
-    // TODO: Navigate to paywall
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Opening Premium upgrade...')),
-    );
+    _openPaywall(context, PaywallTrigger.postCalculation);
   }
 
   void _upgradeToPro(BuildContext context) {
-    // TODO: Navigate to paywall
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Opening Pro upgrade...')),
-    );
+    _openPaywall(context, PaywallTrigger.postCalculation);
   }
 
-  void _manageSubscription(BuildContext context, WidgetRef ref, SubscriptionStatus? status) {
-    // TODO: Open platform-specific subscription management
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Manage subscription in App Store/Play Store')),
-    );
+  Future<void> _manageSubscription(
+    BuildContext context,
+    WidgetRef ref,
+    SubscriptionStatus? status,
+  ) async {
+    final url = Platform.isIOS
+        ? Uri.parse('https://apps.apple.com/account/subscriptions')
+        : Uri.parse('https://play.google.com/store/account/subscriptions');
+
+    if (await canLaunchUrl(url)) {
+      await launchUrl(url, mode: LaunchMode.externalApplication);
+    } else if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Could not open subscription settings')),
+      );
+    }
   }
 
   Future<void> _cancelSubscription(BuildContext context, WidgetRef ref, SubscriptionStatus? status) async {
@@ -445,23 +459,44 @@ class SubscriptionSettingsPage extends ConsumerWidget {
 
     if (confirmed == true && context.mounted) {
       final manager = ref.read(subscriptionManagerProvider);
-      final userId = status?.userId ?? 'anonymous'; // TODO: Get from auth
-      
-      final success = await manager.cancelSubscription(userId);
-      
-      if (context.mounted) {
-        if (success) {
+      final userId = await ref.read(userIdProvider.future);
+
+      if (userId == null || userId.isEmpty) {
+        if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Subscription cancelled')),
-          );
-          ref.invalidate(subscriptionStatusProvider);
-        } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Failed to cancel subscription')),
+            const SnackBar(content: Text('User ID not available')),
           );
         }
+        return;
+      }
+
+      final success = await manager.cancelSubscription(userId);
+
+      if (!context.mounted) return;
+
+      if (success) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Subscription cancelled')),
+        );
+        ref.invalidate(subscriptionStatusProvider);
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Failed to cancel subscription')),
+        );
       }
     }
+  }
+
+  void _openPaywall(BuildContext context, PaywallTrigger trigger) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => PaywallPage(
+          trigger: trigger,
+          onDismiss: () => Navigator.of(context).pop(),
+        ),
+        fullscreenDialog: true,
+      ),
+    );
   }
 
   Future<void> _restorePurchases(BuildContext context, WidgetRef ref) async {

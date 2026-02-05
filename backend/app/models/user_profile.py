@@ -70,6 +70,8 @@ class UserProfile(Base):
     # Engagement metrics
     readings_count = Column(Integer, default=0)
     last_reading_date = Column(DateTime, nullable=True)
+    pdf_exports_count = Column(Integer, default=0)
+    pdf_exports_month = Column(String(7), nullable=True)  # YYYY-MM
     has_completed_onboarding = Column(Boolean, default=False)
     has_seen_dashboard_intro = Column(Boolean, default=False)
     
@@ -103,6 +105,8 @@ class UserProfile(Base):
             "notification_style": self.notification_style,
             "readings_count": self.readings_count,
             "last_reading_date": self.last_reading_date.isoformat() if self.last_reading_date else None,
+            "pdf_exports_count": self.pdf_exports_count,
+            "pdf_exports_month": self.pdf_exports_month,
             "has_completed_onboarding": self.has_completed_onboarding,
             "has_seen_dashboard_intro": self.has_seen_dashboard_intro,
             "created_at": self.created_at.isoformat(),

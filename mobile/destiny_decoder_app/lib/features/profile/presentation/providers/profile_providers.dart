@@ -157,6 +157,25 @@ class ProfileNotifier extends AsyncNotifier<UserProfile?> {
     }
   }
 
+  /// Increment monthly PDF export count
+  Future<void> incrementPdfExports() async {
+    try {
+      final deviceId = await _deviceId;
+      final count = await _repository.incrementPdfExportsCount(deviceId: deviceId);
+
+      final current = state.value;
+      if (current != null) {
+        state = AsyncValue.data(
+          current.copyWith(
+            pdfExportsCount: count,
+          ),
+        );
+      }
+    } catch (e) {
+      debugPrint('Error incrementing PDF exports: $e');
+    }
+  }
+
   /// Mark dashboard intro as seen
   Future<void> markDashboardSeen() async {
     try {
@@ -223,6 +242,15 @@ final userReadingsCountProvider = Provider<int>((ref) {
   final profileAsync = ref.watch(userProfileProvider);
   return profileAsync.when(
     data: (profile) => profile?.readingsCount ?? 0,
+    loading: () => 0,
+    error: (_, __) => 0,
+  );
+});
+
+final userPdfExportsCountProvider = Provider<int>((ref) {
+  final profileAsync = ref.watch(userProfileProvider);
+  return profileAsync.when(
+    data: (profile) => profile?.pdfExportsCount ?? 0,
     loading: () => 0,
     error: (_, __) => 0,
   );

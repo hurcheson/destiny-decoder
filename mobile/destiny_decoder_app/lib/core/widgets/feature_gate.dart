@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../iap/subscription_manager.dart';
+import '../../features/profile/presentation/providers/profile_providers.dart';
 import '../../features/paywall/paywall_page.dart';
 
 /// Feature gate widget that shows paywall if feature is locked
@@ -125,28 +126,28 @@ class ActionFeatureGate {
 
   /// Check reading limit before saving
   Future<bool> canSaveReading() async {
+    final readingsCount = ref.read(userReadingsCountProvider);
     return checkAccess(
       featureName: 'Unlimited Readings',
       trigger: PaywallTrigger.readingLimit,
       checkAccess: (status) {
         if (status == null) return false;
         final limit = status.readingLimit;
-        // TODO: Check actual saved reading count
-        return limit == -1 || limit > 0; // -1 = unlimited
+        return limit == -1 || readingsCount < limit; // -1 = unlimited
       },
     );
   }
 
   /// Check PDF limit before export
   Future<bool> canExportPDF() async {
+    final pdfExports = ref.read(userPdfExportsCountProvider);
     return checkAccess(
       featureName: 'Unlimited PDF Exports',
       trigger: PaywallTrigger.pdfLimit,
       checkAccess: (status) {
         if (status == null) return false;
         final limit = status.pdfMonthlyLimit;
-        // TODO: Check actual PDF export count this month
-        return limit == -1 || limit > 0; // -1 = unlimited
+        return limit == -1 || pdfExports < limit; // -1 = unlimited
       },
     );
   }

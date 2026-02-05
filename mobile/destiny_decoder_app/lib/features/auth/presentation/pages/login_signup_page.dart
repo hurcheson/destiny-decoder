@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/app_logo.dart';
 import '../../providers/auth_notifier.dart';
 
@@ -14,9 +13,12 @@ class LoginSignupPage extends ConsumerStatefulWidget {
 
 class _LoginSignupPageState extends ConsumerState<LoginSignupPage> {
   bool _isLogin = true;
+  bool _obscurePassword = true;
+  bool _obscureConfirmPassword = true;
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
+  final _firstNameController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   String? _errorMessage;
   bool _isLoading = false;
@@ -26,6 +28,7 @@ class _LoginSignupPageState extends ConsumerState<LoginSignupPage> {
     _emailController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
+    _firstNameController.dispose();
     super.dispose();
   }
 
@@ -51,20 +54,52 @@ class _LoginSignupPageState extends ConsumerState<LoginSignupPage> {
         await authNotifier.signup(
           email: _emailController.text.trim(),
           password: _passwordController.text,
+          firstName: _firstNameController.text.trim(),
         );
       }
 
       // Success - auth notifier handles navigation
     } catch (e) {
-      setState(() {
-        _errorMessage = e.toString();
-      });
+        final cleanError = _cleanErrorMessage(e.toString());
+        setState(() {
+          _errorMessage = cleanError;
+        });
+      
+        // Show SnackBar for immediate visibility
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(cleanError),
+              backgroundColor: Colors.red[700],
+              duration: const Duration(seconds: 5),
+              action: SnackBarAction(
+                label: 'Dismiss',
+                textColor: Colors.white,
+                onPressed: () {
+                  ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                },
+              ),
+            ),
+          );
+        }
     } finally {
       setState(() {
         _isLoading = false;
       });
     }
   }
+
+    String _cleanErrorMessage(String error) {
+      // Remove "Exception: " prefix if present
+      if (error.startsWith('Exception: ')) {
+        return error.substring(11);
+      }
+      // Remove "Error: " prefix if present
+      if (error.startsWith('Error: ')) {
+        return error.substring(7);
+      }
+      return error;
+    }
 
   void _toggleAuthMode() {
     setState(() {
@@ -73,6 +108,7 @@ class _LoginSignupPageState extends ConsumerState<LoginSignupPage> {
       _emailController.clear();
       _passwordController.clear();
       _confirmPasswordController.clear();
+      _firstNameController.clear();
     });
   }
 
@@ -147,6 +183,31 @@ class _LoginSignupPageState extends ConsumerState<LoginSignupPage> {
                     },
                   ),
                   
+                  // First Name Field (only for signup)
+                  if (!_isLogin) ...[
+                    const SizedBox(height: 16),
+                    TextFormField(
+                      controller: _firstNameController,
+                      decoration: InputDecoration(
+                        labelText: 'Full Name',
+                        hintText: 'John Doe',
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        prefixIcon: const Icon(Icons.person),
+                      ),
+                      validator: (value) {
+                        if (value?.isEmpty ?? true) {
+                          return 'Full name is required';
+                        }
+                        if (value!.length < 2) {
+                          return 'Name must be at least 2 characters';
+                        }
+                        return null;
+                      },
+                    ),
+                  ],
+                  
                   const SizedBox(height: 16),
                   
                   // Password Field
@@ -159,8 +220,18 @@ class _LoginSignupPageState extends ConsumerState<LoginSignupPage> {
                         borderRadius: BorderRadius.circular(12),
                       ),
                       prefixIcon: const Icon(Icons.lock),
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          _obscurePassword ? Icons.visibility_off : Icons.visibility,
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            _obscurePassword = !_obscurePassword;
+                          });
+                        },
+                      ),
                     ),
-                    obscureText: true,
+                    obscureText: _obscurePassword,
                     validator: (value) {
                       if (value?.isEmpty ?? true) {
                         return 'Password is required';
@@ -184,8 +255,18 @@ class _LoginSignupPageState extends ConsumerState<LoginSignupPage> {
                           borderRadius: BorderRadius.circular(12),
                         ),
                         prefixIcon: const Icon(Icons.lock),
+                        suffixIcon: IconButton(
+                          icon: Icon(
+                            _obscureConfirmPassword ? Icons.visibility_off : Icons.visibility,
+                          ),
+                          onPressed: () {
+                            setState(() {
+                              _obscureConfirmPassword = !_obscureConfirmPassword;
+                            });
+                          },
+                        ),
                       ),
-                      obscureText: true,
+                      obscureText: _obscureConfirmPassword,
                       validator: (value) {
                         if (value?.isEmpty ?? true) {
                           return 'Please confirm your password';

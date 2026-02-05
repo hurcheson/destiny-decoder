@@ -78,18 +78,19 @@ class PersonalDashboardPage extends ConsumerWidget {
                     try {
                       // Logout
                       await ref.read(authStateNotifierProvider.notifier).logout();
-                      
+                      if (!context.mounted) return;
+
+                      // Navigate to login screen
+                      Navigator.of(context).pushAndRemoveUntil(
+                        MaterialPageRoute(builder: (_) => const LoginSignupPage()),
+                        (route) => false,
+                      );
+                    } catch (e) {
                       if (context.mounted) {
-                        // Navigate to login screen
-                        Navigator.of(context).pushAndRemoveUntil(
-                          MaterialPageRoute(builder: (_) => const LoginSignupPage()),
-                          (route) => false,
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('Error logging out: $e')),
                         );
                       }
-                    } catch (e) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('Error logging out: $e')),
-                      );
                     }
                   }
                 },

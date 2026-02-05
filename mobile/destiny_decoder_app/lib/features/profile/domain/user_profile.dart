@@ -173,6 +173,8 @@ class UserProfile extends Equatable {
   final String notificationStyle; // motivational, informational, minimal
   final int readingsCount;
   final DateTime? lastReadingDate;
+  final int pdfExportsCount;
+  final String? pdfExportsMonth;
   final bool hasCompletedOnboarding;
   final bool hasSeenDashboardIntro;
   final DateTime createdAt;
@@ -191,6 +193,8 @@ class UserProfile extends Equatable {
     this.notificationStyle = 'motivational',
     this.readingsCount = 0,
     this.lastReadingDate,
+    this.pdfExportsCount = 0,
+    this.pdfExportsMonth,
     this.hasCompletedOnboarding = false,
     this.hasSeenDashboardIntro = false,
     required this.createdAt,
@@ -210,6 +214,8 @@ class UserProfile extends Equatable {
     String? notificationStyle,
     int? readingsCount,
     DateTime? lastReadingDate,
+    int? pdfExportsCount,
+    String? pdfExportsMonth,
     bool? hasCompletedOnboarding,
     bool? hasSeenDashboardIntro,
     DateTime? createdAt,
@@ -228,6 +234,8 @@ class UserProfile extends Equatable {
       notificationStyle: notificationStyle ?? this.notificationStyle,
       readingsCount: readingsCount ?? this.readingsCount,
       lastReadingDate: lastReadingDate ?? this.lastReadingDate,
+      pdfExportsCount: pdfExportsCount ?? this.pdfExportsCount,
+      pdfExportsMonth: pdfExportsMonth ?? this.pdfExportsMonth,
       hasCompletedOnboarding: hasCompletedOnboarding ?? this.hasCompletedOnboarding,
       hasSeenDashboardIntro: hasSeenDashboardIntro ?? this.hasSeenDashboardIntro,
       createdAt: createdAt ?? this.createdAt,
@@ -249,6 +257,8 @@ class UserProfile extends Equatable {
       'notification_style': notificationStyle,
       'readings_count': readingsCount,
       'last_reading_date': lastReadingDate?.toIso8601String(),
+      'pdf_exports_count': pdfExportsCount,
+      'pdf_exports_month': pdfExportsMonth,
       'has_completed_onboarding': hasCompletedOnboarding,
       'has_seen_dashboard_intro': hasSeenDashboardIntro,
       'created_at': createdAt.toIso8601String(),
@@ -272,6 +282,8 @@ class UserProfile extends Equatable {
       lastReadingDate: json['last_reading_date'] != null
           ? DateTime.parse(json['last_reading_date'])
           : null,
+      pdfExportsCount: json['pdf_exports_count'] ?? 0,
+      pdfExportsMonth: json['pdf_exports_month'],
       hasCompletedOnboarding: json['has_completed_onboarding'] ?? false,
       hasSeenDashboardIntro: json['has_seen_dashboard_intro'] ?? false,
       createdAt: DateTime.parse(json['created_at'] ?? DateTime.now().toIso8601String()),
@@ -293,6 +305,8 @@ class UserProfile extends Equatable {
     notificationStyle,
     readingsCount,
     lastReadingDate,
+    pdfExportsCount,
+    pdfExportsMonth,
     hasCompletedOnboarding,
     hasSeenDashboardIntro,
     createdAt,

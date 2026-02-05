@@ -162,6 +162,8 @@ class UserProfileResponse(BaseModel):
     notification_style: str
     readings_count: int
     last_reading_date: Optional[str]
+    pdf_exports_count: int
+    pdf_exports_month: Optional[str]
     has_completed_onboarding: bool
     has_seen_dashboard_intro: bool
     created_at: str
