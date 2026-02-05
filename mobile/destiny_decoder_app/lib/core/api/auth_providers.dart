@@ -33,11 +33,8 @@ final userEmailProvider = FutureProvider<String?>((ref) async {
   return authService.getEmail();
 });
 
-// Get subscription tier
-final subscriptionTierProvider = FutureProvider<String?>((ref) async {
-  final authService = ref.watch(authServiceProvider);
-  return authService.getSubscriptionTier();
-});
+// Note: Subscription tier is now stored in backend profile
+// Use userProfileProvider from features/profile/presentation/providers/profile_providers.dart
 
 // Auth state notifier
 class AuthStateNotifier extends AsyncNotifier<bool> {
@@ -78,7 +75,6 @@ class AuthStateNotifier extends AsyncNotifier<bool> {
       ref.invalidate(userTokenProvider);
       ref.invalidate(userIdProvider);
       ref.invalidate(userEmailProvider);
-      ref.invalidate(subscriptionTierProvider);
     } on AuthException catch (e) {
       state = AsyncValue.error(e, StackTrace.current);
       rethrow;
@@ -104,7 +100,6 @@ class AuthStateNotifier extends AsyncNotifier<bool> {
       ref.invalidate(userTokenProvider);
       ref.invalidate(userIdProvider);
       ref.invalidate(userEmailProvider);
-      ref.invalidate(subscriptionTierProvider);
     } on AuthException catch (e) {
       state = AsyncValue.error(e, StackTrace.current);
       rethrow;
@@ -121,7 +116,6 @@ class AuthStateNotifier extends AsyncNotifier<bool> {
       ref.invalidate(userTokenProvider);
       ref.invalidate(userIdProvider);
       ref.invalidate(userEmailProvider);
-      ref.invalidate(subscriptionTierProvider);
     } catch (e) {
       state = AsyncValue.error(e, StackTrace.current);
     }
