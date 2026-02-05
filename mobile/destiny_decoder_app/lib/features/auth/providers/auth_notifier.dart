@@ -16,7 +16,7 @@ class AuthStateNotifier extends AsyncNotifier<bool> {
     required String password,
     required String firstName,
   }) async {
-    final authService = ref.watch(authServiceProvider);
+    final authService = ref.read(authServiceProvider);
     
     try {
       await authService.signup(
@@ -37,16 +37,22 @@ class AuthStateNotifier extends AsyncNotifier<bool> {
     required String email,
     required String password,
   }) async {
-    final authService = ref.watch(authServiceProvider);
+    final authService = ref.read(authServiceProvider);
     
     try {
-      await authService.login(
+      final response = await authService.login(
         email: email,
         password: password,
       );
       
-      // Update state to authenticated on success
+      // Immediately update state to authenticated
       state = const AsyncValue.data(true);
+      
+      // Verify token was stored
+      final token = await authService.getToken();
+      if (token == null || token.isEmpty) {
+        throw Exception('Token storage failed');
+      }
     } on AuthException catch (e) {
       throw Exception(e.message);
     }
@@ -54,7 +60,7 @@ class AuthStateNotifier extends AsyncNotifier<bool> {
 
   /// Log out
   Future<void> logout() async {
-    final authService = ref.watch(authServiceProvider);
+    final authService = ref.read(authServiceProvider);
     await authService.logout();
     
     // Update state to not authenticated
@@ -66,8 +72,3 @@ class AuthStateNotifier extends AsyncNotifier<bool> {
 final authStateNotifierProvider = AsyncNotifierProvider<AuthStateNotifier, bool>(
   AuthStateNotifier.new,
 );
-
-/// Check if user is authenticated
-final isAuthenticatedProvider = FutureProvider<bool>((ref) async {
-  return ref.watch(authStateNotifierProvider.future);
-});
