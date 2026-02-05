@@ -59,14 +59,25 @@ class _LoginSignupPageState extends ConsumerState<LoginSignupPage> {
       }
 
       // Success - auth notifier handles navigation
+      // Clear any error messages and snackbars
+      if (mounted) {
+        setState(() {
+          _errorMessage = null;
+        });
+        ScaffoldMessenger.of(context).hideCurrentSnackBar();
+      }
     } catch (e) {
         final cleanError = _cleanErrorMessage(e.toString());
-        setState(() {
-          _errorMessage = cleanError;
-        });
-      
-        // Show SnackBar for immediate visibility
+        
         if (mounted) {
+          setState(() {
+            _errorMessage = cleanError;
+          });
+          
+          // Hide any previous snackbars first
+          ScaffoldMessenger.of(context).hideCurrentSnackBar();
+          
+          // Show SnackBar for immediate visibility
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(cleanError),
@@ -83,9 +94,11 @@ class _LoginSignupPageState extends ConsumerState<LoginSignupPage> {
           );
         }
     } finally {
-      setState(() {
-        _isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     }
   }
 
@@ -110,6 +123,8 @@ class _LoginSignupPageState extends ConsumerState<LoginSignupPage> {
       _confirmPasswordController.clear();
       _firstNameController.clear();
     });
+    // Hide any snackbars when switching modes
+    ScaffoldMessenger.of(context).hideCurrentSnackBar();
   }
 
   @override
