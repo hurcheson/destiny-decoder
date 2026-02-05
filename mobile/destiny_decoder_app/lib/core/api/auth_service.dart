@@ -1,9 +1,7 @@
-// Auth service for JWT-based authentication with the backend.
-// Handles signup, login, token storage, and auto-login.
+// Auth service using Firebase Authentication
+// Handles signup, login, and token management
 
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'dart:async';
 
 
@@ -18,117 +16,84 @@ class AuthException implements Exception {
 }
 
 
-class AuthResponse {
-  final String token;
-  final String userId;
-  final String email;
-  final String subscriptionTier;
-
-  AuthResponse({
-    required this.token,
-    required this.userId,
-    required this.email,
-    required this.subscriptionTier,
-  });
-
-  factory AuthResponse.fromJson(Map<String, dynamic> json) {
-    return AuthResponse(
-      token: json['token'] ?? '',
-      userId: json['user_id'] ?? '',
-      email: json['email'] ?? '',
-      subscriptionTier: json['subscription_tier'] ?? 'free',
-    );
-  }
-}
-
-
 class AuthService {
-  static const String _tokenKey = 'jwt_token';
-  static const String _userIdKey = 'user_id';
-  static const String _emailKey = 'user_email';
-  static const String _subscriptionTierKey = 'subscription_tier';
-  
-  final FlutterSecureStorage _secureStorage;
-  final String _baseUrl;
+  final FirebaseAuth _firebaseAuth;
   
   final StreamController<bool> _authStateController = StreamController<bool>.broadcast();
   Stream<bool> get authStateStream => _authStateController.stream;
 
-  AuthService({
-    required String baseUrl,
-    required FlutterSecureStorage secureStorage,
-  })  : _baseUrl = baseUrl,
-        _secureStorage = secureStorage;
+  AuthService({FirebaseAuth? firebaseAuth})
+      : _firebaseAuth = firebaseAuth ?? FirebaseAuth.instance {
+    // Listen to Firebase auth state changes
+    _firebaseAuth.authStateChanges().listen((User? user) {
+      _authStateController.add(user != null);
+    });
+  }
 
   // Check if user is authenticated
   Future<bool> isAuthenticated() async {
-    final token = await getToken();
-    return token != null && token.isNotEmpty;
+    return _firebaseAuth.currentUser != null;
   }
 
-  // Get stored JWT token
+  // Get current user
+  User? get currentUser => _firebaseAuth.currentUser;
+
+  // Get Firebase ID token (for backend API calls)
   Future<String?> getToken() async {
-    return await _secureStorage.read(key: _tokenKey);
+    final user = _firebaseAuth.currentUser;
+    if (user == null) return null;
+    return await user.getIdToken();
   }
 
-  // Get stored user ID
+  // Get user ID
   Future<String?> getUserId() async {
-    return await _secureStorage.read(key: _userIdKey);
+    return _firebaseAuth.currentUser?.uid;
   }
 
-  // Get stored email
+  // Get email
   Future<String?> getEmail() async {
-    return await _secureStorage.read(key: _emailKey);
+    return _firebaseAuth.currentUser?.email;
   }
 
-  // Get subscription tier
-  Future<String?> getSubscriptionTier() async {
-    return await _secureStorage.read(key: _subscriptionTierKey);
+  // Get display name (using firstName)
+  Future<String?> getDisplayName() async {
+    return _firebaseAuth.currentUser?.displayName;
   }
 
   // Sign up new user
-  Future<AuthResponse> signup({
+  Future<UserCredential> signup({
     required String email,
     required String password,
     required String firstName,
   }) async {
     try {
-      final response = await http.post(
-        Uri.parse('$_baseUrl/api/auth/signup'),
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-        },
-        body: jsonEncode({
-          'email': email,
-          'password': password,
-          'first_name': firstName,
-        }),
+      final userCredential = await _firebaseAuth.createUserWithEmailAndPassword(
+        email: email,
+        password: password,
       );
 
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body) as Map<String, dynamic>;
-        final authResponse = AuthResponse.fromJson(data);
-        
-        // Store credentials securely
-        await _storeAuthData(authResponse);
-        _authStateController.add(true);
-        
-        return authResponse;
-      } else if (response.statusCode == 400) {
-        final error = jsonDecode(response.body);
-        throw AuthException(
-          message: error['detail'] ?? 'Sign up failed',
-          code: 'signup_error',
-        );
-      } else {
-        throw AuthException(
-          message: 'Sign up failed: ${response.statusCode}',
-          code: 'server_error',
-        );
+      // Update display name
+      await userCredential.user?.updateDisplayName(firstName);
+      
+      _authStateController.add(true);
+      return userCredential;
+    } on FirebaseAuthException catch (e) {
+      String message;
+      switch (e.code) {
+        case 'weak-password':
+          message = 'Password is too weak. Use at least 6 characters.';
+          break;
+        case 'email-already-in-use':
+          message = 'An account already exists with this email.';
+          break;
+        case 'invalid-email':
+          message = 'Invalid email address.';
+          break;
+        default:
+          message = e.message ?? 'Sign up failed. Please try again.';
       }
+      throw AuthException(message: message, code: e.code);
     } catch (e) {
-      if (e is AuthException) rethrow;
       throw AuthException(
         message: 'Network error during sign up: $e',
         code: 'network_error',
@@ -137,45 +102,37 @@ class AuthService {
   }
 
   // Login user
-  Future<AuthResponse> login({
+  Future<UserCredential> login({
     required String email,
     required String password,
   }) async {
     try {
-      final response = await http.post(
-        Uri.parse('$_baseUrl/api/auth/login'),
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-        },
-        body: jsonEncode({
-          'email': email,
-          'password': password,
-        }),
+      final userCredential = await _firebaseAuth.signInWithEmailAndPassword(
+        email: email,
+        password: password,
       );
-
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body) as Map<String, dynamic>;
-        final authResponse = AuthResponse.fromJson(data);
-        
-        // Store credentials securely
-        await _storeAuthData(authResponse);
-        _authStateController.add(true);
-        
-        return authResponse;
-      } else if (response.statusCode == 401) {
-        throw AuthException(
-          message: 'Invalid email or password',
-          code: 'invalid_credentials',
-        );
-      } else {
-        throw AuthException(
-          message: 'Login failed: ${response.statusCode}',
-          code: 'server_error',
-        );
+      
+      _authStateController.add(true);
+      return userCredential;
+    } on FirebaseAuthException catch (e) {
+      String message;
+      switch (e.code) {
+        case 'user-not-found':
+        case 'wrong-password':
+        case 'invalid-credential':
+          message = 'Invalid email or password';
+          break;
+        case 'user-disabled':
+          message = 'This account has been disabled.';
+          break;
+        case 'too-many-requests':
+          message = 'Too many failed attempts. Please try again later.';
+          break;
+        default:
+          message = e.message ?? 'Login failed. Please try again.';
       }
+      throw AuthException(message: message, code: e.code);
     } catch (e) {
-      if (e is AuthException) rethrow;
       throw AuthException(
         message: 'Network error during login: $e',
         code: 'network_error',
@@ -183,72 +140,43 @@ class AuthService {
     }
   }
 
+  // Send password reset email
+  Future<void> sendPasswordResetEmail(String email) async {
+    try {
+      await _firebaseAuth.sendPasswordResetEmail(email: email);
+    } on FirebaseAuthException catch (e) {
+      String message;
+      switch (e.code) {
+        case 'user-not-found':
+          message = 'No account found with this email.';
+          break;
+        case 'invalid-email':
+          message = 'Invalid email address.';
+          break;
+        default:
+          message = e.message ?? 'Failed to send reset email.';
+      }
+      throw AuthException(message: message, code: e.code);
+    }
+  }
+
   // Verify token validity
   Future<bool> verifyToken() async {
     try {
-      final token = await getToken();
-      if (token == null) return false;
-
-      final response = await http.get(
-        Uri.parse('$_baseUrl/api/auth/verify?token=$token'),
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-        },
-      );
-
-      return response.statusCode == 200;
+      final user = _firebaseAuth.currentUser;
+      if (user == null) return false;
+      
+      // Reload user to check if still valid
+      await user.reload();
+      return _firebaseAuth.currentUser != null;
     } catch (e) {
       return false;
     }
   }
 
-  // Refresh token
-  Future<String?> refreshToken() async {
-    try {
-      final token = await getToken();
-      if (token == null) return null;
-
-      final response = await http.post(
-        Uri.parse('$_baseUrl/api/auth/refresh?token=$token'),
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-        },
-      );
-
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body) as Map<String, dynamic>;
-        final newToken = data['token'] as String;
-        
-        // Update stored token
-        await _secureStorage.write(key: _tokenKey, value: newToken);
-        return newToken;
-      }
-    } catch (e) {
-      // Silent fail, let app handle re-login
-    }
-    return null;
-  }
-
-  // Store auth data securely
-  Future<void> _storeAuthData(AuthResponse response) async {
-    await Future.wait([
-      _secureStorage.write(key: _tokenKey, value: response.token),
-      _secureStorage.write(key: _userIdKey, value: response.userId),
-      _secureStorage.write(key: _emailKey, value: response.email),
-      _secureStorage.write(key: _subscriptionTierKey, value: response.subscriptionTier),
-    ]);
-  }
-
   // Logout
   Future<void> logout() async {
-    await Future.wait([
-      _secureStorage.delete(key: _tokenKey),
-      _secureStorage.delete(key: _userIdKey),
-      _secureStorage.delete(key: _emailKey),
-      _secureStorage.delete(key: _subscriptionTierKey),
-    ]);
+    await _firebaseAuth.signOut();
     _authStateController.add(false);
   }
 

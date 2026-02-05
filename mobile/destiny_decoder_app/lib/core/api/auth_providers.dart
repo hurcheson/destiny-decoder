@@ -1,16 +1,12 @@
-// Riverpod providers for authentication state management.
+// Riverpod providers for Firebase authentication state management.
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'auth_service.dart';
-import '../config/app_config.dart';
 
-// Auth service provider
+// Auth service provider (using Firebase)
 final authServiceProvider = Provider<AuthService>((ref) {
-  return AuthService(
-    baseUrl: AppConfig.apiBaseUrl,
-    secureStorage: const FlutterSecureStorage(),
-  );
+  return AuthService(firebaseAuth: FirebaseAuth.instance);
 });
 
 // Check if user is authenticated (async)
