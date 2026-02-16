@@ -8,6 +8,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from datetime import datetime
 import uuid
+from typing import Optional
 
 from app.config.database import get_db
 from app.models.user_profile import UserProfile, LifeStage, SpiritualPreference, CommunicationStyle
@@ -36,6 +37,16 @@ def _ensure_pdf_month(profile: UserProfile) -> None:
         profile.pdf_exports_count = 0
 
 
+def _get_profile_query(db: Session, user_id: Optional[str], device_id: Optional[str]) -> Optional[UserProfile]:
+    if user_id:
+        profile = db.query(UserProfile).filter(UserProfile.user_id == user_id).first()
+        if profile:
+            return profile
+    if device_id:
+        return db.query(UserProfile).filter(UserProfile.device_id == device_id).first()
+    return None
+
+
 @router.post("/create", response_model=UserProfileResponse, status_code=status.HTTP_201_CREATED)
 async def create_profile(
     request: CreateUserProfileRequest,
@@ -59,16 +70,21 @@ async def create_profile(
         HTTPException 400: If invalid data provided
     """
     try:
-        # Check if profile already exists for this device
-        existing = db.query(UserProfile).filter(
-            UserProfile.device_id == request.device_id
-        ).first()
-        
-        if existing:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"Profile already exists for device {request.device_id}"
-            )
+        # Check if profile already exists for this user or device
+        if request.user_id:
+            existing = db.query(UserProfile).filter(UserProfile.user_id == request.user_id).first()
+            if existing:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Profile already exists for this user"
+                )
+        else:
+            existing = db.query(UserProfile).filter(UserProfile.device_id == request.device_id).first()
+            if existing:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=f"Profile already exists for device {request.device_id}"
+                )
         
         # Calculate life seal from DOB
         date_parts = request.date_of_birth.split("-")
@@ -83,6 +99,7 @@ async def create_profile(
         profile = UserProfile(
             id=str(uuid.uuid4()),
             device_id=request.device_id,
+            user_id=request.user_id,
             first_name=request.first_name,
             date_of_birth=request.date_of_birth,
             life_seal=life_seal_number,
@@ -117,7 +134,8 @@ async def create_profile(
 
 @router.get("/me", response_model=UserProfileResponse)
 async def get_profile(
-    device_id: str,
+    device_id: Optional[str] = None,
+    user_id: Optional[str] = None,
     db: Session = Depends(get_db)
 ) -> UserProfileResponse:
     """
@@ -133,14 +151,12 @@ async def get_profile(
     Raises:
         HTTPException 404: If profile not found
     """
-    profile = db.query(UserProfile).filter(
-        UserProfile.device_id == device_id
-    ).first()
+    profile = _get_profile_query(db, user_id, device_id)
     
     if not profile:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="Profile not found for this device"
+            detail="Profile not found for this user"
         )
 
     _ensure_pdf_month(profile)
@@ -152,7 +168,8 @@ async def get_profile(
 
 @router.get("/me/with-calculations", response_model=UserProfileWithCalculationsResponse)
 async def get_profile_with_calculations(
-    device_id: str,
+    device_id: Optional[str] = None,
+    user_id: Optional[str] = None,
     db: Session = Depends(get_db)
 ) -> UserProfileWithCalculationsResponse:
     """
@@ -168,14 +185,12 @@ async def get_profile_with_calculations(
     Returns:
         Profile with calculated daily numbers
     """
-    profile = db.query(UserProfile).filter(
-        UserProfile.device_id == device_id
-    ).first()
+    profile = _get_profile_query(db, user_id, device_id)
     
     if not profile:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="Profile not found for this device"
+            detail="Profile not found for this user"
         )
 
     _ensure_pdf_month(profile)
@@ -216,7 +231,8 @@ async def get_profile_with_calculations(
 
 @router.put("/me", response_model=UserProfileResponse)
 async def update_profile(
-    device_id: str,
+    device_id: Optional[str] = None,
+    user_id: Optional[str] = None,
     request: UpdateUserProfileRequest,
     db: Session = Depends(get_db)
 ) -> UserProfileResponse:
@@ -234,14 +250,12 @@ async def update_profile(
     Raises:
         HTTPException 404: If profile not found
     """
-    profile = db.query(UserProfile).filter(
-        UserProfile.device_id == device_id
-    ).first()
+    profile = _get_profile_query(db, user_id, device_id)
     
     if not profile:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="Profile not found for this device"
+            detail="Profile not found for this user"
         )
     
     # Update only provided fields
@@ -259,7 +273,8 @@ async def update_profile(
 
 @router.post("/me/increment-readings")
 async def increment_readings(
-    device_id: str,
+    device_id: Optional[str] = None,
+    user_id: Optional[str] = None,
     db: Session = Depends(get_db)
 ) -> dict:
     """
@@ -273,14 +288,12 @@ async def increment_readings(
     Returns:
         Updated readings count
     """
-    profile = db.query(UserProfile).filter(
-        UserProfile.device_id == device_id
-    ).first()
+    profile = _get_profile_query(db, user_id, device_id)
     
     if not profile:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="Profile not found for this device"
+            detail="Profile not found for this user"
         )
     
     profile.readings_count += 1
@@ -296,21 +309,20 @@ async def increment_readings(
 
 @router.post("/me/increment-pdf-exports")
 async def increment_pdf_exports(
-    device_id: str,
+    device_id: Optional[str] = None,
+    user_id: Optional[str] = None,
     db: Session = Depends(get_db)
 ) -> dict:
     """
     Increment monthly PDF export count.
     Resets the count when a new month starts.
     """
-    profile = db.query(UserProfile).filter(
-        UserProfile.device_id == device_id
-    ).first()
+    profile = _get_profile_query(db, user_id, device_id)
 
     if not profile:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="Profile not found for this device"
+            detail="Profile not found for this user"
         )
 
     _ensure_pdf_month(profile)
@@ -326,7 +338,8 @@ async def increment_pdf_exports(
 
 @router.post("/me/mark-dashboard-seen")
 async def mark_dashboard_seen(
-    device_id: str,
+    device_id: Optional[str] = None,
+    user_id: Optional[str] = None,
     db: Session = Depends(get_db)
 ) -> dict:
     """
@@ -339,14 +352,12 @@ async def mark_dashboard_seen(
     Returns:
         Success status
     """
-    profile = db.query(UserProfile).filter(
-        UserProfile.device_id == device_id
-    ).first()
+    profile = _get_profile_query(db, user_id, device_id)
     
     if not profile:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="Profile not found for this device"
+            detail="Profile not found for this user"
         )
     
     profile.has_seen_dashboard_intro = True
@@ -357,7 +368,8 @@ async def mark_dashboard_seen(
 
 @router.delete("/me")
 async def delete_profile(
-    device_id: str,
+    device_id: str | None = None,
+    user_id: str | None = None,
     db: Session = Depends(get_db)
 ) -> dict:
     """
@@ -370,14 +382,12 @@ async def delete_profile(
     Returns:
         Success status
     """
-    profile = db.query(UserProfile).filter(
-        UserProfile.device_id == device_id
-    ).first()
+    profile = _get_profile_query(db, user_id, device_id)
     
     if not profile:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="Profile not found for this device"
+            detail="Profile not found for this user"
         )
     
     db.delete(profile)

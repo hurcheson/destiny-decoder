@@ -1,7 +1,9 @@
 // Auth service using Firebase Authentication
 // Handles signup, login, and token management
 
+
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'dart:async';
 
 
@@ -18,6 +20,32 @@ class AuthException implements Exception {
 
 class AuthService {
   final FirebaseAuth _firebaseAuth;
+  final GoogleSignIn _googleSignIn = GoogleSignIn.instance;
+  bool _googleInitialized = false;
+  Future<void> _ensureGoogleInitialized() async {
+    if (_googleInitialized) return;
+    await _googleSignIn.initialize();
+    _googleInitialized = true;
+  }
+
+  // Google Sign-In
+  Future<UserCredential> signInWithGoogle() async {
+    try {
+      await _ensureGoogleInitialized();
+      final GoogleSignInAccount googleUser = await _googleSignIn.authenticate();
+      final GoogleSignInAuthentication googleAuth = googleUser.authentication;
+      final credential = GoogleAuthProvider.credential(
+        idToken: googleAuth.idToken,
+      );
+      final userCredential = await _firebaseAuth.signInWithCredential(credential);
+      _authStateController.add(true);
+      return userCredential;
+    } on FirebaseAuthException catch (e) {
+      throw AuthException(message: e.message ?? 'Google sign-in failed', code: e.code);
+    } catch (e) {
+      throw AuthException(message: 'Google sign-in error: $e', code: 'google_sign_in_error');
+    }
+  }
   
   final StreamController<bool> _authStateController = StreamController<bool>.broadcast();
   Stream<bool> get authStateStream => _authStateController.stream;

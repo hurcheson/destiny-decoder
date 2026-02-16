@@ -163,6 +163,7 @@ enum CommunicationStyle {
 class UserProfile extends Equatable {
   final String id;
   final String deviceId;
+  final String? userId;
   final String firstName;
   final String dateOfBirth; // YYYY-MM-DD
   final int? lifeSeal;
@@ -183,6 +184,7 @@ class UserProfile extends Equatable {
   const UserProfile({
     required this.id,
     required this.deviceId,
+    this.userId,
     required this.firstName,
     required this.dateOfBirth,
     this.lifeSeal,
@@ -204,6 +206,7 @@ class UserProfile extends Equatable {
   UserProfile copyWith({
     String? id,
     String? deviceId,
+    String? userId,
     String? firstName,
     String? dateOfBirth,
     int? lifeSeal,
@@ -224,6 +227,7 @@ class UserProfile extends Equatable {
     return UserProfile(
       id: id ?? this.id,
       deviceId: deviceId ?? this.deviceId,
+      userId: userId ?? this.userId,
       firstName: firstName ?? this.firstName,
       dateOfBirth: dateOfBirth ?? this.dateOfBirth,
       lifeSeal: lifeSeal ?? this.lifeSeal,
@@ -247,6 +251,7 @@ class UserProfile extends Equatable {
     return {
       'id': id,
       'device_id': deviceId,
+      'user_id': userId,
       'first_name': firstName,
       'date_of_birth': dateOfBirth,
       'life_seal': lifeSeal,
@@ -270,6 +275,7 @@ class UserProfile extends Equatable {
     return UserProfile(
       id: json['id'] ?? '',
       deviceId: json['device_id'] ?? '',
+      userId: json['user_id'],
       firstName: json['first_name'] ?? '',
       dateOfBirth: json['date_of_birth'] ?? '',
       lifeSeal: json['life_seal'],
@@ -295,6 +301,7 @@ class UserProfile extends Equatable {
   List<Object?> get props => [
     id,
     deviceId,
+    userId,
     firstName,
     dateOfBirth,
     lifeSeal,

@@ -4,6 +4,16 @@ import '../../../../core/api/auth_providers.dart';
 
 /// Auth state notifier to manage login/logout state
 class AuthStateNotifier extends AsyncNotifier<bool> {
+    /// Google Sign-In
+    Future<void> signInWithGoogle() async {
+      final authService = ref.read(authServiceProvider);
+      try {
+        await authService.signInWithGoogle();
+        state = const AsyncValue.data(true);
+      } on AuthException catch (e) {
+        throw Exception(e.message);
+      }
+    }
   @override
   Future<bool> build() async {
     final authService = ref.watch(authServiceProvider);

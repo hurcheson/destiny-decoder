@@ -7,7 +7,6 @@ import 'core/theme/app_theme.dart';
 import 'core/firebase/firebase_service.dart';
 import 'core/network/api_client_provider.dart';
 import 'core/analytics/analytics_service.dart';
-import 'core/navigation/main_navigation_page.dart';
 import 'core/deep_linking/deep_link_service.dart';
 import 'core/screens/splash_screen.dart';
 import 'features/auth/presentation/pages/login_signup_page.dart';
@@ -24,15 +23,15 @@ void main() async {
   final prefs = await SharedPreferences.getInstance();
   final hasSeenOnboarding = prefs.getBool('has_seen_onboarding') ?? false;
 
-  // Log app open
-  await AnalyticsService.logAppOpen();
-
   // Initialize Firebase
   try {
     await FirebaseService().initialize();
     if (kDebugMode) {
       print('✅ Firebase initialized successfully');
     }
+
+    // Log app open
+    await AnalyticsService.logAppOpen();
     
     // Register FCM token with backend
     final firebaseService = FirebaseService();
@@ -155,13 +154,9 @@ class _DestinyDecoderAppState extends ConsumerState<DestinyDecoderApp> {
               if (profile != null && profile.hasCompletedOnboarding) {
                 // Profile exists and onboarding complete → Dashboard
                 return const PersonalDashboardPage();
-              } else if (widget.hasSeenOnboarding) {
-                // Onboarding seen but no profile → Main navigation (old flow)
-                return const MainNavigationPage();
-              } else {
-                // Never seen onboarding → Onboarding page
-                return const OnboardingPage();
               }
+              // Authenticated but no profile → Onboarding page
+              return const OnboardingPage();
             },
             loading: () => Scaffold(
               body: Center(

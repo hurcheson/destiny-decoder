@@ -129,6 +129,7 @@ class NotificationPreferencesResponse(BaseModel):
 class CreateUserProfileRequest(BaseModel):
     """Create new user profile during onboarding"""
     device_id: str
+    user_id: Optional[str] = None
     first_name: str = Field(..., min_length=1, max_length=100)
     date_of_birth: str = Field(..., description="YYYY-MM-DD format")
     life_stage: Optional[str] = None  # twenties, thirties, forties, fifties+
@@ -152,6 +153,7 @@ class UserProfileResponse(BaseModel):
     """User profile response"""
     id: str
     device_id: str
+    user_id: Optional[str] = None
     first_name: str
     date_of_birth: str
     life_seal: Optional[int]

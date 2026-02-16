@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart' show debugPrint;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../core/config/app_config.dart';
+import '../../../../core/api/auth_providers.dart';
 import '../../data/profile_repository.dart';
 import '../../domain/user_profile.dart';
 
@@ -43,20 +44,23 @@ final dioProvider = Provider<Dio>((ref) {
 final userProfileProvider = FutureProvider<UserProfile?>((ref) async {
   final repository = ref.watch(profileRepositoryProvider);
   final deviceIdAsync = await ref.watch(deviceIdProvider.future);
+  final userId = await ref.watch(userIdProvider.future);
   
-  return repository.getProfile(deviceId: deviceIdAsync);
+  return repository.getProfile(deviceId: deviceIdAsync, userId: userId);
 });
 
 // Notifier for profile operations (Riverpod 3.x)
 class ProfileNotifier extends AsyncNotifier<UserProfile?> {
   ProfileRepository get _repository => ref.read(profileRepositoryProvider);
   Future<String> get _deviceId => ref.read(deviceIdProvider.future);
+  Future<String?> get _userId => ref.read(userIdProvider.future);
 
   @override
   Future<UserProfile?> build() async {
     // Load initial profile
     final deviceId = await _deviceId;
-    return _repository.getProfile(deviceId: deviceId);
+    final userId = await _userId;
+    return _repository.getProfile(deviceId: deviceId, userId: userId);
   }
 
   /// Create new profile during onboarding
@@ -72,8 +76,10 @@ class ProfileNotifier extends AsyncNotifier<UserProfile?> {
     
     try {
       final deviceId = await _deviceId;
+      final userId = await _userId;
       final profile = await _repository.createProfile(
         deviceId: deviceId,
+        userId: userId,
         firstName: firstName,
         dateOfBirth: dateOfBirth,
         lifeStage: lifeStage.toBackend(),
@@ -96,8 +102,10 @@ class ProfileNotifier extends AsyncNotifier<UserProfile?> {
     
     try {
       final deviceId = await _deviceId;
+      final userId = await _userId;
       final profile = await _repository.getProfile(
         deviceId: deviceId,
+        userId: userId,
         forceRefresh: true,
       );
       
@@ -120,8 +128,10 @@ class ProfileNotifier extends AsyncNotifier<UserProfile?> {
   }) async {
     try {
       final deviceId = await _deviceId;
+      final userId = await _userId;
       final profile = await _repository.updateProfile(
         deviceId: deviceId,
+        userId: userId,
         firstName: firstName,
         lifeStage: lifeStage?.toBackend(),
         spiritualPreference: spiritualPreference?.toBackend(),
@@ -142,7 +152,8 @@ class ProfileNotifier extends AsyncNotifier<UserProfile?> {
   Future<void> incrementReadings() async {
     try {
       final deviceId = await _deviceId;
-      await _repository.incrementReadingsCount(deviceId: deviceId);
+      final userId = await _userId;
+      await _repository.incrementReadingsCount(deviceId: deviceId, userId: userId);
       
       // Refresh profile to get updated count
       final current = state.value;
@@ -161,7 +172,8 @@ class ProfileNotifier extends AsyncNotifier<UserProfile?> {
   Future<void> incrementPdfExports() async {
     try {
       final deviceId = await _deviceId;
-      final count = await _repository.incrementPdfExportsCount(deviceId: deviceId);
+      final userId = await _userId;
+      final count = await _repository.incrementPdfExportsCount(deviceId: deviceId, userId: userId);
 
       final current = state.value;
       if (current != null) {
@@ -180,7 +192,8 @@ class ProfileNotifier extends AsyncNotifier<UserProfile?> {
   Future<void> markDashboardSeen() async {
     try {
       final deviceId = await _deviceId;
-      await _repository.markDashboardSeen(deviceId: deviceId);
+      final userId = await _userId;
+      await _repository.markDashboardSeen(deviceId: deviceId, userId: userId);
       
       // Update local state
       final current = state.value;

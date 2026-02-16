@@ -12,6 +12,50 @@ class LoginSignupPage extends ConsumerStatefulWidget {
 }
 
 class _LoginSignupPageState extends ConsumerState<LoginSignupPage> {
+    Future<void> _handleGoogleSignIn() async {
+      setState(() {
+        _isLoading = true;
+        _errorMessage = null;
+      });
+      try {
+        final authNotifier = ref.read(authStateNotifierProvider.notifier);
+        await authNotifier.signInWithGoogle();
+        if (mounted) {
+          setState(() {
+            _errorMessage = null;
+          });
+          ScaffoldMessenger.of(context).hideCurrentSnackBar();
+        }
+      } catch (e) {
+        final cleanError = _cleanErrorMessage(e.toString());
+        if (mounted) {
+          setState(() {
+            _errorMessage = cleanError;
+          });
+          ScaffoldMessenger.of(context).hideCurrentSnackBar();
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(cleanError),
+              backgroundColor: Colors.red[700],
+              duration: const Duration(seconds: 5),
+              action: SnackBarAction(
+                label: 'Dismiss',
+                textColor: Colors.white,
+                onPressed: () {
+                  ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                },
+              ),
+            ),
+          );
+        }
+      } finally {
+        if (mounted) {
+          setState(() {
+            _isLoading = false;
+          });
+        }
+      }
+    }
   bool _isLogin = true;
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
@@ -340,6 +384,31 @@ class _LoginSignupPageState extends ConsumerState<LoginSignupPage> {
                               color: Colors.white,
                             ),
                           ),
+                  ),
+                  const SizedBox(height: 16),
+                  // Google Sign-In Button
+                  ElevatedButton.icon(
+                    onPressed: _isLoading ? null : _handleGoogleSignIn,
+                    icon: Image.asset(
+                      'assets/google_logo.png',
+                      height: 24,
+                      width: 24,
+                    ),
+                    label: const Text(
+                      'Sign in with Google',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.white,
+                      foregroundColor: Colors.black87,
+                      side: const BorderSide(color: Colors.black12),
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      textStyle: const TextStyle(fontSize: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      elevation: 0,
+                    ),
                   ),
                   
                   const SizedBox(height: 24),

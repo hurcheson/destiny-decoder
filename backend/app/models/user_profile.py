@@ -47,8 +47,8 @@ class UserProfile(Base):
 
     # Core identifiers
     id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
-    device_id = Column(String(255), nullable=False, unique=True, index=True)
-    user_id = Column(String, nullable=True, index=True)  # For future auth integration
+    device_id = Column(String(255), nullable=False, index=True)
+    user_id = Column(String, nullable=True, unique=True, index=True)  # Auth integration (Firebase uid)
 
     # Personal information
     first_name = Column(String(100), nullable=False)
@@ -95,6 +95,7 @@ class UserProfile(Base):
         return {
             "id": self.id,
             "device_id": self.device_id,
+            "user_id": self.user_id,
             "first_name": self.first_name,
             "date_of_birth": self.date_of_birth,
             "life_seal": self.life_seal,

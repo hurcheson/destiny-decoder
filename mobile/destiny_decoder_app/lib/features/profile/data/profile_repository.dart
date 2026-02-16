@@ -13,6 +13,13 @@ class ProfileRepository {
 
   static const String _profileCacheKey = 'user_profile_cache_v1';
 
+  String _cacheKey({String? userId, required String deviceId}) {
+    if (userId != null && userId.isNotEmpty) {
+      return '$_profileCacheKey:user:$userId';
+    }
+    return '$_profileCacheKey:device:$deviceId';
+  }
+
   ProfileRepository({
     required Dio dio,
     required SharedPreferencesAsync prefs,
@@ -22,6 +29,7 @@ class ProfileRepository {
   /// Create new profile during onboarding
   Future<UserProfile> createProfile({
     required String deviceId,
+    String? userId,
     required String firstName,
     required String dateOfBirth,
     required String lifeStage,
@@ -34,6 +42,7 @@ class ProfileRepository {
         '/profile/create',
         data: {
           'device_id': deviceId,
+          'user_id': userId,
           'first_name': firstName,
           'date_of_birth': dateOfBirth,
           'life_stage': lifeStage,
@@ -48,7 +57,7 @@ class ProfileRepository {
         final profile = UserProfile.fromJson(response.data);
         
         // Cache locally
-        await _cacheProfile(profile);
+        await _cacheProfile(profile, userId: userId, deviceId: deviceId);
         
         return profile;
       } else {
@@ -64,12 +73,13 @@ class ProfileRepository {
   /// Get current user's profile
   Future<UserProfile?> getProfile({
     required String deviceId,
+    String? userId,
     bool forceRefresh = false,
   }) async {
     try {
       // Try to get from cache first if not forcing refresh
       if (!forceRefresh) {
-        final cached = await _getCachedProfile();
+        final cached = await _getCachedProfile(userId: userId, deviceId: deviceId);
         if (cached != null) {
           return cached;
         }
@@ -78,14 +88,17 @@ class ProfileRepository {
       // Fetch from API
       final response = await _dio.get(
         '/profile/me',
-        queryParameters: {'device_id': deviceId},
+        queryParameters: {
+          'device_id': deviceId,
+          'user_id': userId,
+        },
       );
 
       if (response.statusCode == 200) {
         final profile = UserProfile.fromJson(response.data);
         
         // Cache locally
-        await _cacheProfile(profile);
+        await _cacheProfile(profile, userId: userId, deviceId: deviceId);
         
         return profile;
       } else {
@@ -100,18 +113,19 @@ class ProfileRepository {
       // If network error, try to return cached version
       if (e.type == DioExceptionType.connectionTimeout ||
           e.type == DioExceptionType.unknown) {
-        return await _getCachedProfile();
+        return await _getCachedProfile(userId: userId, deviceId: deviceId);
       }
       throw Exception('Network error: ${e.message}');
     } catch (e) {
       // Return cached as fallback
-      return await _getCachedProfile();
+      return await _getCachedProfile(userId: userId, deviceId: deviceId);
     }
   }
 
   /// Update user profile preferences
   Future<UserProfile> updateProfile({
     required String deviceId,
+    String? userId,
     String? firstName,
     String? lifeStage,
     String? spiritualPreference,
@@ -130,7 +144,10 @@ class ProfileRepository {
 
       final response = await _dio.put(
         '/profile/me',
-        queryParameters: {'device_id': deviceId},
+        queryParameters: {
+          'device_id': deviceId,
+          'user_id': userId,
+        },
         data: data,
       );
 
@@ -138,7 +155,7 @@ class ProfileRepository {
         final profile = UserProfile.fromJson(response.data);
         
         // Cache locally
-        await _cacheProfile(profile);
+        await _cacheProfile(profile, userId: userId, deviceId: deviceId);
         
         return profile;
       } else {
@@ -154,21 +171,25 @@ class ProfileRepository {
   /// Increment readings count after successful decode
   Future<int> incrementReadingsCount({
     required String deviceId,
+    String? userId,
   }) async {
     try {
       final response = await _dio.post(
         '/profile/me/increment-readings',
-        queryParameters: {'device_id': deviceId},
+        queryParameters: {
+          'device_id': deviceId,
+          'user_id': userId,
+        },
       );
 
       if (response.statusCode == 200) {
         final readingsCount = response.data['readings_count'] ?? 0;
         
         // Update cache with new count
-        final cached = await _getCachedProfile();
+        final cached = await _getCachedProfile(userId: userId, deviceId: deviceId);
         if (cached != null) {
           final updated = cached.copyWith(readingsCount: readingsCount);
-          await _cacheProfile(updated);
+          await _cacheProfile(updated, userId: userId, deviceId: deviceId);
         }
         
         return readingsCount;
@@ -185,24 +206,28 @@ class ProfileRepository {
   /// Increment monthly PDF export count
   Future<int> incrementPdfExportsCount({
     required String deviceId,
+    String? userId,
   }) async {
     try {
       final response = await _dio.post(
         '/profile/me/increment-pdf-exports',
-        queryParameters: {'device_id': deviceId},
+        queryParameters: {
+          'device_id': deviceId,
+          'user_id': userId,
+        },
       );
 
       if (response.statusCode == 200) {
         final pdfExportsCount = response.data['pdf_exports_count'] ?? 0;
         final pdfExportsMonth = response.data['pdf_exports_month'];
 
-        final cached = await _getCachedProfile();
+        final cached = await _getCachedProfile(userId: userId, deviceId: deviceId);
         if (cached != null) {
           final updated = cached.copyWith(
             pdfExportsCount: pdfExportsCount,
             pdfExportsMonth: pdfExportsMonth,
           );
-          await _cacheProfile(updated);
+          await _cacheProfile(updated, userId: userId, deviceId: deviceId);
         }
 
         return pdfExportsCount;
@@ -219,19 +244,23 @@ class ProfileRepository {
   /// Mark dashboard intro as seen
   Future<void> markDashboardSeen({
     required String deviceId,
+    String? userId,
   }) async {
     try {
       final response = await _dio.post(
         '/profile/me/mark-dashboard-seen',
-        queryParameters: {'device_id': deviceId},
+        queryParameters: {
+          'device_id': deviceId,
+          'user_id': userId,
+        },
       );
 
       if (response.statusCode == 200) {
         // Update cache
-        final cached = await _getCachedProfile();
+        final cached = await _getCachedProfile(userId: userId, deviceId: deviceId);
         if (cached != null) {
           final updated = cached.copyWith(hasSeenDashboardIntro: true);
-          await _cacheProfile(updated);
+          await _cacheProfile(updated, userId: userId, deviceId: deviceId);
         }
       }
     } on DioException catch (e) {
@@ -244,18 +273,20 @@ class ProfileRepository {
   }
 
   /// Cache profile locally
-  Future<void> _cacheProfile(UserProfile profile) async {
+  Future<void> _cacheProfile(UserProfile profile, {String? userId, required String deviceId}) async {
     try {
-      await _prefs.setString(_profileCacheKey, jsonEncode(profile.toJson()));
+      final key = _cacheKey(userId: userId, deviceId: deviceId);
+      await _prefs.setString(key, jsonEncode(profile.toJson()));
     } catch (e) {
       debugPrint('Error caching profile: $e');
     }
   }
 
   /// Get cached profile
-  Future<UserProfile?> _getCachedProfile() async {
+  Future<UserProfile?> _getCachedProfile({String? userId, required String deviceId}) async {
     try {
-      final cached = await _prefs.getString(_profileCacheKey);
+      final key = _cacheKey(userId: userId, deviceId: deviceId);
+      final cached = await _prefs.getString(key);
       if (cached != null) {
         final json = jsonDecode(cached);
         return UserProfile.fromJson(json);

@@ -12,7 +12,20 @@
           "package_name": "com.example.destiny_decoder_app"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "177104812289-lnsqagh20vd3lst87lqqa20jnr48muah.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.destiny_decoder_app",
+            "certificate_hash": "e12efddadd39075714f4ead4466e05a904b8a8ff"
+          }
+        },
+        {
+          "client_id": "177104812289-fe3gckaf3om4d4pmcmadn577cgh4toit.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyDeyjfjkhaPuO9yypSSjFPJ4WQtUWZjyz4"
@@ -20,7 +33,12 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "177104812289-fe3gckaf3om4d4pmcmadn577cgh4toit.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }
