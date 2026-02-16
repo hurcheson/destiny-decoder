@@ -231,9 +231,9 @@ async def get_profile_with_calculations(
 
 @router.put("/me", response_model=UserProfileResponse)
 async def update_profile(
+    request: UpdateUserProfileRequest,
     device_id: Optional[str] = None,
     user_id: Optional[str] = None,
-    request: UpdateUserProfileRequest,
     db: Session = Depends(get_db)
 ) -> UserProfileResponse:
     """
