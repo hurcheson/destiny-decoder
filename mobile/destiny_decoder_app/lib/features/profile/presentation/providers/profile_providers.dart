@@ -216,7 +216,7 @@ final profileNotifierProvider = AsyncNotifierProvider<ProfileNotifier, UserProfi
 
 // Convenience selectors
 final userFirstNameProvider = Provider<String>((ref) {
-  final profileAsync = ref.watch(userProfileProvider);
+  final profileAsync = ref.watch(profileNotifierProvider);
   return profileAsync.when(
     data: (profile) => profile?.firstName ?? '',
     loading: () => '',
@@ -252,7 +252,7 @@ final userSpirituaiPreferenceProvider = Provider<SpiritualPreference>((ref) {
 });
 
 final userReadingsCountProvider = Provider<int>((ref) {
-  final profileAsync = ref.watch(userProfileProvider);
+  final profileAsync = ref.watch(profileNotifierProvider);
   return profileAsync.when(
     data: (profile) => profile?.readingsCount ?? 0,
     loading: () => 0,
@@ -279,7 +279,7 @@ final userHasCompletedOnboardingProvider = Provider<bool>((ref) {
 });
 
 final userHasSeenDashboardIntroProvider = Provider<bool>((ref) {
-  final profileAsync = ref.watch(userProfileProvider);
+  final profileAsync = ref.watch(profileNotifierProvider);
   return profileAsync.when(
     data: (profile) => profile?.hasSeenDashboardIntro ?? false,
     loading: () => false,

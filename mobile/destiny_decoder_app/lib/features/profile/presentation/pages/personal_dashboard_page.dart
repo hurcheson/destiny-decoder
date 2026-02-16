@@ -19,7 +19,7 @@ class PersonalDashboardPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    final profileAsync = ref.watch(userProfileProvider);
+    final profileAsync = ref.watch(profileNotifierProvider);
     final hasSeenIntro = ref.watch(userHasSeenDashboardIntroProvider);
     final firstName = ref.watch(userFirstNameProvider);
     final lifeSeal = ref.watch(userLifeSealProvider);

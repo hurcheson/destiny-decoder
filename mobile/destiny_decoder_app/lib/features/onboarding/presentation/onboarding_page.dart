@@ -166,6 +166,9 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage>
         interests: _selectedInterests,
       );
       
+      // Invalidate userProfileProvider so it refetches the profile
+      ref.invalidate(userProfileProvider);
+      
       // Mark onboarding complete
       await ref.read(onboardingControllerProvider.notifier).completeOnboarding();
       
