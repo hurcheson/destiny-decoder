@@ -394,9 +394,9 @@ class _LoginSignupPageState extends ConsumerState<LoginSignupPage> {
                       height: 24,
                       width: 24,
                     ),
-                    label: const Text(
-                      'Sign in with Google',
-                      style: TextStyle(fontWeight: FontWeight.bold),
+                    label: Text(
+                      _isLogin ? 'Sign in with Google' : 'Sign up with Google',
+                      style: const TextStyle(fontWeight: FontWeight.bold),
                     ),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.white,
